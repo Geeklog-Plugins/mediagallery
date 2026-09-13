@@ -1,0 +1,47 @@
+name: Modernize MediaGallery media detail page
+
+on:
+  push:
+    branches:
+      - modernize-1.8.0
+    paths:
+      - '.github/modernize-media-page-trigger'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: modernize-1.8.0
+          fetch-depth: 0
+
+      - name: Apply media detail modernization
+        run: python tools/modernize_media_page_180.py
+
+      - name: Validate media detail modernization
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l include/lib-media.php
+          grep -q 'mg-media-article' templates/view_image.thtml
+          grep -q 'mg-media-pagination' templates/view_image.thtml
+          grep -q 'mg-media-tags' templates/view_image.thtml
+          grep -q 'mg-tag' include/lib-media.php
+          grep -q "preg_split('/\[\\\\s,\]+/'" include/lib-media.php
+          ! grep -q 'style="margin:5px"' include/lib-media.php
+          grep -q 'MediaGallery 1.8 media detail modernization' public_html/style.css
+          grep -q 'Modernize the default media-detail page' ROADMAP.md
+
+      - name: Commit media detail modernization
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'hostellerie'
+          git config user.email 'hostellerie.org@gmail.com'
+          git add include/lib-media.php templates/view_image.thtml public_html/style.css ROADMAP.md
+          git commit -m 'Modernize MediaGallery media detail page'
+          git push origin HEAD:modernize-1.8.0
