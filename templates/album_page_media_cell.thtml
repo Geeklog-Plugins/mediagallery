@@ -1,4 +1,4 @@
-<article class="mg_media_item mg-card">
+<article class="mg_media_item mg-card mg-card-compact">
   <div class="mg-card-media">
     <div class="mg_thumbnail">
       <div class="mg_thumbnail_wrapper">{media_item_thumbnail}{mp3_podcast}</div>
@@ -21,19 +21,11 @@
     <div class="mg_search_album">{search_album}</div>
     {!endif}
 
-    <div class="mg-card-meta">
-      <span class="mg_time">{media_time}</span>
-      {!if media_comments}<span class="mg_comments">{lang_comments} {media_comments_count}</span>{!endif}
-      {!if media_views}<span class="mg_views">{lang_views} {media_views_count}</span>{!endif}
+    <div class="mg-card-meta mg-card-meta-compact">
+      <span class="mg_time">{media_date_short}</span>
+      {!if media_views}<span class="mg_views">{media_views_count} {lang_views}</span>{!endif}
+      {!if media_comments}<span class="mg_comments">{media_comments_count} {lang_comments}</span>{!endif}
     </div>
-
-    {!if rating_box}
-    <div class="mg-card-rating">{rating_box}</div>
-    {!endif}
-
-    {!if enable_keywords}
-    <div class="mgMediaKeywords mg-card-tags"><strong>{lang_keywords}</strong> <span class="mg-card-tag-list">{media_keywords}</span></div>
-    {!endif}
 
     {!if edit_link}
     <div class="mgMediaEdit mg-card-edit">{edit_link}</div>
