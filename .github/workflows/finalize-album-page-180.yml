@@ -1,0 +1,50 @@
+name: Finalize MediaGallery album page modernization
+
+on:
+  push:
+    branches:
+      - modernize-1.8.0
+    paths:
+      - '.github/finalize-album-page-trigger'
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: modernize-1.8.0
+          fetch-depth: 0
+
+      - name: Apply album page CSS and roadmap update
+        run: python tools/finalize_album_page_180.py
+
+      - name: Validate album page modernization
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'mg-album-default-grid' templates/album_page.thtml
+          grep -q 'mg-card-meta' templates/album_page_media_cell.thtml
+          grep -q 'mg-card-description' templates/album_page_album_cell.thtml
+          grep -q 'MediaGallery 1.8 album page modernization' public_html/style.css
+          grep -q 'Modernize the default album page' ROADMAP.md
+
+      - name: Remove temporary finalizer files
+        shell: bash
+        run: |
+          rm -f tools/finalize_album_page_180.py
+          rm -f .github/workflows/finalize-album-page-180.yml
+          rm -f .github/finalize-album-page-trigger
+
+      - name: Commit finalized album page
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'hostellerie'
+          git config user.email 'hostellerie.org@gmail.com'
+          git add -A
+          git commit -m 'Complete MediaGallery album page modernization'
+          git push origin HEAD:modernize-1.8.0
