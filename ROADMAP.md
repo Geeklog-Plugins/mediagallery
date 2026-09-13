@@ -149,6 +149,7 @@ The Geeklog 2.1.1 / PHP 5.6 validation confirmed that image uploads succeed once
 - [x] Complete final public markup audit: one H1 per Podcast page, semantic repeated-card headings, non-link anchors and table-free member enrollment.
 - [x] Modernize the default media-detail page with semantic article/figure markup, separated navigation/actions, compact metadata and normalized keyword tags.
 - [x] Modernize the default album page with centered auto-fit cards, compact metadata, unified controls and a responsive footer.
+- [x] Refine Root Album and media-detail controls: use Geeklog short-date formatting, lighter subalbum cards and compact media actions.
 - [x] Simplify default album cards to title, short date, views/comments only; keep rating, tags and technical detail on media-detail pages.
 - [x] Replace the public advanced-search presentation tables with a semantic responsive search form.
 - [x] Modernize secondary public autotag, random-block, fullscreen-slideshow and maintained HTML5 audio rendering for responsive output.

@@ -6,12 +6,11 @@
   </div>
 
   <div class="mg-card-body">
-    <h2 class="mg_album_item_title mg-card-title">{lang_album} {album_title} <span class="mg_item_count">({subalbum_media_count})</span></h2>
+    <h2 class="mg_album_item_title mg-card-title">{album_title} <span class="mg_item_count" aria-label="Media count">{subalbum_media_count}</span></h2>
 
     {!if album_desc}<div class="mg-card-description">{album_desc}</div>{!endif}
 
     <div class="mg-card-meta mg-card-meta-album">
-      {!if updated}<span><strong>{updated}</strong> {album_last_update}</span>{!endif}
       {!if lang_views}<span><strong>{lang_views}</strong> {views}</span>{!endif}
       {!if lang_subalbums}<span><strong>{lang_subalbums}</strong> {subalbumcount}</span>{!endif}
     </div>

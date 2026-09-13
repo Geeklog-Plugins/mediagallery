@@ -2585,3 +2585,113 @@ a.SWFUProgressCancel:hover {
     gap: .5rem;
   }
 }
+
+
+/* MediaGallery 1.8 public UI refinement */
+.mg-album-default-grid .mg_album_item .mg-card-body {
+  padding-top: .72rem;
+}
+
+.mg-album-default-grid .mg_album_item .mg-card-title {
+  margin-bottom: .35rem;
+}
+
+.mg-album-default-grid .mg_item_count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.55rem;
+  min-height: 1.55rem;
+  margin-left: .25rem;
+  padding: 0 .35rem;
+  border-radius: 999px;
+  background: rgba(127, 127, 127, .12);
+  font-size: .78em;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.mg-album-default-grid .mg-card-meta-album {
+  margin-top: .2rem;
+  opacity: .78;
+}
+
+.mg-media-toolbar {
+  max-width: 70rem;
+  margin: .55rem auto 1rem;
+  padding: .25rem 0;
+  background: transparent;
+}
+
+.mg-media-pagination,
+.mg-media-actions {
+  gap: .3rem;
+}
+
+.mg-media-toolbar .mg-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.9rem;
+  margin: 0;
+  padding: .22rem .48rem;
+  border: 0;
+  border-radius: .35rem;
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+  font-size: .82rem;
+  line-height: 1.2;
+  text-decoration: none;
+}
+
+.mg-media-toolbar .mg-action:hover,
+.mg-media-toolbar .mg-action:focus-visible {
+  background: rgba(127, 127, 127, .1);
+  text-decoration: underline;
+}
+
+.mg-media-toolbar .mg-action-nav {
+  border: 1px solid rgba(127, 127, 127, .22);
+}
+
+.mg-media-toolbar .mg-action-secondary {
+  opacity: .78;
+}
+
+.mg-media-toolbar .mg-action-admin {
+  opacity: .9;
+  font-weight: 600;
+}
+
+.mg-media-position {
+  min-width: 3.2rem;
+  min-height: 1.9rem;
+  padding: .15rem .35rem;
+  font-size: .88rem;
+}
+
+.mg-album-page-header .mg_adminbox input[type="submit"],
+.mg-album-secondary-controls input[type="submit"] {
+  opacity: .68;
+  box-shadow: none;
+}
+
+.mg-album-page-header .mg_adminbox input[type="submit"]:hover,
+.mg-album-page-header .mg_adminbox input[type="submit"]:focus-visible,
+.mg-album-secondary-controls input[type="submit"]:hover,
+.mg-album-secondary-controls input[type="submit"]:focus-visible {
+  opacity: 1;
+}
+
+@media (max-width: 640px) {
+  .mg-media-toolbar {
+    gap: .35rem;
+  }
+  .mg-media-actions {
+    justify-content: flex-start;
+  }
+  .mg-media-toolbar .mg-action-secondary {
+    flex: 0 0 auto;
+  }
+}

@@ -15,16 +15,16 @@
 </header>
 <nav class="mg_navbar mg-media-toolbar" aria-label="Media actions and navigation">
   <div class="mg-media-pagination">
-    {!if prev_link}<a class="button mg-action mg-action-prev" href="{prev_link}">&larr; {lang_prev}</a>{!endif}
+    {!if prev_link}<a class="mg-action mg-action-nav mg-action-prev" href="{prev_link}">&larr; {lang_prev}</a>{!endif}
     {!if pagination}<span class="mg-media-position" aria-label="{item_number} {lang_of} {total_items}">{item_number} / {total_items}</span>{!endif}
-    {!if next_link}<a class="button mg-action mg-action-next" href="{next_link}">{lang_next} &rarr;</a>{!endif}
+    {!if next_link}<a class="mg-action mg-action-nav mg-action-next" href="{next_link}">{lang_next} &rarr;</a>{!endif}
   </div>
   <div class="mg-media-actions">
-    {!if url_slideshow}<a class="button mg-action" href="{url_slideshow}"{slideshow_onclick}>{lang_slideshow}</a>{!endif}
-    {!if download_link}<a class="button mg-action" href="{download_link}">{lang_download}</a>{!endif}
-    {!if property}<a class="button mg-action" href="{property}" onclick="return popitup(this.href)">{lang_property}</a>{!endif}
-    {!if switch_size}<a class="button mg-action" href="{switch_size}">{lang_switch_size}</a>{!endif}
-    {!if edit_item_link}<a class="button mg-action mg-action-admin" href="{edit_item_link}">{lang_edit}</a>{!endif}
+    {!if url_slideshow}<a class="mg-action mg-action-secondary" href="{url_slideshow}"{slideshow_onclick}>{lang_slideshow}</a>{!endif}
+    {!if download_link}<a class="mg-action mg-action-secondary" href="{download_link}">{lang_download}</a>{!endif}
+    {!if property}<a class="mg-action mg-action-secondary" href="{property}" onclick="return popitup(this.href)">{lang_property}</a>{!endif}
+    {!if switch_size}<a class="mg-action mg-action-secondary" href="{switch_size}">{lang_switch_size}</a>{!endif}
+    {!if edit_item_link}<a class="mg-action mg-action-secondary mg-action-admin" href="{edit_item_link}">{lang_edit}</a>{!endif}
   </div>
 </nav>
 <article class="mg-media-article">
