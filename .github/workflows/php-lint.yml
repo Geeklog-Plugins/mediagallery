@@ -6,16 +6,16 @@ on:
       - modernize-1.8.0
     paths-ignore:
       - 'dist/**'
-      - '.github/**'
-      - '**/*.md'
   pull_request:
     paths-ignore:
       - 'dist/**'
-      - '.github/**'
-      - '**/*.md'
 
 permissions:
   contents: read
+
+concurrency:
+  group: mediagallery-validate-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   php-lint:
