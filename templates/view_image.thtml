@@ -13,40 +13,53 @@
     </div></form>
   </div>
 </header>
-<nav class="mg_navbar" aria-label="Media actions and navigation">
-{!if prev_link}<a class="button left" href="{prev_link}">{lang_prev}</a>{!endif}
-{!if next_link}<a class="button right" href="{next_link}">{lang_next}</a>{!endif}
-{!if url_slideshow}<a class="button" href="{url_slideshow}"{slideshow_onclick}>{lang_slideshow}</a>{!endif}
-{!if download_link}<a class="button" href="{download_link}">{lang_download}</a>{!endif}
-{!if property}<a class="button" href="{property}" onclick="return popitup(this.href)">{lang_property}</a>{!endif}
-{!if switch_size}<a class="button" href="{switch_size}">{lang_switch_size}</a>{!endif}
-{!if edit_item_link}<a class="button" href="{edit_item_link}">{lang_edit}</a>{!endif}
-&nbsp;
-{!if pagination}<div class="mg_right_nav">{item_number}&nbsp;{lang_of}&nbsp;{total_items}</div>{!endif}
+<nav class="mg_navbar mg-media-toolbar" aria-label="Media actions and navigation">
+  <div class="mg-media-pagination">
+    {!if prev_link}<a class="button mg-action mg-action-prev" href="{prev_link}">&larr; {lang_prev}</a>{!endif}
+    {!if pagination}<span class="mg-media-position" aria-label="{item_number} {lang_of} {total_items}">{item_number} / {total_items}</span>{!endif}
+    {!if next_link}<a class="button mg-action mg-action-next" href="{next_link}">{lang_next} &rarr;</a>{!endif}
+  </div>
+  <div class="mg-media-actions">
+    {!if url_slideshow}<a class="button mg-action" href="{url_slideshow}"{slideshow_onclick}>{lang_slideshow}</a>{!endif}
+    {!if download_link}<a class="button mg-action" href="{download_link}">{lang_download}</a>{!endif}
+    {!if property}<a class="button mg-action" href="{property}" onclick="return popitup(this.href)">{lang_property}</a>{!endif}
+    {!if switch_size}<a class="button mg-action" href="{switch_size}">{lang_switch_size}</a>{!endif}
+    {!if edit_item_link}<a class="button mg-action mg-action-admin" href="{edit_item_link}">{lang_edit}</a>{!endif}
+  </div>
 </nav>
-<h1 class="mg_media_title">{!if media_title}{media_title}{!else}{album_title}{!endif}</h1>
-<div class="mg_media_detail">{image_detail}</div>
-<div class="mg_media_desc">{!if media_desc}{media_desc}{!else}&nbsp;{!endif}</div>
-<div class="mg_info">
-  <div class="mg_info_left">
-    <p><strong>ID:</strong>&nbsp;{media_id}</p>
-    {!if media_properties}<p>{getid3}{media_properties}{getid3end}</p>{!endif}
-  </div>
-  <div class="mg_info_right">
-    <p><strong>{lang_uploaded_by}:</strong>&nbsp;{owner_username}</p>
-  </div>
-  <div class="mg_info_center">
-    <p>{media_time}</p>
-    <p>{lang_views} {media_views}</p>
-    <div>{rating_box}</div>
-    {!if media_keywords}<p><strong>{lang_keywords}</strong> {media_keywords}</p>{!endif}
-  </div>
-  {!if exif_info}
-  <div class="mg_exif_info">
-  {exif_info}
-  </div>
-  {!endif}
-</div>
+<article class="mg-media-article">
+  <header class="mg-media-article-header">
+    <h1 class="mg_media_title">{!if media_title}{media_title}{!else}{album_title}{!endif}</h1>
+  </header>
+  <figure class="mg-media-figure">
+    <div class="mg_media_detail">{image_detail}</div>
+    {!if media_desc}<figcaption class="mg_media_desc">{media_desc}</figcaption>{!endif}
+  </figure>
+  <footer class="mg-media-meta">
+    <div class="mg-media-meta-primary">
+      <span class="mg-media-author"><strong>{lang_uploaded_by}:</strong>&nbsp;{owner_username}</span>
+      <span class="mg-media-date">{media_time}</span>
+      <span class="mg-media-views">{lang_views} {media_views}</span>
+    </div>
+    {!if rating_box}<div class="mg-media-rating">{rating_box}</div>{!endif}
+    {!if media_keywords}
+    <div class="mg-media-tags">
+      <strong class="mg-media-tags-label">{lang_keywords}</strong>
+      <span class="mg-tag-list">{media_keywords}</span>
+    </div>
+    {!endif}
+    {!if edit_item_link}
+    <details class="mg-media-technical">
+      <summary>Media ID</summary>
+      <code>{media_id}</code>
+      {!if media_properties}<div class="mg-media-properties">{getid3}{media_properties}{getid3end}</div>{!endif}
+    </details>
+    {!else}
+      {!if media_properties}<div class="mg-media-properties">{getid3}{media_properties}{getid3end}</div>{!endif}
+    {!endif}
+    {!if exif_info}<div class="mg_exif_info">{exif_info}</div>{!endif}
+  </footer>
+</article>
 {!if jumpbox}<div class="mg_jumpbox">{jumpbox}</div>{!endif}
 <script type="text/javascript">
 //<![CDATA[
