@@ -1,41 +1,42 @@
-<article class="mg_media_item">
-<div class="mg_thumbnail">
-  <div class="mg_thumbnail_wrapper">{media_item_thumbnail}{mp3_podcast}</div>
-</div>
+<article class="mg_media_item mg-card">
+  <div class="mg-card-media">
+    <div class="mg_thumbnail">
+      <div class="mg_thumbnail_wrapper">{media_item_thumbnail}{mp3_podcast}</div>
+    </div>
+  </div>
 
-<h2 class="mg_title">
-{media_title}
-{!if musicalbum}
-&nbsp;/&nbsp;{musicalbum}
-{!endif}
-</h2>
-{!if artist}
-<div class="mg_artist">{artist}</div>
-{!endif}
+  <div class="mg-card-body">
+    <h2 class="mg_title mg-card-title">
+      {media_title}
+      {!if musicalbum}
+      <span class="mg-card-subtitle">/ {musicalbum}</span>
+      {!endif}
+    </h2>
 
-{!if search_album}
-<div class="mg_search_album">{search_album}</div>
-{!endif}
+    {!if artist}
+    <div class="mg_artist mg-card-artist">{artist}</div>
+    {!endif}
 
-<div class="mg_time">{media_time}</div>
+    {!if search_album}
+    <div class="mg_search_album">{search_album}</div>
+    {!endif}
 
-{!if media_comments}
-<div class="mg_comments">{lang_comments} {media_comments_count}</div>
-{!endif}
+    <div class="mg-card-meta">
+      <span class="mg_time">{media_time}</span>
+      {!if media_comments}<span class="mg_comments">{lang_comments} {media_comments_count}</span>{!endif}
+      {!if media_views}<span class="mg_views">{lang_views} {media_views_count}</span>{!endif}
+    </div>
 
-{!if media_views}
-<div class="mg_views">{lang_views} {media_views_count}</div>
-{!endif}
+    {!if rating_box}
+    <div class="mg-card-rating">{rating_box}</div>
+    {!endif}
 
-{!if rating_box}
-{rating_box}
-{!endif}
+    {!if enable_keywords}
+    <div class="mgMediaKeywords mg-card-tags"><strong>{lang_keywords}</strong> <span class="mg-card-tag-list">{media_keywords}</span></div>
+    {!endif}
 
-{!if edit_link}
-<div class="mgMediaEdit">{edit_link}</div>
-{!endif}
-
-{!if enable_keywords}
-<div class="mgMediaKeywords"><span class="pluginSmallText"><strong>{lang_keywords}</strong> {media_keywords}</span></div>
-{!endif}
+    {!if edit_link}
+    <div class="mgMediaEdit mg-card-edit">{edit_link}</div>
+    {!endif}
+  </div>
 </article>
