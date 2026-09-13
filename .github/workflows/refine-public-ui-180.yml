@@ -1,0 +1,40 @@
+name: Refine MediaGallery public UI
+
+on:
+  push:
+    branches: [ modernize-1.8.0 ]
+    paths:
+      - '.github/refine-public-ui-trigger'
+
+permissions:
+  contents: write
+
+jobs:
+  refine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: modernize-1.8.0
+          fetch-depth: 0
+      - name: Apply public UI refinement
+        run: python3 tools/refine_public_ui_180.py
+      - name: Validate changes
+        run: |
+          grep -q "shortdate" include/classMedia.php
+          grep -q "mg-action-secondary" templates/view_image.thtml
+          ! grep -q "{updated}" templates/album_page_album_cell.thtml
+          grep -q "MediaGallery 1.8 public UI refinement" public_html/style.css
+          php -l include/classMedia.php
+      - name: Remove temporary files
+        run: |
+          rm -f tools/refine_public_ui_180.py
+          rm -f .github/workflows/refine-public-ui-180.yml
+          rm -f .github/refine-public-ui-trigger
+      - name: Commit refinement
+        run: |
+          git config user.name "hostellerie"
+          git config user.email "hostellerie.org@gmail.com"
+          git add -A
+          git commit -m "Refine MediaGallery root and media controls"
+          git push origin modernize-1.8.0
