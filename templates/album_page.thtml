@@ -8,6 +8,14 @@
 <header class="mg_album_header mg-album-page-header">
   <div class="mg-album-heading">
     <h1 class="mg_album_title">{album_title}{!if rsslink}&nbsp;&nbsp;{rsslink}{!endif}</h1>
+    <nav class="mg-album-inline-actions" aria-label="Album actions">
+      {!if url_slideshow}
+      <a href="{url_slideshow}"{slideshow_onclick}>{lang_slideshow}</a>
+      {!endif}
+      {!if edit_album}
+      <a class="mg-album-admin-action" href="{url_edit}">{lang_edit}</a>
+      {!endif}
+    </nav>
   </div>
   <div class="mg-album-controls">
     <div class="mg_search">
@@ -22,26 +30,18 @@
       </form>
     </div>
     {!if select_adminbox}
-    <div class="mg_adminbox">
+    <div class="mg_adminbox mg-secondary-control">
       {select_adminbox}
     </div>
     {!endif}
   </div>
 </header>
 
-<nav class="mg_navbar mg-album-toolbar" aria-label="Album actions and pagination">
-  <div class="mg-album-actions">
-    {!if url_slideshow}
-    <a class="button" href="{url_slideshow}"{slideshow_onclick}>{lang_slideshow}</a>
-    {!endif}
-    {!if edit_album}
-    <a class="button" href="{url_edit}">{lang_edit}</a>
-    {!endif}
-  </div>
-  {!if top_pagination}
+{!if top_pagination}
+<nav class="mg-album-top-pagination" aria-label="Album pagination">
   <div class="mg_pagination">{top_pagination}</div>
-  {!endif}
 </nav>
+{!endif}
 
 {!if album_description}
 <section class="mg_album_description">
@@ -63,15 +63,15 @@
 
 {!if lang_no_image}<div class="noitems">{lang_no_image}</div>{!endif}
 
-<footer class="mg-album-footer">
-  <nav class="mg_navbar mg-album-pagination-bar" aria-label="Album pagination and information">
+<footer class="mg-album-footer mg-album-footer-compact">
+  <nav class="mg-album-pagination-bar" aria-label="Album pagination and information">
     <div class="mg-album-page-info">
-      <span>{album_id_display}</span><span class="mg_separator">|</span><span>{page_number}</span>
+      <span>{page_number}</span>
     </div>
     <div class="mg_pagination">{bottom_pagination}</div>
   </nav>
   <div class="mg-album-secondary-controls">
-    <div class="mg_jumpbox">{jumpbox}</div>
-    <div class="mg_sortbox">{select_sortbox}</div>
+    <div class="mg_jumpbox mg-secondary-control">{jumpbox}</div>
+    <div class="mg_sortbox mg-secondary-control">{select_sortbox}</div>
   </div>
 </footer>
