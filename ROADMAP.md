@@ -149,6 +149,7 @@ The Geeklog 2.1.1 / PHP 5.6 validation confirmed that image uploads succeed once
 - [x] Complete final public markup audit: one H1 per Podcast page, semantic repeated-card headings, non-link anchors and table-free member enrollment.
 - [x] Modernize the default media-detail page with semantic article/figure markup, separated navigation/actions, compact metadata and normalized keyword tags.
 - [x] Modernize the default album page with centered auto-fit cards, compact metadata, unified controls and a responsive footer.
+- [x] Simplify default album cards to title, short date, views/comments only; keep rating, tags and technical detail on media-detail pages.
 - [x] Replace the public advanced-search presentation tables with a semantic responsive search form.
 - [x] Modernize secondary public autotag, random-block, fullscreen-slideshow and maintained HTML5 audio rendering for responsive output.
 - [x] Modernize active media popups, public profile tables and remaining audio fragments for responsive rendering.
@@ -215,7 +216,7 @@ PLG_invokeService(
 - [x] Exclude `.github/`, `dist/`, `.gitignore` and build-only directories.
 - [x] Validate archive filenames against Geeklog 2.2.2 filename rules.
 - [x] Validate presence of the 1.8 storage and migration helpers in the archive.
-- [x] Keep archive generation intentional rather than rebuilding after every source commit.
+- [x] Rebuild the test archive automatically after every validated branch change, excluding `dist/**` to prevent loops.
 - [ ] Rebuild the final RC archive only after remaining source/documentation changes are complete.
 
 ## 12. Release-candidate validation matrix

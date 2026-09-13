@@ -663,6 +663,7 @@ class Media {
         } else {
             $media_time = MG_getUserDateTimeFormat($this->time);
         }
+        $media_date_short = COM_strftime('%d %b %Y', $media_time[1]);
 
         $media_title = (!empty($this->title)) ? PLG_replaceTags($this->title) : 'No Name';
 
@@ -693,6 +694,7 @@ class Media {
             'media_description' => PLG_replaceTags(nl2br($this->description)),
             'media_tag'         => MG_escapeHTML(strip_tags($this->title)),
             'media_time'        => $media_time[0],
+            'media_date_short'  => $media_date_short,
             'media_owner'       => $username,
             'media_item_thumbnail' => $media_item_thumbnail,
             'site_url'          => $_MG_CONF['site_url'],
