@@ -637,16 +637,28 @@ function plugin_getheadercode_mediagallery()
     global $_CONF, $_MG_CONF, $_SCRIPTS, $mgLightBox, $swfjsinclude;
 
     $retval = '';
+    $assetVersion = !empty($_MG_CONF['pi_version']) ? $_MG_CONF['pi_version'] : '1.8.0';
 
     //
     // Check to see if the template path is using the plugins/ directory, if yes,
-    // we must point to the stylesheet in public_html/mediagallery/
+    // we must point to the stylesheet in public_html/mediagallery/.
+    // Append the plugin version and file modification time so browsers keep
+    // caching unchanged CSS while immediately seeing each updated stylesheet.
     //
     if ($_MG_CONF['template_path'] == $_CONF['path'] . 'plugins/mediagallery/templates') {
+        $stylePath = $_CONF['path_html'] . 'mediagallery/style.css';
         $styleFile = $_MG_CONF['site_url'] . '/style.css';
     } else {
+        $stylePath = $_CONF['path_layout'] . 'mediagallery/style.css';
         $styleFile = $_CONF['layout_url'] . '/mediagallery/style.css';
     }
+
+    $styleMtime = @filemtime($stylePath);
+    $styleCacheVersion = $assetVersion;
+    if ($styleMtime !== false) {
+        $styleCacheVersion .= '-' . $styleMtime;
+    }
+    $styleFile .= '?v=' . rawurlencode($styleCacheVersion);
     $retval .= LB . '<link rel="stylesheet" type="text/css" href="' . $styleFile . '"' . XHTML . '>' . LB;
 
     $_SCRIPTS->setJavaScriptFile('mediagallery', '/mediagallery/js/mediagallery.js');
@@ -659,8 +671,18 @@ function plugin_getheadercode_mediagallery()
 
     $_SCRIPTS->setJavaScriptFile('jquery.cyclelite', '/mediagallery/js/jquery.cycle.lite.min.js');
 
-
-    $_SCRIPTS->setCSSFile('mg.framecss' . $_MG_CONF['random_skin'] , '/mediagallery/frames/' . $_MG_CONF['random_skin'] . '/style.css', false);
+    $frameStyleRelative = '/mediagallery/frames/' . $_MG_CONF['random_skin'] . '/style.css';
+    $frameStylePath = $_CONF['path_html'] . ltrim($frameStyleRelative, '/');
+    $frameMtime = @filemtime($frameStylePath);
+    $frameCacheVersion = $assetVersion;
+    if ($frameMtime !== false) {
+        $frameCacheVersion .= '-' . $frameMtime;
+    }
+    $_SCRIPTS->setCSSFile(
+        'mg.framecss' . $_MG_CONF['random_skin'],
+        $frameStyleRelative . '?v=' . rawurlencode($frameCacheVersion),
+        false
+    );
 
     return $retval;
 }
