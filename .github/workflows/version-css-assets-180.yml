@@ -1,0 +1,42 @@
+name: Version MediaGallery CSS assets
+
+on:
+  push:
+    branches:
+      - modernize-1.8.0
+    paths:
+      - '.github/version-css-assets-trigger'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: modernize-1.8.0
+          fetch-depth: 0
+
+      - name: Version MediaGallery CSS assets
+        run: python tools/version_css_assets_180.py
+
+      - name: Validate PHP syntax and versioned URLs
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l functions_legacy.inc
+          grep -n "styleCacheVersion" functions_legacy.inc
+          grep -n "frameCacheVersion" functions_legacy.inc
+          grep -n "?v=" functions_legacy.inc
+
+      - name: Commit CSS versioning
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'hostellerie'
+          git config user.email 'hostellerie.org@gmail.com'
+          git add functions_legacy.inc
+          git commit -m 'Version MediaGallery CSS assets'
+          git push origin HEAD:modernize-1.8.0
