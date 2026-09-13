@@ -820,9 +820,6 @@ function MG_displayMedia($id, $full=0, $sortOrder=0, $comments=0, $spage=0)
     }
 
     $media_desc = PLG_replaceTags(nl2br($media['media_desc']));
-    if (strlen($media_desc) > 0) {
-        $media_desc = '<p style="margin:5px">'.$media_desc.'</p>';
-    }
 
     $getid3link = '';
     $getid3linkend = '';
@@ -832,14 +829,20 @@ function MG_displayMedia($id, $full=0, $sortOrder=0, $comments=0, $spage=0)
     $lang_keywords = '';
     if ($mg_album->enable_keywords == 1 && !empty($media['media_keywords'])) {
         $lang_keywords = $LANG_MG01['keywords'];
-        $keyWords = array();
-        $keyWords = explode(' ', $media['media_keywords']);
-        $numKeyWords = count($keyWords);
-        for ($i=0; $i<$numKeyWords; $i++) {
-            $keyWords[$i] = str_replace('"', ' ', $keyWords[$i]);
-            $searchKeyword = $keyWords[$i];
-            $keyWords[$i] = str_replace('_', ' ', $keyWords[$i]);
-            $kwText .= '<a href="' . $_MG_CONF['site_url'] . '/search.php?mode=search&amp;swhere=1&amp;keywords=' . $searchKeyword . '&amp;keyType=any">' . $keyWords[$i] . '</a>';
+        $keyWords = preg_split('/[\s,]+/', trim($media['media_keywords']));
+        if (!is_array($keyWords)) {
+            $keyWords = array();
+        }
+        foreach ($keyWords as $keyword) {
+            $keyword = trim(str_replace('\"', ' ', $keyword));
+            if ($keyword === '') {
+                continue;
+            }
+            $searchKeyword = rawurlencode($keyword);
+            $displayKeyword = MG_escapeHTML(str_replace('_', ' ', $keyword));
+            $kwText .= '<a class="mg-tag" href="' . $_MG_CONF['site_url']
+                . '/search.php?mode=search&amp;swhere=1&amp;keywords=' . $searchKeyword
+                . '&amp;keyType=any">' . $displayKeyword . '</a>';
         }
     }
 
