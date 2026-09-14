@@ -1,0 +1,122 @@
+name: Temporary CSS surgical fix
+
+on:
+  push:
+    branches:
+      - modernize-1.8.0
+    paths:
+      - .github/workflows/tmp-css-surgical-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch-css:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          ref: modernize-1.8.0
+
+      - name: Patch existing stylesheet blocks
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('public_html/style.css')
+          css = path.read_text(encoding='utf-8')
+
+          old_slideshow = '''.mg-slideshow-stage {
+            box-sizing: border-box;
+            overflow: hidden;
+          }
+          .mg-slideshow-image {
+            width: 100%;
+            height: 100%;
+            max-width: 100%;
+            max-height: 100%;
+            margin: 0;
+            object-fit: contain;
+            object-position: center center;
+          }'''
+
+          new_slideshow = '''.mg-slideshow-stage {
+            box-sizing: border-box;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+          }
+          .mg-slideshow-image {
+            display: block;
+            width: auto;
+            height: auto;
+            max-width: 100%;
+            max-height: 100%;
+            margin: 0;
+            object-fit: contain;
+            object-position: center center;
+          }'''
+
+          if css.count(old_slideshow) != 1:
+              raise SystemExit('Expected exactly one final slideshow sizing block')
+          css = css.replace(old_slideshow, new_slideshow, 1)
+
+          old_stack = '''.mg-album-default-grid .mg-card-square .mg-card-preview-stack {
+            position: relative;
+            display: block;
+            width: 100%;
+            height: 100%;
+            aspect-ratio: 1 / 1;
+            overflow: hidden;
+            border-radius: .45rem;
+            background: rgba(127,127,127,.055);
+          }'''
+
+          new_stack = '''.mg-album-default-grid .mg-card-square .mg-card-preview-stack {
+            position: relative;
+            display: block;
+            width: 100%;
+            height: 100%;
+            aspect-ratio: 1 / 1;
+            overflow: hidden;
+            border-radius: .45rem;
+            background: rgba(127,127,127,.055);
+            transition: background-color .25s ease;
+          }'''
+
+          if css.count(old_stack) != 1:
+              raise SystemExit('Expected exactly one card preview stack block')
+          css = css.replace(old_stack, new_stack, 1)
+
+          anchor = '''.mg-album-default-grid .mg-card-square:hover .mg-card-preview-cover,
+          .mg-album-default-grid .mg-card-square:focus-within .mg-card-preview-cover {
+            opacity: 0;
+            transform: none;
+          }'''
+
+          dark_hover = '''.mg-album-default-grid .mg-card-square:hover .mg-card-preview-stack,
+          .mg-album-default-grid .mg-card-square:focus-within .mg-card-preview-stack {
+            background: #08090b;
+          }
+          
+          ''' + anchor
+
+          if css.count(anchor) != 1:
+              raise SystemExit('Expected exactly one card preview hover block')
+          css = css.replace(anchor, dark_hover, 1)
+
+          path.write_text(css, encoding='utf-8')
+          PY
+
+      - name: Remove temporary workflow and commit
+        shell: bash
+        run: |
+          rm .github/workflows/tmp-css-surgical-fix.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public_html/style.css .github/workflows/tmp-css-surgical-fix.yml
+          git commit -m "Keep slideshow images inside viewport and darken preview letterbox [skip ci]"
+          git push origin HEAD:modernize-1.8.0
