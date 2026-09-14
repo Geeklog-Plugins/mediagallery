@@ -1,6 +1,6 @@
 name: Temporary full i18n audit
 
-# Refreshed after French batch 3
+# Focused on executable UI; documentation is excluded.
 on:
   push:
     branches:
@@ -49,12 +49,9 @@ jobs:
                       keys.add((am.group(1), am.group(2)))
               return keys
 
-          def french_keys(path):
-              text = Path(path).read_text(encoding='utf-8')
-              return set(re.findall(r"\$(LANG_MG\d+)\['([^']+)'\]\s*=", text))
-
           en = english_keys('language/english_utf-8.php')
-          fr = french_keys('language/french_france_utf-8.php')
+          fr_text = Path('language/french_france_utf-8.php').read_text(encoding='utf-8')
+          fr = set(re.findall(r"\$(LANG_MG\d+)\['([^']+)'\]\s*=", fr_text))
           missing = sorted(en - fr)
 
           candidates = []
@@ -67,37 +64,34 @@ jobs:
               for p in root.rglob('*'):
                   if not p.is_file() or p.suffix.lower() not in {'.php', '.thtml', '.html', '.js'}:
                       continue
+                  posix = p.as_posix()
+                  if '/docs/' in posix or posix.startswith('public_html/docs/'):
+                      continue
                   lines = p.read_text(encoding='utf-8', errors='ignore').splitlines()
                   for n, line in enumerate(lines, 1):
                       if '$LANG_' in line or '{lang_' in line:
                           continue
                       for rx in (text_re, attr_re):
-                          for m in rx.finditer(line):
-                              value = m.group(1).strip()
+                          for match in rx.finditer(line):
+                              value = match.group(1).strip()
                               if value in {'DOCTYPE', 'UTF'}:
                                   continue
                               candidates.append((str(p), n, value))
 
-          out = []
-          out.append('# MediaGallery French localization audit')
-          out.append('')
-          out.append(f'- English keys detected: **{len(en)}**')
-          out.append(f'- French keyed overrides: **{len(fr)}**')
-          out.append(f'- Keys still without explicit French override: **{len(missing)}**')
-          out.append(f'- Hard-coded UI candidates: **{len(candidates)}**')
-          out.append('')
-          out.append('## Missing French keys')
-          out.append('')
+          out = ['# MediaGallery French localization audit', '']
+          out += [f'- English keys detected: **{len(en)}**',
+                  f'- French keyed overrides: **{len(fr)}**',
+                  f'- Keys still without explicit French override: **{len(missing)}**',
+                  f'- Executable UI hard-coded candidates: **{len(candidates)}**', '']
+          out += ['## Missing French keys', '']
           for array, key in missing:
               out.append(f'- `{array}[{key}]`')
-          out.append('')
-          out.append('## Hard-coded UI candidates')
-          out.append('')
+          out += ['', '## Executable UI hard-coded candidates', '']
           for path, line, value in candidates:
               out.append(f'- `{path}:{line}` — `{value}`')
           out.append('')
-          Path('I18N_AUDIT.md').write_text('\n'.join(out) + '\n', encoding='utf-8')
-          print('\n'.join(out[:12]))
+          Path('I18N_AUDIT.md').write_text('\n'.join(out), encoding='utf-8')
+          print('\n'.join(out[:10]))
           PY
 
       - name: Commit audit report
@@ -107,5 +101,5 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add I18N_AUDIT.md
-          git commit -m 'Refresh French localization audit [skip ci]'
+          git commit -m 'Refresh focused French localization audit [skip ci]'
           git push origin HEAD:modernize-1.8.0
