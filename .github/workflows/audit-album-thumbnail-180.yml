@@ -1,0 +1,13 @@
+name: Audit MediaGallery album thumbnail
+on:
+  push:
+    paths:
+      - '.github/audit-album-thumbnail-trigger'
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Locate album thumbnail producer
+        run: |
+          grep -R -n -A120 -B10 "function MG_albumThumbnail" . --exclude-dir=.git || true
