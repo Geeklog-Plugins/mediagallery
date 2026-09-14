@@ -1,0 +1,56 @@
+name: Fix MediaGallery PHP block dependencies
+
+on:
+  push:
+    branches:
+      - modernize-1.8.0
+    paths:
+      - '.github/workflows/fix-phpblock-dependencies.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: modernize-1.8.0
+
+      - name: Patch block dependency loading
+        shell: python
+        run: |
+          from pathlib import Path
+
+          bootstrap = Path('functions.inc')
+          text = bootstrap.read_text()
+          old = """\n/*\n * Legacy plugin entry points (notably Geeklog PHP blocks) can be called after\n * functions.inc has been loaded without first passing through a MediaGallery\n * public script. Load the common helpers here so functions such as\n * MG_getUserPrefs(), MG_getTemplatePath() and the other shared MG_* helpers are\n * always available to those entry points. require_once keeps the normal public\n * page bootstrap path safe when common.php is included again later.\n */\nrequire_once __DIR__ . '/include/common.php';\n"""
+          if old not in text:
+              raise SystemExit('Expected global common.php bootstrap block not found')
+          bootstrap.write_text(text.replace(old, '\n', 1))
+
+          legacy = Path('functions_legacy.inc')
+          text = legacy.read_text()
+          old = """function phpblock_mg_maenroll()\n{\n    global $_CONF, $_MG_CONF, $_TABLES, $_USER, $LANG_MG03;\n\n    if (COM_isAnonUser()) return;\n"""
+          new = """function phpblock_mg_maenroll()\n{\n    global $_CONF, $_MG_CONF, $_TABLES, $_USER, $LANG_MG03;\n\n    // PHP blocks are invoked from normal Geeklog pages as well as MediaGallery\n    // pages, so load the shared helpers explicitly just like randommedia does.\n    require_once $_CONF['path'] . 'plugins/mediagallery/include/common.php';\n\n    if (COM_isAnonUser()) return;\n"""
+          if old not in text:
+              raise SystemExit('Expected phpblock_mg_maenroll() body not found')
+          legacy.write_text(text.replace(old, new, 1))
+
+      - name: Verify PHP block entry points
+        shell: bash
+        run: |
+          grep -q "function phpblock_mg_randommedia" functions_legacy.inc
+          grep -q "function phpblock_mg_maenroll" functions_legacy.inc
+          grep -A8 "function phpblock_mg_maenroll" functions_legacy.inc | grep -q "include/common.php"
+          ! grep -q "Legacy plugin entry points (notably Geeklog PHP blocks)" functions.inc
+
+      - name: Commit fix
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add functions.inc functions_legacy.inc
+          git commit -m "Fix PHP block dependency loading"
+          git push origin HEAD:modernize-1.8.0
