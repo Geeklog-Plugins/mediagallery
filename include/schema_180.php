@@ -32,7 +32,8 @@ function MG_ensureAlbumSchema180($force = false)
         return true;
     }
 
-    $marker = 'mediagallery_schema_180_albums';
+    // Geeklog's vars.name column is VARCHAR(20), including Geeklog 2.1.1.
+    $marker = 'mg_schema180_albums';
     if (!$force) {
         $done = DB_getItem($_TABLES['vars'], 'value', "name = '" . DB_escapeString($marker) . "'");
         if ($done === '1') {
