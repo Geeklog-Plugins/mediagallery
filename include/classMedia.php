@@ -569,10 +569,19 @@ class Media {
 
         $fileSize = MG_getSize($fs_bytes);
 
-        $direct_url = self::getFileUrl('disp', $this->filename, $this->mime_ext);
+        $direct_url = '';
         $direct_path = self::getFilePath('disp', $this->filename, $this->mime_ext);
-        if (!file_exists($direct_path)) {
-            $direct_url = self::getFileUrl('disp', $this->filename, 'jpg');
+        if (file_exists($direct_path)) {
+            $direct_url = self::getFileUrl('disp', $this->filename, $this->mime_ext);
+        } else {
+            $direct_jpg_path = self::getFilePath('disp', $this->filename, 'jpg');
+            if (file_exists($direct_jpg_path)) {
+                $direct_url = self::getFileUrl('disp', $this->filename, 'jpg');
+            } elseif (!empty($this->media_thumbnail)) {
+                // Existing installations may not have a display derivative for every image.
+                // Fall back to the proven historical thumbnail instead of emitting a broken URL.
+                $direct_url = $this->media_thumbnail;
+            }
         }
 
         $edit_item = '';
