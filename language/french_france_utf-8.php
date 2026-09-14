@@ -246,8 +246,6 @@ $LANG_MG03['aria_breadcrumb'] = 'Fil d’Ariane';
 $LANG_MG03['aria_album_actions'] = 'Actions de l’album';
 $LANG_MG03['aria_album_pagination'] = 'Pagination de l’album';
 $LANG_MG03['aria_album_pagination_info'] = 'Pagination et informations de l’album';
-?>
-
 // ---------------------------------------------------------------------------
 // French administration/configuration coverage - batch 2
 // ---------------------------------------------------------------------------
