@@ -2888,8 +2888,8 @@ a.SWFUProgressCancel:hover {
   box-shadow: 0 .65rem 1.5rem rgba(0,0,0,.10);
 }
 
-.mg-album-default-grid .mg-card:hover .mg-card-media img,
-.mg-album-default-grid .mg-card:focus-within .mg-card-media img {
+.mg-album-default-grid .mg-card:hover .mg-card-media img:not(.mg-card-preview-image),
+.mg-album-default-grid .mg-card:focus-within .mg-card-media img:not(.mg-card-preview-image) {
   transform: scale(1.025);
 }
 
@@ -2980,7 +2980,10 @@ a.SWFUProgressCancel:hover {
 .mg-album-default-grid .mg-card:hover, .mg-album-default-grid .mg-card:focus-within {
   transform: translateY(-.2rem); border-color: rgba(127,127,127,.32); box-shadow: 0 .55rem 1.5rem rgba(0,0,0,.1);
 }
-.mg-album-default-grid .mg-card:hover .mg_thumbnail img, .mg-album-default-grid .mg-card:focus-within .mg_thumbnail img { transform: scale(1.025); }
+.mg-album-default-grid .mg-card:hover .mg_thumbnail img:not(.mg-card-preview-image),
+.mg-album-default-grid .mg-card:focus-within .mg_thumbnail img:not(.mg-card-preview-image) {
+  transform: scale(1.025);
+}
 .mg-card-album-views { opacity: .68; font-size: .88rem; }
 
 .mg-slideshow-play {
@@ -3149,8 +3152,8 @@ a.SWFUProgressCancel:hover {
   box-sizing: border-box;
   padding: .35rem;
   opacity: 0;
-  transform: scale(.91);
-  transition: opacity .32s ease, transform .38s cubic-bezier(.2,.7,.2,1);
+  transform: none;
+  transition: opacity .25s ease;
 }
 .mg-album-default-grid .mg-card-square:hover .mg-card-preview-cover,
 .mg-album-default-grid .mg-card-square:focus-within .mg-card-preview-cover {
