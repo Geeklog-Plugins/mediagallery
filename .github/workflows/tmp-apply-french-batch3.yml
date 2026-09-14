@@ -1,0 +1,51 @@
+name: Apply French translation batch 3
+
+on:
+  push:
+    branches:
+      - modernize-1.8.0
+    paths:
+      - '.github/workflows/tmp-apply-french-batch3.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: modernize-1.8.0
+          fetch-depth: 0
+
+      - name: Apply translation batch
+        run: python3 tools/tmp_apply_french_batch3.py
+
+      - name: Validate PHP
+        run: php -l language/french_france_utf-8.php
+
+      - name: Build archive
+        run: |
+          set -euo pipefail
+          ARCHIVE='mediagallery_1.8.0_2.1.1.zip'
+          rm -rf package
+          mkdir -p package/mediagallery dist
+          find dist -maxdepth 1 -type f -name '*.zip' -delete
+          rsync -a ./ package/mediagallery/ \
+            --exclude='.git/' --exclude='.gitignore' --exclude='.github/' \
+            --exclude='dist/' --exclude='package/' --exclude='tools/tmp_apply_french_batch3.py' \
+            --exclude='I18N_AUDIT.md'
+          (cd package && zip -qr "../dist/${ARCHIVE}" mediagallery)
+          unzip -t "dist/${ARCHIVE}" >/dev/null
+
+      - name: Commit and clean temporary files
+        run: |
+          set -euo pipefail
+          rm -f tools/tmp_apply_french_batch3.py .github/workflows/tmp-apply-french-batch3.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add language/french_france_utf-8.php
+          git add -f dist/ tools/tmp_apply_french_batch3.py .github/workflows/tmp-apply-french-batch3.yml
+          git commit -m 'Expand French configuration and interface translations [skip ci]'
+          git push origin HEAD:modernize-1.8.0
