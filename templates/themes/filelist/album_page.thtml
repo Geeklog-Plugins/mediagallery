@@ -1,5 +1,4 @@
 {lbslideshow}
-<script type="text/javascript" src="{site_url}/players/audio-player.js"></script>
 
 <nav class="bc_navigation" aria-label="Breadcrumb">
 {birdseed}

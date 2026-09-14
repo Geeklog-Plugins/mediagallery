@@ -3116,13 +3116,18 @@ a.SWFUProgressCancel:hover {
 }
 .mg-album-default-grid .mg-card-square .mg-card-preview-stack {
   position: relative;
+  display: grid;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1;
   overflow: hidden;
   border-radius: .45rem;
   background: rgba(127,127,127,.055);
 }
 .mg-album-default-grid .mg-card-square .mg-card-preview-image {
-  position: absolute;
-  inset: 0;
+  position: relative;
+  inset: auto;
+  grid-area: 1 / 1;
   display: block;
   width: 100% !important;
   height: 100% !important;

@@ -1,5 +1,4 @@
 {lbslideshow}
-<script type="text/javascript" src="{site_url}/players/audio-player.js"></script>
 
 <header class="mg_search_page_header">
   <h1 class="mg_search_page_title">{lang_search_title}</h1>
