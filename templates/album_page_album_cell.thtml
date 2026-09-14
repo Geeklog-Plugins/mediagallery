@@ -6,7 +6,7 @@
   </div>
 
   <div class="mg-card-body">
-    <h2 class="mg_album_item_title mg-card-title">{album_title} <span class="mg_item_count" aria-label="Media count">{subalbum_media_count}</span></h2>
+    <h2 class="mg_album_item_title mg-card-title"><a href="{u_viewalbum}">{album_title}</a> <span class="mg_item_count" aria-label="Media count">{subalbum_media_count}</span></h2>
 
     {!if album_desc}<div class="mg-card-description">{album_desc}</div>{!endif}
 
