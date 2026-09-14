@@ -3094,7 +3094,7 @@ a.SWFUProgressCancel:hover {
 }
 
 
-/* MediaGallery 1.8 square crop with full-image hover */
+/* MediaGallery 1.8 square crop with mini-lightbox hover */
 .mg-album-default-grid .mg-card-square .mg-card-media {
   aspect-ratio: 1 / 1;
   height: auto;
@@ -3106,36 +3106,70 @@ a.SWFUProgressCancel:hover {
 .mg-album-default-grid .mg-card-square .mg_thumbnail,
 .mg-album-default-grid .mg-card-square .mg_thumbnail_wrapper,
 .mg-album-default-grid .mg-card-square .mg-card-image-link,
-.mg-album-default-grid .mg-card-square .mg_thumbnail_wrapper > a {
+.mg-album-default-grid .mg-card-square .mg_thumbnail_wrapper > a,
+.mg-album-default-grid .mg-card-square .mg-card-preview-stack {
   display: block;
   width: 100%;
   height: 100%;
   min-width: 0;
   min-height: 0;
 }
-.mg-album-default-grid .mg-card-square .mg-card-media img {
+.mg-album-default-grid .mg-card-square .mg-card-preview-stack {
+  position: relative;
+  overflow: hidden;
+  border-radius: .45rem;
+  background: rgba(127,127,127,.055);
+}
+.mg-album-default-grid .mg-card-square .mg-card-preview-image {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100% !important;
   height: 100% !important;
   max-width: none !important;
   max-height: none !important;
-  object-fit: cover;
   object-position: center center;
-  border-radius: .45rem;
-  transform: scale(1);
-  transition: transform .28s ease, filter .28s ease;
+  border-radius: inherit;
+  will-change: opacity, transform;
 }
-.mg-album-default-grid .mg-card-square:hover .mg-card-media img,
-.mg-album-default-grid .mg-card-square:focus-within .mg-card-media img {
+.mg-album-default-grid .mg-card-square .mg-card-preview-cover {
+  object-fit: cover;
+  opacity: 1;
+  transform: scale(1.015);
+  filter: brightness(1) saturate(1);
+  transition: opacity .32s ease, transform .38s cubic-bezier(.2,.7,.2,1), filter .32s ease;
+}
+.mg-album-default-grid .mg-card-square .mg-card-preview-full {
   object-fit: contain;
-  transform: scale(.94);
+  box-sizing: border-box;
+  padding: .35rem;
+  opacity: 0;
+  transform: scale(.91);
+  transition: opacity .32s ease, transform .38s cubic-bezier(.2,.7,.2,1);
+}
+.mg-album-default-grid .mg-card-square:hover .mg-card-preview-cover,
+.mg-album-default-grid .mg-card-square:focus-within .mg-card-preview-cover {
+  opacity: .20;
+  transform: scale(1.045);
+  filter: brightness(.68) saturate(.78);
+}
+.mg-album-default-grid .mg-card-square:hover .mg-card-preview-full,
+.mg-album-default-grid .mg-card-square:focus-within .mg-card-preview-full {
+  opacity: 1;
+  transform: scale(.965);
 }
 .mg-album-default-grid .mg-card-square:hover .mg-card-media,
 .mg-album-default-grid .mg-card-square:focus-within .mg-card-media {
-  background: rgba(127,127,127,.075);
+  background: rgba(127,127,127,.065);
+}
+@media (max-width: 38rem) {
+  .mg-album-default-grid .mg-card-square .mg-card-preview-full {
+    padding: .25rem;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .mg-album-default-grid .mg-card-square .mg-card-media img {
+  .mg-album-default-grid .mg-card-square .mg-card-preview-cover,
+  .mg-album-default-grid .mg-card-square .mg-card-preview-full {
     transition: none !important;
   }
 }

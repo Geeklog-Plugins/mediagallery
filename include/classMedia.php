@@ -646,10 +646,14 @@ class Media {
         // CSS crops it to a square at rest and reveals the complete image on hover/focus.
         $media_card_preview = $media_item_thumbnail;
         if ($searchmode == 0 && $this->type == 0 && $this->remote != 1 && !empty($direct_url)) {
+            $card_preview_url = MG_escapeHTML($direct_url);
             $media_card_preview = $media_start_link
-                . '<img class="mg-card-preview-image" src="' . MG_escapeHTML($direct_url)
+                . '<span class="mg-card-preview-stack">'
+                . '<img class="mg-card-preview-image mg-card-preview-cover" src="' . $card_preview_url
                 . '" alt="' . $caption . '" loading="lazy" decoding="async">'
-                . '</a>';
+                . '<img class="mg-card-preview-image mg-card-preview-full" src="' . $card_preview_url
+                . '" alt="" aria-hidden="true" loading="lazy" decoding="async">'
+                . '</span></a>';
         }
 
         if ($mode == 1) {
