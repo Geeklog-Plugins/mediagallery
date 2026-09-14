@@ -1615,3 +1615,9 @@ $LANG_configselects['mediagallery'] = array(
 if (isset($_MG_CONF, $_MG_CONF['custom_image_width'], $_MG_CONF['custom_image_height'])) {
     $LANG_configselects['mediagallery'][21][$LANG_MG01['size_custom'] . ' - ' . $_MG_CONF['custom_image_width'] . 'x' . $_MG_CONF['custom_image_height']] = 9;
 }
+
+// MediaGallery 1.8.0 template accessibility labels
+$LANG_MG03['aria_breadcrumb'] = 'Breadcrumb';
+$LANG_MG03['aria_album_actions'] = 'Album actions';
+$LANG_MG03['aria_album_pagination'] = 'Album pagination';
+$LANG_MG03['aria_album_pagination_info'] = 'Album pagination and information';

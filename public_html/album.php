@@ -112,7 +112,7 @@ function MG_buildAdminbox(&$album, &$root_album, &$T)
         $admin_box = '<form name="adminbox" id="adminbox" action="' . $action . '" method="get" class="uk-form"><div>' . LB;
         $admin_box .= '<input type="hidden" name="album_id" value="' . $album->id . '"' . XHTML . '>' . LB;
         $admin_box .= '<select name="mode" onchange="forms[\'adminbox\'].submit()">' . LB;
-        $admin_box .= '<option label="Options" value="">' . $LANG_MG01['options'] . '</option>' . LB;
+        $admin_box .= '<option label="' . MG_escapeHTML($LANG_MG01['options']) . '" value="">' . $LANG_MG01['options'] . '</option>' . LB;
         $admin_box .= $admin_box_option;
         $admin_box .= '</select>' . LB;
         $admin_box .= '<input type="submit" value="' . $LANG_MG03['go'] . '"' . XHTML . '>' . LB;
@@ -360,6 +360,10 @@ $T->set_var(array(
     'album_owner'        => $ownername,
     'media_count'        => $album->getMediaCount(),
     'lang_search'        => $LANG_MG01['search'],
+    'lang_aria_breadcrumb' => $LANG_MG03['aria_breadcrumb'],
+    'lang_aria_album_actions' => $LANG_MG03['aria_album_actions'],
+    'lang_aria_album_pagination' => $LANG_MG03['aria_album_pagination'],
+    'lang_aria_album_pagination_info' => $LANG_MG03['aria_album_pagination_info'],
     'keywords'           => '',
     'rsslink'            => $rsslink,
     'list_title'         => $LANG_MG03['list_title'],
