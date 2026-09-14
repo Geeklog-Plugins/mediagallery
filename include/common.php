@@ -1250,24 +1250,15 @@ function MG_albumThumbnail($album_id)
     }
 
 
-    // Keep separate cover/full sources for the mini-lightbox. A display derivative
-    // that preserves the original ratio stays preferred; a cropped legacy derivative
-    // falls back to the original so portrait covers can be revealed completely.
+    // Keep the display derivative for the square card, but always use the
+    // uncropped original in the mini-lightbox when that source is available.
     $album_full_image = $album_last_image;
     if ($album_data['tn_attached'] != 1 && isset($display_cover_filename) && $display_cover_filename != '') {
         list($original_cover_image, $original_cover_size) = MG_getImageUrl(
             'orig/' . $display_cover_filename[0] . '/' . $display_cover_filename
         );
         if ($original_cover_size !== false && $original_cover_size[0] > 0 && $original_cover_size[1] > 0) {
-            $use_original_cover = ($mediasize === false || $mediasize[0] < 1 || $mediasize[1] < 1);
-            if (!$use_original_cover) {
-                $original_cover_ratio = $original_cover_size[0] / $original_cover_size[1];
-                $preview_cover_ratio = $mediasize[0] / $mediasize[1];
-                $use_original_cover = abs($original_cover_ratio - $preview_cover_ratio) > 0.02;
-            }
-            if ($use_original_cover) {
-                $album_full_image = $original_cover_image;
-            }
+            $album_full_image = $original_cover_image;
         }
     }
 

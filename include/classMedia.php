@@ -654,30 +654,15 @@ class Media {
         $media_item_thumbnail = MG_getFramedImage($skin, $this->title, $url_media_item,
                                                   $media_thumbnail, $newwidth, $newheight, $media_start_link);
 
-        // MediaGallery 1.8: square crop at rest, complete image on hover/focus.
-        // Prefer the lighter display derivative for the full layer when it preserves
-        // the original aspect ratio. If a legacy derivative is itself cropped, use
-        // the original image so portrait media can really be revealed in full.
+        // MediaGallery 1.8: use the display derivative for the sharp square cover
+        // and the uncropped original for the mini-lightbox whenever it exists.
         $media_card_preview = $media_item_thumbnail;
         if ($searchmode == 0 && $this->type == 0 && $this->remote != 1 && !empty($direct_url)) {
-            $card_cover_source = !empty($this->media_thumbnail) ? $this->media_thumbnail : $direct_url;
+            $card_cover_source = $direct_url;
             $card_full_source = $direct_url;
             $orig_preview_path = self::getFilePath('orig', $this->filename, $this->mime_ext);
             if (file_exists($orig_preview_path)) {
-                $orig_preview_size = @getimagesize($orig_preview_path);
-                $display_preview_size = ($direct_preview_path != '') ? @getimagesize($direct_preview_path) : false;
-                if ($orig_preview_size !== false && $orig_preview_size[0] > 0 && $orig_preview_size[1] > 0) {
-                    $use_original_preview = ($display_preview_size === false
-                        || $display_preview_size[0] < 1 || $display_preview_size[1] < 1);
-                    if (!$use_original_preview) {
-                        $orig_ratio = $orig_preview_size[0] / $orig_preview_size[1];
-                        $display_ratio = $display_preview_size[0] / $display_preview_size[1];
-                        $use_original_preview = abs($orig_ratio - $display_ratio) > 0.02;
-                    }
-                    if ($use_original_preview) {
-                        $card_full_source = self::getFileUrl('orig', $this->filename, $this->mime_ext);
-                    }
-                }
+                $card_full_source = self::getFileUrl('orig', $this->filename, $this->mime_ext);
             }
             $card_cover_url = MG_escapeHTML($card_cover_source);
             $card_full_url = MG_escapeHTML($card_full_source);
