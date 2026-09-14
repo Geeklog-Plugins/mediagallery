@@ -16,7 +16,7 @@ if (strpos(strtolower($_SERVER['PHP_SELF']), strtolower(basename(__FILE__))) !==
  */
 require_once __DIR__ . '/include/input_compat_180.php';
 require_once __DIR__ . '/functions_legacy.inc';
-
+require_once __DIR__ . '/include/interoperability_180.php';
 
 require_once __DIR__ . '/include/config_180.php';
 require_once __DIR__ . '/include/schema_180.php';
