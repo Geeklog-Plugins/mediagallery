@@ -3178,3 +3178,23 @@ a.SWFUProgressCancel:hover {
     transition: none !important;
   }
 }
+
+
+/* MediaGallery 1.8 reliable card click target */
+.mg-album-default-grid .mg-card-media {
+  position: relative;
+}
+.mg-album-default-grid .mg-card-image-link,
+.mg-album-default-grid .mg_thumbnail_wrapper > a {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.mg-album-default-grid .mg-card-preview-stack,
+.mg-album-default-grid .mg-card-preview-image {
+  pointer-events: none;
+}
