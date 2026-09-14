@@ -1,0 +1,83 @@
+name: Temporary slideshow viewport fix
+
+on:
+  push:
+    branches:
+      - modernize-1.8.0
+    paths:
+      - '.github/workflows/tmp-slideshow-viewport.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix-and-build:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: modernize-1.8.0
+          fetch-depth: 0
+
+      - name: Patch slideshow viewport sizing
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('templates/slideshow.thtml')
+          s = p.read_text()
+          anchor = "    if (!root || !image || photoCount < 1) {\n        return;\n    }\n\n"
+          insert = "    if (!root || !image || photoCount < 1) {\n        return;\n    }\n\n    // Keep the fixed slideshow outside any transformed or contained theme wrapper.\n    if (root.parentNode !== document.body) {\n        document.body.appendChild(root);\n    }\n\n    function fitImageToViewport() {\n        var viewportWidth = window.innerWidth || document.documentElement.clientWidth || 1;\n        var viewportHeight = window.innerHeight || document.documentElement.clientHeight || 1;\n        var gutter = Math.max(16, Math.min(40, viewportWidth * 0.03));\n        var maxWidth = Math.max(1, viewportWidth - (gutter * 2));\n        var maxHeight = Math.max(1, viewportHeight - (gutter * 2));\n\n        image.style.setProperty('width', 'auto', 'important');\n        image.style.setProperty('height', 'auto', 'important');\n        image.style.setProperty('max-width', Math.floor(maxWidth) + 'px', 'important');\n        image.style.setProperty('max-height', Math.floor(maxHeight) + 'px', 'important');\n    }\n\n"
+          if s.count(anchor) != 1:
+              raise SystemExit('Slideshow initialization anchor not found exactly once')
+          s = s.replace(anchor, insert, 1)
+          old_onload = "        image.onload = function () {\n            root.classList.remove('is-changing');\n        };"
+          new_onload = "        image.onload = function () {\n            fitImageToViewport();\n            root.classList.remove('is-changing');\n        };"
+          if s.count(old_onload) != 1:
+              raise SystemExit('Slideshow onload block not found exactly once')
+          s = s.replace(old_onload, new_onload, 1)
+          resize_anchor = "    document.addEventListener('visibilitychange', function () {"
+          resize_insert = "    window.addEventListener('resize', fitImageToViewport);\n    window.addEventListener('orientationchange', fitImageToViewport);\n\n    document.addEventListener('visibilitychange', function () {"
+          if s.count(resize_anchor) != 1:
+              raise SystemExit('Visibility listener anchor not found exactly once')
+          s = s.replace(resize_anchor, resize_insert, 1)
+          p.write_text(s)
+          PY
+
+      - name: Verify template patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq "document.body.appendChild(root);" templates/slideshow.thtml
+          grep -Fq "function fitImageToViewport()" templates/slideshow.thtml
+          grep -Fq "image.style.setProperty('max-height'" templates/slideshow.thtml
+          grep -Fq "window.addEventListener('resize', fitImageToViewport);" templates/slideshow.thtml
+
+      - name: Build installable archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          ARCHIVE='mediagallery_1.8.0_2.1.1.zip'
+          rm -rf package
+          mkdir -p package/mediagallery dist
+          find dist -maxdepth 1 -type f \( -name 'mediagallery-*.zip' -o -name 'mediagallery_*.zip' -o -name '*.zip.sha256' \) -delete
+          rsync -a ./ package/mediagallery/ --exclude='.git/' --exclude='.gitignore' --exclude='.github/' --exclude='.build-request' --exclude='dist/' --exclude='package/' --exclude='.idea/' --exclude='tmp/'
+          printf '%s\n' 'MediaGallery 1.8.0 test archive' 'Geeklog target: 2.1.1+' 'Source branch: modernize-1.8.0' 'Slideshow: viewport-bound image sizing' > package/mediagallery/BUILD_INFO.txt
+          (cd package && zip -qr "../dist/${ARCHIVE}" mediagallery)
+          unzip -t "dist/${ARCHIVE}" >/dev/null
+          unzip -p "dist/${ARCHIVE}" mediagallery/templates/slideshow.thtml | grep -Fq "function fitImageToViewport()"
+          unzip -p "dist/${ARCHIVE}" mediagallery/templates/slideshow.thtml | grep -Fq "document.body.appendChild(root);"
+
+      - name: Commit fix and archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/tmp-slideshow-viewport.yml
+          git add templates/slideshow.thtml
+          git add -f dist/mediagallery_1.8.0_2.1.1.zip
+          git commit -m 'Bind slideshow images to viewport and rebuild archive [skip ci]'
+          git push origin HEAD:modernize-1.8.0
