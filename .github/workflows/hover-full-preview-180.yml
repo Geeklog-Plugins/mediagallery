@@ -1,0 +1,35 @@
+name: Hover full card preview
+on:
+  push:
+    branches: [ modernize-1.8.0 ]
+    paths:
+      - '.github/hover-full-preview-trigger'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: modernize-1.8.0
+      - name: Apply hover preview refinement
+        run: python3 tools/hover_full_preview_180.py
+      - name: Validate PHP syntax
+        run: |
+          php -l include/classMedia.php
+          php -l include/common.php
+      - name: Validate markup and CSS
+        run: |
+          grep -q 'mg-card-image-link' templates/album_page_album_cell.thtml
+          grep -q 'object-fit: contain' public_html/style.css
+          grep -q 'square crop with full-image hover' public_html/style.css
+      - name: Remove temporary tooling
+        run: rm -f tools/hover_full_preview_180.py .github/workflows/hover-full-preview-180.yml .github/hover-full-preview-trigger
+      - name: Commit changes
+        run: |
+          git config user.name hostellerie
+          git config user.email hostellerie.org@gmail.com
+          git add -A
+          git commit -m 'Reveal full MediaGallery card images on hover'
+          git push
