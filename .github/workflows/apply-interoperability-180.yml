@@ -1,4 +1,4 @@
-name: Apply MediaGallery interoperability patch
+name: Finalize MediaGallery interoperability patch
 
 on:
   push:
@@ -18,140 +18,36 @@ jobs:
           ref: modernize-1.8.0
           fetch-depth: 0
 
-      - name: Apply interoperability changes
+      - name: Avoid duplicate recursive delete event
         run: |
           python3 <<'PY'
           from pathlib import Path
-
-          def replace_once(path, old, new):
-              p = Path(path)
-              text = p.read_text()
-              if old not in text:
-                  raise SystemExit('Pattern not found in %s:\n%s' % (path, old[:240]))
-              text = text.replace(old, new, 1)
-              p.write_text(text)
-
-          # Extend the existing MediaGallery Item Info contract. Raw ids remain
-          # media ids; album:<id> is the portable Geeklog 2.1.1+ album namespace.
-          replace_once(
-              'functions_legacy.inc',
-              "function plugin_getiteminfo_mediagallery($id, $what, $uid = 0, $options = array())\n{\n    global $_CONF, $_TABLES, $_MG_CONF, $LANG_MG00, $LANG_MG03;\n\n    $properties = explode(',', $what);",
-              "function plugin_getiteminfo_mediagallery($id, $what, $uid = 0, $options = array())\n{\n    global $_CONF, $_TABLES, $_MG_CONF, $LANG_MG00, $LANG_MG03;\n\n    $item180 = MG_parseItemId180($id);\n    if ($item180['type'] === 'album') {\n        return MG_getAlbumItemInfo180($item180['id'], $what, $uid);\n    }\n    $id = $item180['id'];\n\n    $properties = explode(',', $what);"
-          )
-
-          replace_once(
-              'functions_legacy.inc',
-              "function plugin_idToURL_mediagallery($sub_type, $item_id)\n{\n    global $_MG_CONF;\n\n    return $_MG_CONF['site_url'].'/media.php?f=0&amp;sort=0&amp;s='.$item_id;\n}",
-              "function plugin_idToURL_mediagallery($sub_type, $item_id)\n{\n    return MG_itemToURL180($item_id);\n}"
-          )
-
-          # Album creation via the quick-create path.
-          replace_once(
-              'include/albumedit.php',
-              "    $album->saveAlbum();\n    $aid = $album->id;\n\n    require_once $_CONF['path'] . 'plugins/mediagallery/include/rssfeed.php';",
-              "    $album->saveAlbum();\n    $aid = $album->id;\n\n    MG_notifyAlbumSaved180($aid);\n    if ($album->parent > 0) {\n        MG_notifyAlbumSaved180($album->parent);\n    }\n\n    require_once $_CONF['path'] . 'plugins/mediagallery/include/rssfeed.php';"
-          )
-
-          # Preserve the old parent before an album edit so both changed album
-          # listings can be announced when an album is moved.
-          replace_once(
-              'include/albumedit.php',
-              "    $album->parent = COM_applyFilter($_POST['parentaid'], true);\n    $parent_album = new mgAlbum($album->parent);",
-              "    $old_parent = ($update == 1) ? intval($album->parent) : 0;\n    $album->parent = COM_applyFilter($_POST['parentaid'], true);\n    $parent_album = new mgAlbum($album->parent);"
-          )
-
-          replace_once(
-              'include/albumedit.php',
-              "    MG_buildFullRSS();\n    MG_buildAlbumRSS($album->id);\n\n    $actionURL = $_MG_CONF['site_url'] . '/album.php?aid=' . $album->id;",
-              "    MG_buildFullRSS();\n    MG_buildAlbumRSS($album->id);\n\n    MG_notifyAlbumSaved180($album->id);\n    if ($album->parent > 0) {\n        MG_notifyAlbumSaved180($album->parent);\n    }\n    if ($old_parent > 0 && $old_parent != $album->parent) {\n        MG_notifyAlbumSaved180($old_parent);\n    }\n\n    $actionURL = $_MG_CONF['site_url'] . '/album.php?aid=' . $album->id;"
-          )
-
-          # A media manager save changes the album listing/cover as well as the
-          # individual media items that already emit PLG_itemSaved().
-          replace_once(
-              'include/mediamanage.php',
-              "    require_once $_CONF['path'] . 'plugins/mediagallery/include/rssfeed.php';\n    MG_buildAlbumRSS($album_id);\n    COM_redirect($actionURL);\n}\n\nfunction MG_mediaEdit",
-              "    require_once $_CONF['path'] . 'plugins/mediagallery/include/rssfeed.php';\n    MG_buildAlbumRSS($album_id);\n    MG_notifyAlbumSaved180($album_id);\n    COM_redirect($actionURL);\n}\n\nfunction MG_mediaEdit"
-          )
-
-          replace_once(
-              'include/mediamanage.php',
-              "    PLG_itemSaved($media_id, 'mediagallery');\n\n    // HTML5 playback no longer uses the old ActiveX/Flash/QuickTime option set.",
-              "    PLG_itemSaved($media_id, 'mediagallery');\n    MG_notifyMediaAlbumsSaved180($media_id);\n\n    // HTML5 playback no longer uses the old ActiveX/Flash/QuickTime option set."
-          )
-
-          # Uploading a public media item changes its album page.
-          replace_once(
-              'include/lib-upload.php',
-              "                DB_change($_TABLES['mg_albums'], 'media_count', $album->media_count, 'album_id', $album->id);",
-              "                DB_change($_TABLES['mg_albums'], 'media_count', $album->media_count, 'album_id', $album->id);\n                MG_notifyAlbumSaved180($album->id);"
-          )
-
-          # Batch media deletion changes the album page after media deletion
-          # notifications have already been emitted by MG_deleteMedia().
-          replace_once(
-              'include/batch.php',
-              "    MG_buildFullRSS();\n    MG_buildAlbumRSS($album_id);\n    COM_redirect($actionURL);\n}\n\nfunction MG_batchMoveMedia",
-              "    MG_buildFullRSS();\n    MG_buildAlbumRSS($album_id);\n    MG_notifyAlbumSaved180($album_id);\n    COM_redirect($actionURL);\n}\n\nfunction MG_batchMoveMedia"
-          )
-
-          # Moving a media item changes that media's context and both album
-          # listings. Keep the existing media id contract intact.
-          replace_once(
-              'include/batch.php',
-              "        DB_query($sql);\n        $media_seq += 10;\n\n        // update the media count in both albums...",
-              "        DB_query($sql);\n        PLG_itemSaved($media_id, 'mediagallery');\n        $media_seq += 10;\n\n        // update the media count in both albums..."
-          )
-
-          replace_once(
-              'include/batch.php',
-              "    MG_buildFullRSS();\n    MG_buildAlbumRSS($album_id);\n    MG_buildAlbumRSS($destination);\n\n    COM_redirect($actionURL);",
-              "    MG_buildFullRSS();\n    MG_buildAlbumRSS($album_id);\n    MG_buildAlbumRSS($destination);\n    MG_notifyAlbumSaved180($album_id);\n    MG_notifyAlbumSaved180($destination);\n\n    COM_redirect($actionURL);"
-          )
-
-          # Album deletion is announced with the namespaced id. If content is
-          # moved, the target album changes too; in all cases the former parent
-          # loses a child album.
-          replace_once(
-              'include/batch.php',
-              "    require_once $_CONF['path'] . 'plugins/mediagallery/include/rssfeed.php';\n    MG_buildFullRSS();\n    if ($target_id != 0) MG_buildAlbumRSS($target_id);\n\n    COM_redirect($actionURL);",
-              "    require_once $_CONF['path'] . 'plugins/mediagallery/include/rssfeed.php';\n    MG_buildFullRSS();\n    if ($target_id != 0) MG_buildAlbumRSS($target_id);\n\n    MG_notifyAlbumDeleted180($album_id);\n    if ($target_id > 0) {\n        MG_notifyAlbumSaved180($target_id);\n    }\n    if ($album->parent > 0 && $album->parent != $target_id) {\n        MG_notifyAlbumSaved180($album->parent);\n    }\n\n    COM_redirect($actionURL);"
-          )
-
-          # Recursive album deletion must announce every child album too.
-          replace_once(
-              'include/batch.php',
-              "    DB_delete($_TABLES['mg_media_albums'], 'album_id', intval($album_id));\n    DB_delete($_TABLES['mg_albums'], 'album_id', intval($album_id));\n\n    $feedname = sprintf($_MG_CONF['rss_feed_name'] . \"%06d\", $album_id);",
-              "    DB_delete($_TABLES['mg_media_albums'], 'album_id', intval($album_id));\n    DB_delete($_TABLES['mg_albums'], 'album_id', intval($album_id));\n    MG_notifyAlbumDeleted180($album_id);\n\n    $feedname = sprintf($_MG_CONF['rss_feed_name'] . \"%06d\", $album_id);"
-          )
-
-          # Document the integration contract in the 1.8 testing checklist.
-          p = Path('TESTING-1.8.md')
+          p = Path('include/batch.php')
           text = p.read_text()
-          marker = "\n## Interoperability / lifecycle events\n"
-          if marker not in text:
-              text += marker + "\n- [ ] Creating or editing a public album emits `PLG_itemSaved('album:<id>', 'mediagallery')`.\n- [ ] Making an album private causes consumers using `PLG_getItemInfo(..., uid=1)` to receive no public URL.\n- [ ] Deleting an album emits `PLG_itemDeleted('album:<id>', 'mediagallery')`, including recursive child deletion.\n- [ ] Adding, editing or deleting media keeps the existing media lifecycle event and also announces the affected album page.\n- [ ] Moving media announces the media item plus both source and destination albums.\n- [ ] `plugin_getiteminfo_mediagallery('album:<id>', 'url', 1)` returns the public album URL only when anonymously readable.\n- [ ] The same lifecycle behavior works on Geeklog 2.1.1 and 2.2.2 without requiring the newer `sub_type` argument.\n"
-              p.write_text(text)
+          old = """    MG_notifyAlbumDeleted180($album_id);
+    if ($target_id > 0) {
+        MG_notifyAlbumSaved180($target_id);
+    }
+"""
+          new = """    // Recursive deletion already announces the root album from
+    // MG_deleteChildAlbums(); moving content deletes only this album here.
+    if ($target_id > 0) {
+        MG_notifyAlbumDeleted180($album_id);
+        MG_notifyAlbumSaved180($target_id);
+    }
+"""
+          if old not in text:
+              raise SystemExit('Delete notification block not found')
+          p.write_text(text.replace(old, new, 1))
           PY
 
       - name: PHP syntax check
-        run: |
-          php -l functions.inc
-          php -l functions_legacy.inc
-          php -l include/interoperability_180.php
-          php -l include/albumedit.php
-          php -l include/mediamanage.php
-          php -l include/lib-upload.php
-          php -l include/batch.php
+        run: php -l include/batch.php
 
       - name: Commit changes
         run: |
-          if git diff --quiet; then
-            echo "No patch changes needed"
-            exit 0
-          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add functions_legacy.inc include/albumedit.php include/mediamanage.php include/lib-upload.php include/batch.php TESTING-1.8.md
-          git commit -m "Expose MediaGallery album and media lifecycle events"
+          git add include/batch.php
+          git commit -m "Avoid duplicate album deletion event"
           git push origin HEAD:modernize-1.8.0
