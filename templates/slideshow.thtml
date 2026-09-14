@@ -61,6 +61,24 @@ var photo_captions = [];
         return;
     }
 
+    // Keep the fixed slideshow outside any transformed or contained theme wrapper.
+    if (root.parentNode !== document.body) {
+        document.body.appendChild(root);
+    }
+
+    function fitImageToViewport() {
+        var viewportWidth = window.innerWidth || document.documentElement.clientWidth || 1;
+        var viewportHeight = window.innerHeight || document.documentElement.clientHeight || 1;
+        var gutter = Math.max(16, Math.min(40, viewportWidth * 0.03));
+        var maxWidth = Math.max(1, viewportWidth - (gutter * 2));
+        var maxHeight = Math.max(1, viewportHeight - (gutter * 2));
+
+        image.style.setProperty('width', 'auto', 'important');
+        image.style.setProperty('height', 'auto', 'important');
+        image.style.setProperty('max-width', Math.floor(maxWidth) + 'px', 'important');
+        image.style.setProperty('max-height', Math.floor(maxHeight) + 'px', 'important');
+    }
+
     if (reduceMotion) {
         playing = false;
         root.className += ' mg-reduce-motion';
@@ -112,6 +130,7 @@ var photo_captions = [];
 
         root.classList.add('is-changing');
         image.onload = function () {
+            fitImageToViewport();
             root.classList.remove('is-changing');
         };
         image.src = nextSrc;
@@ -197,6 +216,9 @@ var photo_captions = [];
             next();
         }
     }, {passive: true});
+
+    window.addEventListener('resize', fitImageToViewport);
+    window.addEventListener('orientationchange', fitImageToViewport);
 
     document.addEventListener('visibilitychange', function () {
         if (document.hidden) {
