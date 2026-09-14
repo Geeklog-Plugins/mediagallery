@@ -288,3 +288,5 @@ Before producing the 1.8.0 release candidate:
 ## Release principle
 
 MediaGallery 1.8.0 should be safer to upgrade than 1.7.x, keep persistent user media outside replaceable plugin code, work naturally in single-site and shared-code multisite installations, use Geeklog-native services and mail where available, and fail explicitly when required runtime capabilities such as image processing are missing.
+
+- [x] Final public visual polish: meaningful untitled-media fallback, zero-vote rating suppression, compact Search/Options UI, lighter metadata and immersive controls.

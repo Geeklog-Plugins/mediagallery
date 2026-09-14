@@ -81,6 +81,9 @@ $metaResult = DB_query(
 if ($metaResult !== false && DB_numRows($metaResult) === 1) {
     $mediaMeta = DB_fetchArray($metaResult);
 }
+if (!empty($mediaMeta) && trim(strip_tags(isset($mediaMeta['media_title']) ? $mediaMeta['media_title'] : '')) === '' && $ptitle !== '') {
+    $mediaMeta['media_title'] = $ptitle;
+}
 
 $mediaDescription = isset($mediaMeta['media_desc']) ? $mediaMeta['media_desc'] : '';
 $seoDescription = MG_prepareMetaDescription(PLG_replaceTags($mediaDescription), 160);

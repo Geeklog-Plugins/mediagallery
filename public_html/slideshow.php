@@ -55,7 +55,8 @@ require_once $_CONF['path'] . 'plugins/mediagallery/include/common.php';
 
 COM_setArgNames(array('aid', 'f', 'sort'));
 $album_id  = COM_applyFilter(COM_getArgument('aid'),  true);
-$full      = COM_applyFilter(COM_getArgument('f'),    true);
+$fullArg   = COM_getArgument('f');
+$full      = ($fullArg === '') ? 1 : COM_applyFilter($fullArg, true);
 $sortOrder = COM_applyFilter(COM_getArgument('sort'), true);
 
 $album_data = MG_getAlbumData($album_id, array('skin', 'album_title', 'album_desc', 'album_parent', 'full_display', 'display_image_size'), true);

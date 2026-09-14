@@ -18,17 +18,20 @@
     </nav>
   </div>
   <div class="mg-album-controls">
-    <div class="mg_search">
-      <form name="mgsearch" method="post" action="{site_url}/search.php" class="uk-form" role="search">
-        <div>
-          <label for="mg-search-keywords" class="mg-visually-hidden">{lang_search}</label>
-          <input id="mg-search-keywords" type="search" name="keywords" value="{keywords}" aria-label="{lang_search}"{xhtml}>
-          <input type="hidden" name="mode" value="search"{xhtml}>
-          <input type="hidden" name="swhere" value="0"{xhtml}>
-          <input type="submit" value="{lang_search}"{xhtml}>
-        </div>
-      </form>
-    </div>
+    <details class="mg-compact-search">
+      <summary>{lang_search}</summary>
+      <div class="mg_search">
+        <form name="mgsearch" method="post" action="{site_url}/search.php" class="uk-form" role="search">
+          <div>
+            <label for="mg-search-keywords" class="mg-visually-hidden">{lang_search}</label>
+            <input id="mg-search-keywords" type="search" name="keywords" value="{keywords}" aria-label="{lang_search}"{xhtml}>
+            <input type="hidden" name="mode" value="search"{xhtml}>
+            <input type="hidden" name="swhere" value="0"{xhtml}>
+            <input type="submit" value="{lang_search}"{xhtml}>
+          </div>
+        </form>
+      </div>
+    </details>
     {!if select_adminbox}
     <div class="mg_adminbox mg-secondary-control">
       {select_adminbox}

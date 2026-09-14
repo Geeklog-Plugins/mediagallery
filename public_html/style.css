@@ -2927,3 +2927,80 @@ a.SWFUProgressCancel:hover {
     transform: none;
   }
 }
+
+
+/* MediaGallery 1.8 final visual polish */
+.mg-compact-search { position: relative; flex: 0 0 auto; }
+.mg-compact-search > summary {
+  display: inline-flex; align-items: center; min-height: 2.25rem;
+  padding: .35rem .65rem; border: 1px solid rgba(127,127,127,.3);
+  border-radius: .45rem; background: rgba(255,255,255,.62);
+  cursor: pointer; font-weight: 600; list-style: none;
+}
+.mg-compact-search > summary::-webkit-details-marker { display: none; }
+.mg-compact-search > summary::before { content: "\2315"; margin-right: .35rem; font-size: .95em; opacity: .72; }
+.mg-compact-search[open] > summary { background: rgba(255,255,255,.9); }
+.mg-compact-search .mg_search {
+  position: absolute; z-index: 30; top: calc(100% + .4rem); right: 0;
+  width: min(26rem, calc(100vw - 2rem)); padding: .55rem;
+  border: 1px solid rgba(127,127,127,.22); border-radius: .6rem;
+  background: rgba(255,255,255,.98); box-shadow: 0 .65rem 2rem rgba(0,0,0,.12);
+}
+.mg-compact-search .mg_search form > div { display: flex; gap: .4rem; align-items: center; }
+.mg-compact-search .mg_search input[type="search"] { flex: 1 1 auto; min-width: 0; }
+.mg-compact-search .mg_search input[type="submit"] { flex: 0 0 auto; padding-inline: .75rem; }
+
+.mg-album-page-header, .mg_media_header { padding-block: .55rem; }
+.mg-album-controls { flex: 0 1 auto; gap: .4rem; }
+.mg-album-controls .mg_adminbox { flex: 0 1 15rem; }
+.mg-album-controls select { min-width: 9rem; }
+.mg-album-inline-actions a { opacity: .76; text-decoration: none; transition: opacity .18s ease; }
+.mg-album-inline-actions a:hover, .mg-album-inline-actions a:focus-visible { opacity: 1; text-decoration: underline; }
+
+.mg-media-toolbar { margin-block: .45rem .9rem; padding: .25rem 0; }
+.mg-media-pagination .mg-action-nav {
+  min-height: 2rem; padding: .25rem .55rem; border: 1px solid rgba(127,127,127,.24);
+  border-radius: .4rem; background: rgba(255,255,255,.45); text-decoration: none;
+}
+.mg-media-actions { gap: .75rem; }
+.mg-media-actions .mg-action-secondary {
+  padding: .2rem 0; border: 0; background: transparent; box-shadow: none;
+  opacity: .74; text-decoration: none;
+}
+.mg-media-actions .mg-action-secondary:hover, .mg-media-actions .mg-action-secondary:focus-visible { opacity: 1; text-decoration: underline; }
+.mg-media-actions .mg-action-admin { font-weight: 700; }
+.mg-media-meta { max-width: 58rem; margin-top: 1rem; padding: .75rem 1rem; background: rgba(127,127,127,.035); }
+.mg-media-meta-primary { font-size: .92rem; }
+.mg-media-rating { margin-top: .5rem; }
+.mg-media-tags { margin-top: .55rem; }
+.mg-media-technical { margin-top: .55rem; }
+
+.mg-album-default-grid .mg-card { transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease; }
+.mg-album-default-grid .mg_thumbnail img { transition: transform .28s ease; }
+.mg-album-default-grid .mg-card:hover, .mg-album-default-grid .mg-card:focus-within {
+  transform: translateY(-.2rem); border-color: rgba(127,127,127,.32); box-shadow: 0 .55rem 1.5rem rgba(0,0,0,.1);
+}
+.mg-album-default-grid .mg-card:hover .mg_thumbnail img, .mg-album-default-grid .mg-card:focus-within .mg_thumbnail img { transform: scale(1.025); }
+.mg-card-album-views { opacity: .68; font-size: .88rem; }
+
+.mg-slideshow-play {
+  display: inline-grid; place-items: center; width: 2.65rem; height: 2.65rem; min-width: 2.65rem;
+  padding: 0; border-radius: 50%; font-size: 1.05rem;
+}
+.mg-slideshow-nav {
+  width: min(20vw, 11rem); height: min(58vh, 31rem); border: 0; border-radius: 0;
+  background: transparent; box-shadow: none; font-size: clamp(2.5rem,5vw,4.25rem); opacity: .78;
+}
+.mg-slideshow-prev { background: linear-gradient(90deg, rgba(5,8,14,.42), transparent); }
+.mg-slideshow-next { background: linear-gradient(270deg, rgba(5,8,14,.42), transparent); }
+.mg-slideshow-nav:hover, .mg-slideshow-nav:focus-visible { opacity: 1; }
+.mg-slideshow-image { max-width: min(96vw, 100%); max-height: 94vh; }
+
+@media (max-width: 42rem) {
+  .mg-compact-search .mg_search { position: fixed; top: 4.25rem; right: 1rem; left: 1rem; width: auto; }
+  .mg-media-actions { justify-content: center; gap: .65rem; }
+  .mg-slideshow-nav { width: 24vw; height: 55vh; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mg-album-default-grid .mg-card, .mg-album-default-grid .mg_thumbnail img { transition: none; transform: none !important; }
+}

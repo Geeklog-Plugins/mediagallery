@@ -11,7 +11,7 @@
     {!if album_desc}<div class="mg-card-description">{album_desc}</div>{!endif}
 
     <div class="mg-card-meta mg-card-meta-album">
-      {!if lang_views}<span><strong>{lang_views}</strong> {views}</span>{!endif}
+      {!if lang_views}<span class="mg-card-album-views"><span class="mg-visually-hidden">{lang_views}: </span>{views}</span>{!endif}
       {!if lang_subalbums}<span><strong>{lang_subalbums}</strong> {subalbumcount}</span>{!endif}
     </div>
   </div>

@@ -662,6 +662,15 @@ function MG_displayMedia($id, $full=0, $sortOrder=0, $comments=0, $spage=0)
 
     $media = $media_array[$key];
 
+    // One meaningful title is reused by the H1, page title and comments.
+    $media_title_plain = trim(strip_tags(isset($media['media_title']) ? $media['media_title'] : ''));
+    if ($media_title_plain === '') {
+        $media_title_plain = $LANG_MG03['image'] . ' ' . ($key + 1) . ' - ' . strip_tags($mg_album->title);
+    }
+    $media_title_display = (isset($media['media_title']) && trim(strip_tags($media['media_title'])) !== '')
+        ? PLG_replaceTags($media['media_title'])
+        : MG_escapeHTML($media_title_plain);
+
     if ($mg_album->full == 2 || $_MG_CONF['discard_original'] == 1 || ($mg_album->full == 1 && $_USER['uid'] > 1)) {
         $full = 0;
     }
@@ -793,7 +802,7 @@ function MG_displayMedia($id, $full=0, $sortOrder=0, $comments=0, $spage=0)
     }
 
     $rating_box = '';
-    if ($mg_album->enable_rating > 0) {
+    if ($mg_album->enable_rating > 0 && intval($media['media_votes']) > 0) {
         require_once $_CONF['path'] . 'plugins/mediagallery/include/lib-rating.php';
         $rating_box = MG_getRatingBar(
             $mg_album->enable_rating,
@@ -906,7 +915,7 @@ function MG_displayMedia($id, $full=0, $sortOrder=0, $comments=0, $spage=0)
         'birdseed'            => $birdseed,
         'lang_slideshow_link' => $LANG_MG03['slide_show'],
         'image_detail'        => $u_image,
-        'media_title'         => (isset($media['media_title']) && $media['media_title'] != ' ') ? PLG_replaceTags($media['media_title']) : '',
+        'media_title'         => $media_title_display,
         'album_title'         => $mg_album->title,
         'media_desc'          => (isset($media['media_desc']) && $media['media_desc'] != ' ') ? $media_desc : '',
         'media_time'          => $media_date[0],
@@ -984,11 +993,11 @@ function MG_displayMedia($id, $full=0, $sortOrder=0, $comments=0, $spage=0)
             $commode = COM_applyFilter($_GET['mode']);
         }
         $commentcode = 0; // ¡‚Ì‚Æ‚±‚ë–³ğŒ‚ÉƒRƒƒ“ƒg“Še‚ğ‹–‰ÂB
-        $retval .= CMT_userComments($sid, $media['media_title'], 'mediagallery',
+        $retval .= CMT_userComments($sid, $media_title_plain, 'mediagallery',
                        $comorder, $commode, 0, $page, false, $delete_option, $commentcode);
     }
 
-    return array(strip_tags($media['media_title']), $retval, $aid);
+    return array($media_title_plain, $retval, $aid);
 }
 
 

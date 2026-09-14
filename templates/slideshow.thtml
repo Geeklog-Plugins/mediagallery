@@ -23,8 +23,8 @@
   <div class="mg-slideshow-bottom mg-slideshow-chrome">
     <div class="mg-slideshow-caption" id="caption" aria-live="polite"></div>
     <div class="mg-slideshow-controls">
-      <button class="mg-slideshow-play" type="button" id="mgSlidePlay" aria-pressed="true">
-        <span id="mgSlidePlayText">{stop}</span>
+      <button class="mg-slideshow-play" type="button" id="mgSlidePlay" aria-pressed="true" aria-label="{stop}" title="{stop}">
+        <span id="mgSlidePlayText" aria-hidden="true">&#9208;</span>
       </button>
       <span class="mg-slideshow-counter" id="mgSlideCounter" aria-live="polite"></span>
     </div>
@@ -77,8 +77,10 @@ var photo_captions = [];
     }
 
     function updatePlayButton() {
-        playText.textContent = playing ? '{stop}' : '{play}';
+        playText.textContent = playing ? '\u23f8' : '\u25b6';
         playButton.setAttribute('aria-pressed', playing ? 'true' : 'false');
+        playButton.setAttribute('aria-label', playing ? '{stop}' : '{play}');
+        playButton.setAttribute('title', playing ? '{stop}' : '{play}');
     }
 
     function preload(index) {
