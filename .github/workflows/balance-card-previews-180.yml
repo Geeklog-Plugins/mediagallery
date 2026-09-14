@@ -1,0 +1,42 @@
+name: Balance MediaGallery card previews
+on:
+  push:
+    paths:
+      - '.github/balance-card-previews-trigger'
+permissions:
+  contents: write
+jobs:
+  balance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: modernize-1.8.0
+      - name: Apply balanced card previews
+        run: python3 tools/balance_card_previews_180.py
+      - name: Validate PHP syntax
+        run: |
+          php -l include/classMedia.php
+          php -l include/common.php
+      - name: Validate rendering hooks
+        run: |
+          grep -q 'media_orientation_class' include/classMedia.php
+          grep -q 'cover_orientation_class' include/common.php
+          grep -q 'mg-orientation-' templates/album_page_media_cell.thtml
+          grep -q 'cover_orientation_class' templates/album_page_album_cell.thtml
+          grep -q 'balanced album and root card previews' public_html/style.css
+          ! grep -q '\\n\\n/\* MediaGallery 1.8 generous album card previews' public_html/style.css
+      - name: Remove temporary tooling
+        run: |
+          rm -f tools/balance_card_previews_180.py
+          rm -f .github/workflows/balance-card-previews-180.yml
+          rm -f .github/balance-card-previews-trigger
+          rm -f .github/workflows/audit-album-thumbnail-180.yml
+          rm -f .github/audit-album-thumbnail-trigger
+      - name: Commit changes
+        run: |
+          git config user.name hostellerie
+          git config user.email hostellerie.org@gmail.com
+          git add -A
+          git commit -m 'Balance MediaGallery card previews across orientations'
+          git push origin modernize-1.8.0
