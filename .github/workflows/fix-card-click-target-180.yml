@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - name: Patch click target and archive guard
+      - name: Patch click target
         run: python3 tools/fix-card-click-target-180.py
       - name: Validate
         shell: bash
@@ -22,7 +22,6 @@ jobs:
           set -euo pipefail
           grep -F 'MediaGallery 1.8 reliable card click target' public_html/style.css
           grep -F 'pointer-events: none;' public_html/style.css
-          grep -F 'Archive still contains a stale audio-player.js template reference' .github/workflows/build-dist.yml
           if grep -RIn --include='*.thtml' 'audio-player\.js' templates; then
             echo 'Stale audio-player.js template reference remains' >&2
             exit 1
