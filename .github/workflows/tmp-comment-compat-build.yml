@@ -24,7 +24,16 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 -c "from pathlib import Path; p=Path('functions_legacy.inc'); s=p.read_text(); old=\"function plugin_getcommenturlid_mediagallery(\\$id)\\n{\\n    global \\$_CONF, \\$_MG_CONF;\\n\\t\\n\\treturn \\$_MG_CONF['site_url'] . \\\"/media.php?s=\\$id\\\";\\n}\\n\"; new=\"function plugin_getcommenturlid_mediagallery(\\$id = '')\\n{\\n    global \\$_MG_CONF;\\n\\n    // Geeklog 2.1.1 calls this callback without an item id and expects\\n    // array(base URL, id parameter name). Newer Geeklog versions pass the id\\n    // and expect the complete item URL.\\n    if (\\$id === '' || \\$id === null) {\\n        return array(\\$_MG_CONF['site_url'] . '/media.php', 's');\\n    }\\n\\n    return \\$_MG_CONF['site_url'] . '/media.php?s=' . rawurlencode(\\$id);\\n}\\n\"; assert s.count(old)==1, 'Expected callback block not found exactly once'; p.write_text(s.replace(old,new,1))"
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('functions_legacy.inc')
+          s = p.read_text()
+          old = "function plugin_getcommenturlid_mediagallery($id)\n{\n    global $_CONF, $_MG_CONF;\n\t\n\treturn $_MG_CONF['site_url'] . \"/media.php?s=$id\";\n}\n"
+          new = "function plugin_getcommenturlid_mediagallery($id = '')\n{\n    global $_MG_CONF;\n\n    // Geeklog 2.1.1 calls this callback without an item id and expects\n    // array(base URL, id parameter name). Newer Geeklog versions pass the id\n    // and expect the complete item URL.\n    if ($id === '' || $id === null) {\n        return array($_MG_CONF['site_url'] . '/media.php', 's');\n    }\n\n    return $_MG_CONF['site_url'] . '/media.php?s=' . rawurlencode($id);\n}\n"
+          if s.count(old) != 1:
+              raise SystemExit('Expected callback block not found exactly once')
+          p.write_text(s.replace(old, new, 1))
+          PY
 
       - name: Setup PHP 5.6
         uses: shivammathur/setup-php@v2
