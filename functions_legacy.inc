@@ -1311,6 +1311,10 @@ function phpblock_mg_maenroll()
 {
     global $_CONF, $_MG_CONF, $_TABLES, $_USER, $LANG_MG03;
 
+    // PHP blocks are invoked from normal Geeklog pages as well as MediaGallery
+    // pages, so load the shared helpers explicitly just like randommedia does.
+    require_once $_CONF['path'] . 'plugins/mediagallery/include/common.php';
+
     if (COM_isAnonUser()) return;
 
     $_MG_USERPREFS = MG_getUserPrefs();

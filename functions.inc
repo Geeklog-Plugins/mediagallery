@@ -17,15 +17,6 @@ if (strpos(strtolower($_SERVER['PHP_SELF']), strtolower(basename(__FILE__))) !==
 require_once __DIR__ . '/include/input_compat_180.php';
 require_once __DIR__ . '/functions_legacy.inc';
 
-/*
- * Legacy plugin entry points (notably Geeklog PHP blocks) can be called after
- * functions.inc has been loaded without first passing through a MediaGallery
- * public script. Load the common helpers here so functions such as
- * MG_getUserPrefs(), MG_getTemplatePath() and the other shared MG_* helpers are
- * always available to those entry points. require_once keeps the normal public
- * page bootstrap path safe when common.php is included again later.
- */
-require_once __DIR__ . '/include/common.php';
 
 require_once __DIR__ . '/include/config_180.php';
 require_once __DIR__ . '/include/schema_180.php';
