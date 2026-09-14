@@ -3030,11 +3030,15 @@ a.SWFUProgressCancel:hover {
 
 .mg-slideshow-stage {
   box-sizing: border-box;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
   overflow: hidden;
 }
 .mg-slideshow-image {
-  width: 100%;
-  height: 100%;
+  display: block;
+  width: auto;
+  height: auto;
   max-width: 100%;
   max-height: 100%;
   margin: 0;
@@ -3126,6 +3130,7 @@ a.SWFUProgressCancel:hover {
   overflow: hidden;
   border-radius: .45rem;
   background: rgba(127,127,127,.055);
+  transition: background-color .25s ease;
 }
 .mg-album-default-grid .mg-card-square .mg-card-preview-image {
   position: absolute;
@@ -3151,6 +3156,11 @@ a.SWFUProgressCancel:hover {
   transform: none;
   transition: opacity .25s ease;
 }
+.mg-album-default-grid .mg-card-square:hover .mg-card-preview-stack,
+.mg-album-default-grid .mg-card-square:focus-within .mg-card-preview-stack {
+  background: #08090b;
+}
+
 .mg-album-default-grid .mg-card-square:hover .mg-card-preview-cover,
 .mg-album-default-grid .mg-card-square:focus-within .mg-card-preview-cover {
   opacity: 0;
