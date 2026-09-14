@@ -1,13 +1,13 @@
 {lbslideshow}
 
-<nav class="bc_navigation" aria-label="Breadcrumb">
+<nav class="bc_navigation" aria-label="{lang_aria_breadcrumb}">
 {birdseed}
 </nav>
 
 <header class="mg_album_header mg-album-page-header">
   <div class="mg-album-heading">
     <h1 class="mg_album_title">{album_title}{!if rsslink}&nbsp;&nbsp;{rsslink}{!endif}</h1>
-    <nav class="mg-album-inline-actions" aria-label="Album actions">
+    <nav class="mg-album-inline-actions" aria-label="{lang_aria_album_actions}">
       {!if url_slideshow}
       <a href="{url_slideshow}"{slideshow_onclick}>{lang_slideshow}</a>
       {!endif}
@@ -40,7 +40,7 @@
 </header>
 
 {!if top_pagination}
-<nav class="mg-album-top-pagination" aria-label="Album pagination">
+<nav class="mg-album-top-pagination" aria-label="{lang_aria_album_pagination}">
   <div class="mg_pagination">{top_pagination}</div>
 </nav>
 {!endif}
@@ -66,7 +66,7 @@
 {!if lang_no_image}<div class="noitems">{lang_no_image}</div>{!endif}
 
 <footer class="mg-album-footer mg-album-footer-compact">
-  <nav class="mg-album-pagination-bar" aria-label="Album pagination and information">
+  <nav class="mg-album-pagination-bar" aria-label="{lang_aria_album_pagination_info}">
     <div class="mg-album-page-info">
       <span>{page_number}</span>
     </div>
