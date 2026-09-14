@@ -50,32 +50,51 @@ function MG_parseItemId180($id)
 /**
  * Notify Geeklog listeners that an album's public representation changed.
  *
+ * Each album is announced at most once per request. Operations such as batch
+ * uploads, multi-media edits and recursive maintenance can touch the same
+ * album repeatedly; consumers such as IndexNow only need the final state.
+ *
  * @param int $album_id
  * @return void
  */
 function MG_notifyAlbumSaved180($album_id)
 {
+    static $notified = array();
+
     $album_id = intval($album_id);
     if ($album_id <= 0 || !function_exists('PLG_itemSaved')) {
         return;
     }
+    if (isset($notified[$album_id])) {
+        return;
+    }
 
+    $notified[$album_id] = true;
     PLG_itemSaved(MG_albumItemId180($album_id), 'mediagallery');
 }
 
 /**
  * Notify Geeklog listeners that an album was deleted.
  *
+ * Recursive deletion paths can encounter the root album both in the recursive
+ * worker and in the caller. Deduplication keeps the lifecycle contract stable.
+ *
  * @param int $album_id
  * @return void
  */
 function MG_notifyAlbumDeleted180($album_id)
 {
+    static $notified = array();
+
     $album_id = intval($album_id);
     if ($album_id <= 0 || !function_exists('PLG_itemDeleted')) {
         return;
     }
+    if (isset($notified[$album_id])) {
+        return;
+    }
 
+    $notified[$album_id] = true;
     PLG_itemDeleted(MG_albumItemId180($album_id), 'mediagallery');
 }
 
