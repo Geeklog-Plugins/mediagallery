@@ -1,19 +1,44 @@
 from pathlib import Path
 
-# Fix the mini-lightbox HTML emitted by classMedia.php. The affected PHP
-# fragments are single-quoted strings, so \" was emitted literally into HTML.
-path = Path('include/classMedia.php')
-lines = path.read_text(encoding='utf-8').splitlines(True)
-changed = 0
-fixed = []
-for line in lines:
-    if 'mg-card-preview' in line and '\\"' in line:
-        line = line.replace('\\"', '"')
-        changed += 1
-    fixed.append(line)
-if changed < 4:
-    raise SystemExit('Expected broken mini-lightbox quote sequences not found')
-path.write_text(''.join(fixed), encoding='utf-8')
+# The mini-lightbox originally used absolutely positioned images. That removes
+# them from normal layout and can collapse the percentage-height link/stack to
+# zero. Use a square CSS Grid stack instead: both images occupy the same cell,
+# while the stack itself keeps a real aspect-ratio and clickable area.
+css_path = Path('public_html/style.css')
+css = css_path.read_text(encoding='utf-8')
+old_stack = '''.mg-album-default-grid .mg-card-square .mg-card-preview-stack {
+  position: relative;
+  overflow: hidden;
+  border-radius: .45rem;
+  background: rgba(127,127,127,.055);
+}
+'''
+new_stack = '''.mg-album-default-grid .mg-card-square .mg-card-preview-stack {
+  position: relative;
+  display: grid;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: .45rem;
+  background: rgba(127,127,127,.055);
+}
+'''
+old_img = '''.mg-album-default-grid .mg-card-square .mg-card-preview-image {
+  position: absolute;
+  inset: 0;
+  display: block;
+'''
+new_img = '''.mg-album-default-grid .mg-card-square .mg-card-preview-image {
+  position: relative;
+  inset: auto;
+  grid-area: 1 / 1;
+  display: block;
+'''
+if old_stack not in css or old_img not in css:
+    raise SystemExit('Expected mini-lightbox CSS block not found')
+css = css.replace(old_stack, new_stack, 1).replace(old_img, new_img, 1)
+css_path.write_text(css, encoding='utf-8')
 
 # audio-player.js was a Flash-era helper removed from 1.8, but seven templates
 # still referenced it and generated a 404 on every affected public page.
