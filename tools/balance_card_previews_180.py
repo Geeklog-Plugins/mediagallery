@@ -45,15 +45,17 @@ p = Path('public_html/style.css')
 s = p.read_text(encoding='utf-8')
 marker = r'\n\n/* MediaGallery 1.8 generous album card previews */\n'
 pos = s.find(marker)
+if pos == -1:
+    marker = r'\n\n/* MediaGallery 1.8 generous album card previews */'
+    pos = s.find(marker)
 if pos != -1:
     s = s[:pos].rstrip() + '\n\n'
 else:
-    # tolerate a previously normalized block on rerun
     marker2 = '/* MediaGallery 1.8 generous album card previews */'
     pos = s.find(marker2)
     if pos != -1:
         s = s[:pos].rstrip() + '\n\n'
-css = r'''/* MediaGallery 1.8 balanced album and root card previews */
+css = '''/* MediaGallery 1.8 balanced album and root card previews */
 .mg-album-default-grid .mg-card-media {
   display: grid;
   place-items: center;
