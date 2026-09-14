@@ -1,0 +1,83 @@
+name: Patch MediaGallery 1.8 schema upgrade
+
+on:
+  push:
+    branches:
+      - modernize-1.8.0
+    paths:
+      - '.github/workflows/tmp-schema-upgrade-patch.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: modernize-1.8.0
+          fetch-depth: 0
+
+      - name: Patch upgrade and post-install schema checks
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path('autoinstall.php')
+          s = p.read_text(encoding='utf-8')
+
+          old = """    require_once $_CONF['path'] . 'plugins/mediagallery/include/config_180.php';
+    if (!MG_migrateMediaStorage180(MG_getLegacyMediaStorage180())) {
+"""
+          new = """    require_once $_CONF['path'] . 'plugins/mediagallery/include/config_180.php';
+    require_once $_CONF['path'] . 'plugins/mediagallery/include/schema_180.php';
+    if (!MG_ensureAlbumSchema180(true)) {
+        COM_errorLog('Media Gallery 1.8.0: unable to verify album database schema after install.', 1);
+        return false;
+    }
+    if (!MG_migrateMediaStorage180(MG_getLegacyMediaStorage180())) {
+"""
+          if old not in s:
+              raise SystemExit('postinstall marker not found')
+          s = s.replace(old, new, 1)
+
+          old = """    require_once $_CONF['path'] . 'plugins/mediagallery/include/config_180.php';
+
+    $target = MG_getMediaStorageTarget180();
+"""
+          new = """    require_once $_CONF['path'] . 'plugins/mediagallery/include/config_180.php';
+    require_once $_CONF['path'] . 'plugins/mediagallery/include/schema_180.php';
+
+    if (!MG_ensureAlbumSchema180(true)) {
+        COM_errorLog('Media Gallery 1.8.0: album database schema migration failed.', 1);
+        return 1;
+    }
+
+    $target = MG_getMediaStorageTarget180();
+"""
+          if old not in s:
+              raise SystemExit('upgrade marker not found')
+          s = s.replace(old, new, 1)
+
+          p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Validate patched PHP
+        run: |
+          php -l autoinstall.php
+          php -l functions.inc
+          php -l include/schema_180.php
+
+      - name: Commit patch and remove temporary workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/tmp-schema-upgrade-patch.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add autoinstall.php include/schema_180.php functions.inc
+          git add -f .github/workflows/tmp-schema-upgrade-patch.yml
+          git commit -m 'Repair incomplete album schemas during 1.8 upgrade [skip ci]'
+          git push origin HEAD:modernize-1.8.0
