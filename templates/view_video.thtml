@@ -1,6 +1,6 @@
 <!-- start view_video.thtml -->
 {lbslideshow}
-<nav class="bc_navigation" aria-label="Breadcrumb">{birdseed}</nav>
+<nav class="bc_navigation" aria-label="{lang_aria_breadcrumb}">{birdseed}</nav>
 <header class="mg_album_header mg_media_header">
   <div class="mg_album_context">{album_title}{!if rsslink}&nbsp;{rsslink}{!endif}</div>
   <div class="mg_search">
@@ -13,7 +13,7 @@
     </div></form>
   </div>
 </header>
-<nav class="mg_navbar" aria-label="Media actions and navigation">
+<nav class="mg_navbar" aria-label="{lang_aria_media_actions}">
 {!if prev_link}<a class="button left" href="{prev_link}">{lang_prev}</a>{!endif}
 {!if next_link}<a class="button right" href="{next_link}">{lang_next}</a>{!endif}
 {!if url_slideshow}<a class="button" href="{url_slideshow}"{slideshow_onclick}>{lang_slideshow}</a>{!endif}
@@ -29,7 +29,7 @@
 <div class="mg_media_desc">{!if media_desc}{media_desc}{!else}&nbsp;{!endif}</div>
 <div class="mg_info">
   <div class="mg_info_left">
-    <p><strong>ID:</strong>&nbsp;{media_id}</p>
+    <p><strong>{lang_media_id}:</strong>&nbsp;{media_id}</p>
     {!if media_properties}<p>{getid3}{media_properties}{getid3end}</p>{!endif}
   </div>
   <div class="mg_info_right">

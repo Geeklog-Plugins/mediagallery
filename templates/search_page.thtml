@@ -49,7 +49,7 @@
   </fieldset>
 </form>
 
-<div class="mg_navbar" role="navigation" aria-label="Search results navigation">
+<div class="mg_navbar" role="navigation" aria-label="{lang_aria_search_results_navigation}">
 
   {!if url_slideshow}
   <a href="{url_slideshow}">{lang_slideshow}</a>
@@ -86,7 +86,7 @@
 
 {!if lang_no_image}<div class="noitems">{lang_no_image}</div>{!endif}
 
-<div class="mg_navbar" role="navigation" aria-label="Search results navigation">
+<div class="mg_navbar" role="navigation" aria-label="{lang_aria_search_results_navigation}">
   <span>{album_id_display}</span><span class="mg_separator">|</span><span>{page_number}</span>
   <div class="mg_pagination">{bottom_pagination}</div>
 </div>

@@ -1,6 +1,6 @@
 <!-- start view_image.thtml -->
 {lbslideshow}
-<nav class="bc_navigation" aria-label="Breadcrumb">{birdseed}</nav>
+<nav class="bc_navigation" aria-label="{lang_aria_breadcrumb}">{birdseed}</nav>
 <header class="mg_album_header mg_media_header">
   <div class="mg_album_context">{album_title}{!if rsslink}&nbsp;{rsslink}{!endif}</div>
   <details class="mg-compact-search">
@@ -16,7 +16,7 @@
     </div>
   </details>
 </header>
-<nav class="mg_navbar mg-media-toolbar" aria-label="Media actions and navigation">
+<nav class="mg_navbar mg-media-toolbar" aria-label="{lang_aria_media_actions}">
   <div class="mg-media-pagination">
     {!if prev_link}<a class="mg-action mg-action-nav mg-action-prev" href="{prev_link}">&larr; {lang_prev}</a>{!endif}
     {!if pagination}<span class="mg-media-position" aria-label="{item_number} {lang_of} {total_items}">{item_number} / {total_items}</span>{!endif}
@@ -53,7 +53,7 @@
     {!endif}
     {!if edit_item_link}
     <details class="mg-media-technical">
-      <summary>Media ID</summary>
+      <summary>{lang_media_id}</summary>
       <code>{media_id}</code>
       {!if media_properties}<div class="mg-media-properties">{getid3}{media_properties}{getid3end}</div>{!endif}
     </details>

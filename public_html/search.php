@@ -252,6 +252,7 @@ function MG_search($id, $page, $searchinfo='')
         'return_url'           => $return_url,
         'search_keywords'      => ($searchinfo['keywords'] == '*') ? '*' : MG_escapeHTML($S['keywords']),
         'lang_search'          => $LANG_MG01['search'],
+        'lang_aria_search_results_navigation' => $LANG_MG03['aria_search_results_navigation'],
     ));
 
     MG_buildSearchBox($T, $searchinfo);
@@ -329,6 +330,7 @@ function MG_showSearchForm($searchinfo)
         'return_url'           => $_MG_CONF['site_url'],
         'search_keywords'      => '',
         'lang_search'          => $LANG_MG01['search'],
+        'lang_aria_search_results_navigation' => $LANG_MG03['aria_search_results_navigation'],
     ));
     MG_buildSearchBox($T, $searchinfo);
     $T->set_var('lang_no_image', '');

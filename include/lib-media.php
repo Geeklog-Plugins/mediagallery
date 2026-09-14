@@ -964,6 +964,9 @@ function MG_displayMedia($id, $full=0, $sortOrder=0, $comments=0, $spage=0)
         'lang_uploaded_by'    => $LANG_MG01['uploaded_by'],
         'album_id'            => $aid,
         'lang_search'         => $LANG_MG01['search'],
+        'lang_aria_breadcrumb' => $LANG_MG03['aria_breadcrumb'],
+        'lang_aria_media_actions' => $LANG_MG03['aria_media_actions'],
+        'lang_media_id' => $LANG_MG03['media_id_label'],
     ));
     MG_buildSlideshow($mg_album, $T, $sortOrder);
 

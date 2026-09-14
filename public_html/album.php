@@ -364,6 +364,8 @@ $T->set_var(array(
     'lang_aria_album_actions' => $LANG_MG03['aria_album_actions'],
     'lang_aria_album_pagination' => $LANG_MG03['aria_album_pagination'],
     'lang_aria_album_pagination_info' => $LANG_MG03['aria_album_pagination_info'],
+    'lang_aria_album_navigation' => $LANG_MG03['aria_album_navigation'],
+    'lang_aria_media_list' => $LANG_MG03['aria_media_list'],
     'keywords'           => '',
     'rsslink'            => $rsslink,
     'list_title'         => $LANG_MG03['list_title'],

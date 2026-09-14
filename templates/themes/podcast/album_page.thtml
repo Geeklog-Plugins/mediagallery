@@ -1,6 +1,6 @@
 {lbslideshow}
 
-<nav class="bc_navigation" aria-label="Breadcrumb">
+<nav class="bc_navigation" aria-label="{lang_aria_breadcrumb}">
 {birdseed}
 </nav>
 
