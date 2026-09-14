@@ -56,8 +56,6 @@ jobs:
           fr = french_keys('language/french_france_utf-8.php')
           missing = sorted(en - fr)
 
-          # UI hard-coded text candidates in templates/PHP. This is intentionally
-          # conservative: only obvious user-facing HTML labels/text are reported.
           candidates = []
           text_re = re.compile(r'>\s*([A-Z][A-Za-z][A-Za-z0-9 /&,:;.!?()\-]{2,})\s*<')
           attr_re = re.compile(r'\b(?:aria-label|title|placeholder|value|label)="([A-Z][A-Za-z][A-Za-z0-9 /&,:;.!?()\-]{2,})"')
@@ -68,10 +66,7 @@ jobs:
               for p in root.rglob('*'):
                   if not p.is_file() or p.suffix.lower() not in {'.php', '.thtml', '.html', '.js'}:
                       continue
-                  try:
-                      lines = p.read_text(encoding='utf-8', errors='ignore').splitlines()
-                  except Exception:
-                      continue
+                  lines = p.read_text(encoding='utf-8', errors='ignore').splitlines()
                   for n, line in enumerate(lines, 1):
                       if '$LANG_' in line or '{lang_' in line:
                           continue
@@ -111,5 +106,5 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add I18N_AUDIT.md
-          git commit -m 'Generate French localization audit [skip ci]'
+          git commit -m 'Refresh French localization audit [skip ci]'
           git push origin HEAD:modernize-1.8.0
