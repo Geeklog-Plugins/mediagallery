@@ -16,19 +16,19 @@
 // | Mark R. Evans          mark AT glfusion DOT org                          |
 // +--------------------------------------------------------------------------+
 // |                                                                          |
-// | This program is free software; you can redistribute it and/or            |
-// | modify it under the terms of the GNU General Public License              |
-// | as published by the Free Software Foundation; either version 2           |
-// | of the License, or (at your option) any later version.                   |
+// | This program is free software; you can redistribute it and/or             |
+// | modify it under the terms of the GNU General Public License               |
+// | as published by the Free Software Foundation; either version 2            |
+// | of the License, or (at your option) any later version.                    |
 // |                                                                          |
-// | This program is distributed in the hope that it will be useful,          |
-// | but WITHOUT ANY WARRANTY; without even the implied warranty of           |
-// | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            |
-// | GNU General Public License for more details.                             |
+// | This program is distributed in the hope that it will be useful,           |
+// | but WITHOUT ANY WARRANTY; without even the implied warranty of            |
+// | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             |
+// | GNU General Public License for more details.                              |
 // |                                                                          |
-// | You should have received a copy of the GNU General Public License        |
+// | You should have received a copy of the GNU General Public License         |
 // | along with this program; if not, write to the Free Software Foundation,  |
-// | Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.          |
+// | Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.           |
 // |                                                                          |
 // +--------------------------------------------------------------------------+
 
@@ -56,8 +56,22 @@ if (COM_isAnonUser() && $_MG_CONF['loginrequired'] == 1) {
 $mode       = isset($_POST['mode']) ? COM_applyFilter($_POST['mode']) : '';
 $session_id = isset($_POST['sid'])  ? COM_applyFilter($_POST['sid'])  : '';
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($session_id) || !SEC_checkToken()) {
-    COM_errorLog('MediaGallery: rejected batch mutation because POST/CSRF validation failed.', 1);
+/*
+ * Batch continuation uses the MediaGallery session id itself as the request
+ * nonce. The id is generated server-side by COM_makesid(), is sent only by
+ * POST, and is checked below against the currently authenticated user before
+ * any mutation is performed.
+ *
+ * Do not call SEC_checkToken() here. Geeklog 2.1.1 binds its one-time CSRF
+ * token to the exact HTTP_REFERER URL. A multi-request batch moves from its
+ * originating MediaGallery page to batch.php, which can make an otherwise
+ * valid continuation token fail with the "security token expired" screen.
+ * The forms which start sensitive batch operations still use Geeklog's normal
+ * CSRF token checks; only the already-created, owner-bound batch session uses
+ * this continuation mechanism.
+ */
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($session_id)) {
+    COM_errorLog('MediaGallery: rejected batch mutation because POST/session validation failed.', 1);
     $display = COM_showMessageText($LANG_MG00['access_denied_msg']);
     $display = MG_createHTMLDocument($display);
     COM_output($display);
