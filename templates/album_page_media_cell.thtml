@@ -1,7 +1,7 @@
 <article class="mg_media_item mg-card mg-card-compact">
   <div class="mg-card-media">
     <div class="mg_thumbnail">
-      <div class="mg_thumbnail_wrapper">{media_item_thumbnail}{mp3_podcast}</div>
+      <div class="mg_thumbnail_wrapper">{media_card_preview}{mp3_podcast}</div>
     </div>
   </div>
 

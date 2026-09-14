@@ -642,6 +642,17 @@ class Media {
         $media_item_thumbnail = MG_getFramedImage($skin, $this->title, $url_media_item,
                                                   $media_thumbnail, $newwidth, $newheight, $media_start_link);
 
+        // MediaGallery 1.8: use the larger display image for default album cards when available.
+        // This avoids visibly upscaling 100/150/200px thumbnails while preserving the
+        // historical framed thumbnail for remote images and non-image media.
+        $media_card_preview = $media_item_thumbnail;
+        if ($searchmode == 0 && $this->type == 0 && $this->remote != 1 && !empty($direct_url)) {
+            $media_card_preview = $media_start_link
+                . '<img class="mg-card-preview-image" src="' . MG_escapeHTML($direct_url)
+                . '" alt="' . $caption . '" loading="lazy" decoding="async">'
+                . '</a>';
+        }
+
         if ($mode == 1) {
             return $media_item_thumbnail;
         }
@@ -697,6 +708,7 @@ class Media {
             'media_date_short'  => $media_date_short,
             'media_owner'       => $username,
             'media_item_thumbnail' => $media_item_thumbnail,
+            'media_card_preview'    => $media_card_preview,
             'site_url'          => $_MG_CONF['site_url'],
             'lang_published'    => $LANG_MG03['published'],
             'lang_on'           => $LANG_MG03['on'],

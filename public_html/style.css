@@ -3059,3 +3059,4 @@ a.SWFUProgressCancel:hover {
 .mg-slideshow-nav:focus-visible {
   background: rgba(255,255,255,.08);
 }
+\n\n/* MediaGallery 1.8 generous album card previews */\n.mg-album-default-grid .mg-card-media {\n  display: grid;\n  place-items: center;\n  min-height: 15rem;\n  padding: .85rem;\n  overflow: hidden;\n}\n.mg-album-default-grid .mg_thumbnail,\n.mg-album-default-grid .mg_thumbnail_wrapper {\n  display: grid;\n  place-items: center;\n  width: 100%;\n  height: 100%;\n}\n.mg-album-default-grid .mg-card-preview-image {\n  display: block;\n  width: auto;\n  height: auto;\n  max-width: 92%;\n  max-height: 13rem;\n  object-fit: contain;\n  object-position: center;\n}\n@media (max-width: 38rem) {\n  .mg-album-default-grid .mg-card-media { min-height: 13rem; padding: .7rem; }\n  .mg-album-default-grid .mg-card-preview-image { max-width: 96%; max-height: 11.5rem; }\n}\n
