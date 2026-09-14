@@ -7,7 +7,7 @@
 
   <div class="mg-card-body">
     <h2 class="mg_title mg-card-title">
-      {media_title}
+      {media_link_start}{media_title}</a>
       {!if musicalbum}
       <span class="mg-card-subtitle">/ {musicalbum}</span>
       {!endif}
