@@ -118,12 +118,7 @@ var photo_captions = [];
         counter.textContent = current + ' / ' + photoCount;
         preload(current + 1);
         preload(current - 1);
-
-        if (!fromAuto) {
-            schedule();
-        } else {
-            schedule();
-        }
+        schedule();
     }
 
     function previous() {
@@ -171,7 +166,7 @@ var photo_captions = [];
             event.preventDefault();
             togglePlay();
         } else if (key === 'Escape' || key === 27) {
-            window.location.href = '{return_to_album_url_js}';
+            window.location.href = {return_to_album_url_js};
         }
         showChrome();
     });
