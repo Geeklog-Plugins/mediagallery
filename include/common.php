@@ -1249,12 +1249,16 @@ function MG_albumThumbnail($album_id)
         }
     }
 
-    $cover_orientation_class = 'mg-orientation-square';
-    if (is_array($mediasize) && isset($mediasize[0], $mediasize[1]) && $mediasize[0] > 0 && $mediasize[1] > 0) {
-        if ($mediasize[0] > ($mediasize[1] * 1.15)) {
-            $cover_orientation_class = 'mg-orientation-landscape';
-        } elseif ($mediasize[1] > ($mediasize[0] * 1.15)) {
-            $cover_orientation_class = 'mg-orientation-portrait';
+    // MediaGallery 1.8: album cards use a square cover. Prefer an existing
+    // native 200x200 crop, otherwise the current cover is cropped by CSS.
+    if ($album_data['tn_attached'] != 1 && $cover_filename != '' && $cover_filename != '0'
+            && strpos($cover_filename, 'tn_') !== 0) {
+        $square_cover = MG_getThumbPath('tn/' . $cover_filename[0] . '/' . $cover_filename, '12');
+        $square_cover = rtrim($square_cover, '.');
+        list($square_cover_url, $square_cover_size) = MG_getImageUrl($square_cover);
+        if ($square_cover_size !== false) {
+            $album_last_image = $square_cover_url;
+            $mediasize = $square_cover_size;
         }
     }
 
@@ -1283,7 +1287,6 @@ function MG_albumThumbnail($album_id)
     $C->set_file('cell', 'album_page_album_cell.thtml');
     $C->set_var(array(
         'media_item_thumbnail' => $media_item_thumbnail,
-        'cover_orientation_class' => $cover_orientation_class,
         'u_viewalbum'          => $_MG_CONF['site_url'] . '/album.php?aid=' . $album_id .'&amp;page=1',
         'album_last_image'     => $album_last_image,
         'album_title'          => $album_data['album_title'],

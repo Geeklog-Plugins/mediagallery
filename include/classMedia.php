@@ -642,24 +642,30 @@ class Media {
         $media_item_thumbnail = MG_getFramedImage($skin, $this->title, $url_media_item,
                                                   $media_thumbnail, $newwidth, $newheight, $media_start_link);
 
-        // MediaGallery 1.8: use the larger display image for default album cards when available.
-        // This avoids visibly upscaling 100/150/200px thumbnails while preserving the
-        // historical framed thumbnail for remote images and non-image media.
+        // MediaGallery 1.8 default album cards use a square crop for a consistent grid.
+        // Prefer MediaGallery's native 200x200 crop when it already exists. Existing
+        // installations without that derivative fall back to the display image, which
+        // is cropped non-destructively by CSS (object-fit: cover).
         $media_card_preview = $media_item_thumbnail;
         if ($searchmode == 0 && $this->type == 0 && $this->remote != 1 && !empty($direct_url)) {
+            $card_preview_url = $direct_url;
+            $crop_info = array(
+                'media_type'        => $this->type,
+                'mime_type'         => $this->mime_type,
+                'media_filename'    => $this->filename,
+                'media_mime_ext'    => $this->mime_ext,
+                'remote_media'      => $this->remote_url,
+                'media_tn_attached' => $this->tn_attached,
+            );
+            $crop_relative = self::getDefaultThumbnail($crop_info, '12');
+            if (strpos($crop_relative, '/') !== false
+                    && file_exists($_MG_CONF['path_mediaobjects'] . $crop_relative)) {
+                $card_preview_url = $_MG_CONF['mediaobjects_url'] . '/' . $crop_relative;
+            }
             $media_card_preview = $media_start_link
-                . '<img class="mg-card-preview-image" src="' . MG_escapeHTML($direct_url)
+                . '<img class="mg-card-preview-image" src="' . MG_escapeHTML($card_preview_url)
                 . '" alt="' . $caption . '" loading="lazy" decoding="async">'
                 . '</a>';
-        }
-
-        $media_orientation_class = 'mg-orientation-square';
-        if (is_array($media_size) && isset($media_size[0], $media_size[1]) && $media_size[0] > 0 && $media_size[1] > 0) {
-            if ($media_size[0] > ($media_size[1] * 1.15)) {
-                $media_orientation_class = 'mg-orientation-landscape';
-            } elseif ($media_size[1] > ($media_size[0] * 1.15)) {
-                $media_orientation_class = 'mg-orientation-portrait';
-            }
         }
 
         if ($mode == 1) {
@@ -718,7 +724,6 @@ class Media {
             'media_owner'       => $username,
             'media_item_thumbnail' => $media_item_thumbnail,
             'media_card_preview'    => $media_card_preview,
-            'media_orientation_class' => $media_orientation_class,
             'site_url'          => $_MG_CONF['site_url'],
             'lang_published'    => $LANG_MG03['published'],
             'lang_on'           => $LANG_MG03['on'],

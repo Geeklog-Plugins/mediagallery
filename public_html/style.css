@@ -3055,21 +3055,22 @@ a.SWFUProgressCancel:hover {
   background: rgba(255,255,255,.08);
 }
 
-/* MediaGallery 1.8 balanced album and root card previews */
+/* MediaGallery 1.8 square album and root card previews */
 .mg-album-default-grid .mg-card-media {
   display: grid;
   place-items: center;
-  height: 17rem;
-  min-height: 17rem;
-  padding: 1rem;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  min-height: 0;
+  padding: .7rem;
   overflow: hidden;
   background: rgba(127, 127, 127, .035);
+  box-sizing: border-box;
 }
 .mg-album-default-grid .mg_thumbnail,
 .mg-album-default-grid .mg_thumbnail_wrapper,
 .mg-album-default-grid .mg_thumbnail_wrapper > a {
-  display: grid;
-  place-items: center;
+  display: block;
   width: 100%;
   height: 100%;
   min-width: 0;
@@ -3077,48 +3078,17 @@ a.SWFUProgressCancel:hover {
 }
 .mg-album-default-grid .mg-card-media img {
   display: block;
-  width: auto !important;
-  height: auto !important;
-  object-fit: contain;
-  object-position: center;
-}
-.mg-album-default-grid .mg_media_item.mg-orientation-landscape .mg-card-media img,
-.mg-album-default-grid .mg_album_item.mg-orientation-landscape .mg-card-media img {
-  max-width: 94%;
-  max-height: 13rem;
-}
-.mg-album-default-grid .mg_media_item.mg-orientation-portrait .mg-card-media img,
-.mg-album-default-grid .mg_album_item.mg-orientation-portrait .mg-card-media img {
-  max-width: 78%;
-  max-height: 15rem;
-}
-.mg-album-default-grid .mg_media_item.mg-orientation-square .mg-card-media img,
-.mg-album-default-grid .mg_album_item.mg-orientation-square .mg-card-media img {
-  max-width: 86%;
-  max-height: 14rem;
-}
-.mg-album-default-grid .mg-card-media img {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: cover;
+  object-position: center center;
+  border-radius: .35rem;
   transition: transform .28s ease;
 }
 @media (max-width: 38rem) {
   .mg-album-default-grid .mg-card-media {
-    height: 14rem;
-    min-height: 14rem;
-    padding: .75rem;
-  }
-  .mg-album-default-grid .mg_media_item.mg-orientation-landscape .mg-card-media img,
-  .mg-album-default-grid .mg_album_item.mg-orientation-landscape .mg-card-media img {
-    max-width: 96%;
-    max-height: 10.75rem;
-  }
-  .mg-album-default-grid .mg_media_item.mg-orientation-portrait .mg-card-media img,
-  .mg-album-default-grid .mg_album_item.mg-orientation-portrait .mg-card-media img {
-    max-width: 82%;
-    max-height: 12.5rem;
-  }
-  .mg-album-default-grid .mg_media_item.mg-orientation-square .mg-card-media img,
-  .mg-album-default-grid .mg_album_item.mg-orientation-square .mg-card-media img {
-    max-width: 90%;
-    max-height: 11.75rem;
+    padding: .55rem;
   }
 }
