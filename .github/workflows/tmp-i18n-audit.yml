@@ -1,5 +1,6 @@
 name: Temporary full i18n audit
 
+# Refreshed after French batch 3
 on:
   push:
     branches:
