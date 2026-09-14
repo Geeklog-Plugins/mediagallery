@@ -2,238 +2,346 @@
 // +---------------------------------------------------------------------------+
 // | Media Gallery Plugin - Geeklog                                            |
 // +---------------------------------------------------------------------------+
-// | French (France) UTF-8 language overlay                                    |
+// | French (France) UTF-8 language file                                       |
 // +---------------------------------------------------------------------------+
 // | MediaGallery 1.8.0                                                        |
-// |                                                                           |
-// | The English language file is used as a complete fallback so that new      |
-// | MediaGallery strings remain available even when a French translation has  |
-// | not yet been added. French translations below override matching strings.  |
 // +---------------------------------------------------------------------------+
 
 if (stripos($_SERVER['PHP_SELF'], basename(__FILE__)) !== false) {
     die('This file can not be used on its own!');
 }
 
+// Keep English as a complete fallback for keys not translated yet.
 require dirname(__FILE__) . '/english_utf-8.php';
 
-$MG_FR_TRANSLATIONS = array(
-    // General
-    'Media Gallery' => 'Galerie multimédia',
-    'Access Denied' => 'Accès refusé',
-    'Warning! Plugin is still Enabled' => 'Attention ! Le plugin est toujours activé',
-    'Disable plugin before uninstalling.' => 'Désactivez le plugin avant de le désinstaller.',
-    'Media Item' => 'Média',
-    'Media Gallery Search Results' => 'Résultats de recherche de la galerie multimédia',
-    'Views' => 'Vues',
-    'No Date' => 'Aucune date',
-    'Rating' => 'Note',
-    'No media title available' => 'Aucun titre disponible pour ce média',
-    'Album: ' => 'Album : ',
+// General
+$LANG_MG00['plugin'] = 'Galerie multimédia';
+$LANG_MG00['access_denied'] = 'Accès refusé';
+$LANG_MG00['access_denied_msg'] = 'Vous ne disposez pas des droits nécessaires pour accéder à cette page.';
+$LANG_MG00['admin'] = 'Administration de la galerie multimédia';
+$LANG_MG00['warning'] = 'Attention ! Le plugin est toujours activé';
+$LANG_MG00['enabled'] = 'Désactivez le plugin avant de le désinstaller.';
+$LANG_MG00['media_col_header'] = 'Média';
+$LANG_MG00['stats_title'] = 'Les dix médias les plus consultés';
+$LANG_MG00['items_in'] = 'Éléments dans';
+$LANG_MG00['results'] = 'Résultats de recherche de la galerie multimédia';
+$LANG_MG00['hitsmsg'] = 'Vues';
+$LANG_MG00['whatsnew_prompt'] = 'derniers %s jours';
+$LANG_MG00['no_date'] = 'Aucune date';
+$LANG_MG00['stats_rate_title'] = 'Les dix médias les mieux notés';
+$LANG_MG00['rating'] = 'Note';
+$LANG_MG00['no_title'] = 'Aucun titre disponible pour ce média';
+$LANG_MG00['album'] = 'Album : ';
+$LANG_MG00['whatsnew_title'] = 'Galerie multimédia';
+$LANG_MG00['deny_msg'] = 'Accès refusé. La page a peut-être été déplacée ou supprimée, ou vous ne disposez pas des droits nécessaires.';
 
-    // Common actions
-    'Help' => 'Aide',
-    'Save' => 'Enregistrer',
-    'Yes' => 'Oui',
-    'No' => 'Non',
-    'Submit' => 'Envoyer',
-    'Cancel' => 'Annuler',
-    'Reset' => 'Réinitialiser',
-    'Delete' => 'Supprimer',
-    'All' => 'Tous',
-    'Top' => 'Haut',
-    'Bottom' => 'Bas',
-    'Edit' => 'Modifier',
-    'Move Up' => 'Monter',
-    'Move Down' => 'Descendre',
-    'Rotate Left' => 'Pivoter à gauche',
-    'Rotate Right' => 'Pivoter à droite',
-    'Continue' => 'Continuer',
-    'Recheck' => 'Revérifier',
-    'Check All' => 'Tout sélectionner',
-    'Uncheck All' => 'Tout désélectionner',
-    'Approve' => 'Approuver',
-    'Options' => 'Options',
-    'Details ' => 'Détails ',
-    'None' => 'Aucun',
-    'Both' => 'Les deux',
-    'Ascending' => 'Croissant',
-    'Descending' => 'Décroissant',
-    'Date' => 'Date',
-    'Time' => 'Heure',
-    'Title' => 'Titre',
-    'Description' => 'Description',
-    'File' => 'Fichier',
-    'Directory' => 'Répertoire',
-    'Action' => 'Action',
-    'Status' => 'État',
-    'Count' => 'Nombre',
-    'Order' => 'Ordre',
-    'Select' => 'Sélectionner',
-    'User Name' => 'Nom d’utilisateur',
-    'User ID' => 'ID utilisateur',
-    'Active' => 'Actif',
+// Administration - actions and navigation
+$LANG_MG01['help'] = 'Aide';
+$LANG_MG01['save'] = 'Enregistrer';
+$LANG_MG01['yes'] = 'Oui';
+$LANG_MG01['no'] = 'Non';
+$LANG_MG01['submit'] = 'Envoyer';
+$LANG_MG01['cancel'] = 'Annuler';
+$LANG_MG01['reset'] = 'Réinitialiser';
+$LANG_MG01['delete'] = 'Supprimer';
+$LANG_MG01['all'] = 'Tous';
+$LANG_MG01['homepage_only'] = 'Page d’accueil uniquement';
+$LANG_MG01['top'] = 'Haut';
+$LANG_MG01['bottom'] = 'Bas';
+$LANG_MG01['new_album'] = 'Nouvel album';
+$LANG_MG01['upload_media'] = 'Téléverser des médias';
+$LANG_MG01['ftp_media'] = 'Médias FTP';
+$LANG_MG01['usage_reports'] = 'Rapports d’utilisation';
+$LANG_MG01['configuration'] = 'Configuration';
+$LANG_MG01['media_queue'] = 'File d’attente des médias';
+$LANG_MG01['admin_home'] = 'Accueil administration';
+$LANG_MG01['edit_album'] = 'Modifier l’album';
+$LANG_MG01['create_album'] = 'Créer un album';
+$LANG_MG01['delete_album'] = 'Supprimer l’album';
+$LANG_MG01['album_name_desc'] = 'Titre / description de l’album';
+$LANG_MG01['albums'] = 'Albums';
+$LANG_MG01['moderate'] = 'Modérer';
+$LANG_MG01['media_management'] = 'Gestion des médias';
+$LANG_MG01['count'] = 'Nombre';
+$LANG_MG01['order'] = 'Ordre';
+$LANG_MG01['action'] = 'Action';
+$LANG_MG01['move_up'] = 'Monter';
+$LANG_MG01['move_down'] = 'Descendre';
+$LANG_MG01['rotate_left'] = 'Pivoter à gauche';
+$LANG_MG01['rotate_right'] = 'Pivoter à droite';
+$LANG_MG01['edit'] = 'Modifier';
+$LANG_MG01['caption'] = 'Légende';
+$LANG_MG01['images'] = 'Images';
+$LANG_MG01['file'] = 'Fichier';
+$LANG_MG01['directory'] = 'Répertoire';
+$LANG_MG01['description'] = 'Description';
+$LANG_MG01['capture_time'] = 'Date de prise de vue';
+$LANG_MG01['uploaded_by'] = 'Téléversé par';
+$LANG_MG01['delete_files'] = 'Supprimer les fichiers source';
+$LANG_MG01['not_writable'] = 'Répertoire non inscriptible';
+$LANG_MG01['root_level'] = 'Niveau racine (ne rien créer ici)';
+$LANG_MG01['configuration_title'] = 'Configuration de la galerie multimédia';
+$LANG_MG01['configuration_header'] = 'Options de configuration de la galerie multimédia';
+$LANG_MG01['album_maintenance'] = 'Maintenance des albums';
+$LANG_MG01['media_edit'] = 'Modification des médias';
+$LANG_MG01['usage_report_header'] = 'Rapports d’utilisation de la galerie multimédia';
+$LANG_MG01['edit_media'] = 'Modifier le média';
+$LANG_MG01['image_properties'] = 'Propriétés de l’image';
+$LANG_MG01['left_blocks_only'] = 'Blocs de gauche uniquement';
+$LANG_MG01['right_blocks_only'] = 'Blocs de droite uniquement';
+$LANG_MG01['left_right_blocks'] = 'Blocs de gauche et de droite';
+$LANG_MG01['none'] = 'Aucun';
+$LANG_MG01['no_media_objects'] = 'Aucun média trouvé dans cet album';
+$LANG_MG01['all_dates'] = 'Toutes les dates';
+$LANG_MG01['select_user'] = 'Sélectionner un utilisateur';
+$LANG_MG01['display_rows_prompt'] = 'Lignes affichées';
+$LANG_MG01['album_display_columns_prompt'] = 'Colonnes d’affichage des albums';
+$LANG_MG01['display_columns_prompt'] = 'Colonnes affichées';
+$LANG_MG01['loginrequired_prompt'] = 'Connexion requise';
+$LANG_MG01['comments_prompt'] = 'Autoriser les commentaires';
+$LANG_MG01['graphicspackage_prompt'] = 'Bibliothèque graphique';
+$LANG_MG01['graphicspackage_path_prompt'] = 'Chemin de la bibliothèque graphique';
+$LANG_MG01['displayblock_prompt'] = 'Afficher les blocs Geeklog';
+$LANG_MG01['htmlallowed'] = 'Autoriser le HTML dans les titres';
+$LANG_MG01['whatsnew'] = 'Activer l’affichage dans les nouveautés Geeklog';
+$LANG_MG01['dfid'] = 'Format de date';
+$LANG_MG01['general_options'] = 'Options générales';
+$LANG_MG01['display_options'] = 'Options d’affichage';
+$LANG_MG01['graphics_options'] = 'Bibliothèque graphique';
+$LANG_MG01['usage_tracking'] = 'Suivi de l’utilisation';
+$LANG_MG01['title'] = 'Titre';
+$LANG_MG01['item'] = 'Élément';
+$LANG_MG01['select'] = 'Sélection';
+$LANG_MG01['cover'] = 'Couverture';
+$LANG_MG01['time'] = 'Heure';
+$LANG_MG01['user_id'] = 'ID utilisateur';
+$LANG_MG01['application'] = 'Application';
+$LANG_MG01['album_title'] = 'Titre de l’album';
+$LANG_MG01['new_report'] = 'Nouveau rapport';
+$LANG_MG01['media_capture_time'] = 'Date de capture du média';
+$LANG_MG01['media_upload_time'] = 'Date de téléversement du média';
+$LANG_MG01['parent_album'] = 'Album parent';
+$LANG_MG01['featured_album'] = 'Album mis en avant';
+$LANG_MG01['set_featured'] = 'Mettre en avant';
+$LANG_MG01['position'] = 'Position';
+$LANG_MG01['topic'] = 'Sujet';
+$LANG_MG01['mod_mediatitle'] = 'Titre du média';
+$LANG_MG01['album_link'] = 'Lien de l’album';
+$LANG_MG01['status_header'] = 'État de MediaGallery';
+$LANG_MG01['status'] = 'État';
+$LANG_MG01['delete_all_media'] = 'Supprimer tous les médias de l’album';
+$LANG_MG01['move_all_media'] = 'Déplacer tous les médias';
+$LANG_MG01['mod_album'] = 'Activer la modération pour cet album';
+$LANG_MG01['moderation_group'] = 'Groupe de modération';
+$LANG_MG01['options'] = 'Options';
+$LANG_MG01['admin'] = 'Administration';
+$LANG_MG01['add_media'] = 'Ajouter un média';
+$LANG_MG01['static_sort_media'] = 'Trier les médias';
+$LANG_MG01['manage_media'] = 'Gérer les médias';
+$LANG_MG01['sort_albums'] = 'Trier les albums';
+$LANG_MG01['no_caption'] = 'Aucune légende';
+$LANG_MG01['continue'] = 'Continuer';
+$LANG_MG01['recheck'] = 'Revérifier';
+$LANG_MG01['mg_directories'] = 'Répertoires MediaGallery';
+$LANG_MG01['mg_dir_structure'] = 'Structure des répertoires MediaGallery';
+$LANG_MG01['not_found'] = 'Introuvable';
+$LANG_MG01['ascending'] = 'Croissant';
+$LANG_MG01['descending'] = 'Décroissant';
+$LANG_MG01['static_media_sort'] = 'Tri statique des médias';
+$LANG_MG01['sort_options'] = 'Options de tri';
+$LANG_MG01['order_options'] = 'Options d’ordre';
+$LANG_MG01['subalbums'] = 'Sous-albums';
+$LANG_MG01['destination_album'] = 'Album de destination';
+$LANG_MG01['move'] = 'déplacer';
+$LANG_MG01['date'] = 'Date';
+$LANG_MG01['album'] = 'Album';
+$LANG_MG01['mod_delete'] = 'Supprimer';
+$LANG_MG01['mod_approve'] = 'Approuver';
+$LANG_MG01['documentation'] = 'Documentation d’utilisation';
+$LANG_MG01['check_all'] = 'Tout sélectionner';
+$LANG_MG01['uncheck_all'] = 'Tout désélectionner';
+$LANG_MG01['autotag_error'] = 'Erreur dans l’autotag';
+$LANG_MG01['phpinfo'] = 'Informations PHP';
+$LANG_MG01['album_cover'] = 'Couverture de l’album';
+$LANG_MG01['album_attributes'] = 'Attributs de l’album';
+$LANG_MG01['media_attributes'] = 'Attributs du média';
+$LANG_MG01['attached_thumbnail'] = 'Miniature associée';
+$LANG_MG01['thumbnail'] = 'Miniature';
+$LANG_MG01['enable_exif'] = 'Activer EXIF';
+$LANG_MG01['enable_ratings'] = 'Activer les notes';
+$LANG_MG01['disable_exif'] = 'Désactiver l’affichage EXIF';
+$LANG_MG01['display_below_media'] = 'Afficher sous le média';
+$LANG_MG01['display_in_popup'] = 'Afficher dans une fenêtre contextuelle';
+$LANG_MG01['both'] = 'Les deux';
+$LANG_MG01['play_in_popup'] = 'Lire dans une fenêtre contextuelle';
+$LANG_MG01['download_to_local'] = 'Télécharger sur l’ordinateur';
+$LANG_MG01['play_inline'] = 'Lire dans la page';
+$LANG_MG01['select_date'] = 'Sélectionner une date';
+$LANG_MG01['ss_enable'] = 'Activer le diaporama';
+$LANG_MG01['ri_enable'] = 'Inclure dans le bloc d’image aléatoire';
+$LANG_MG01['tn_size'] = 'Taille des miniatures';
+$LANG_MG01['rows'] = 'Lignes affichées';
+$LANG_MG01['columns'] = 'Colonnes affichées';
+$LANG_MG01['small'] = 'Petite (100x100)';
+$LANG_MG01['medium'] = 'Moyenne (150x150)';
+$LANG_MG01['large'] = 'Grande (200x200)';
+$LANG_MG01['system_default'] = 'Valeur par défaut du système';
+$LANG_MG01['search'] = 'Rechercher';
 
-    // Albums
-    'Root Album' => 'Album racine',
-    'Root Album - No image upload allowed' => 'Album racine - aucun téléversement d’image autorisé',
-    'Root Album Skin' => 'Habillage de l’album racine',
-    'Root Album Name' => 'Nom de l’album racine',
-    'Root Album Display Colums' => 'Colonnes d’affichage de l’album racine',
-    'Root Album Display Rows' => 'Lignes d’affichage de l’album racine',
-    'Root Album Theme' => 'Thème de l’album racine',
-    'New Album' => 'Nouvel album',
-    'Edit Album' => 'Modifier l’album',
-    'Create Album' => 'Créer un album',
-    'Delete Album' => 'Supprimer l’album',
-    'Album Title / Description' => 'Titre / description de l’album',
-    'Albums' => 'Albums',
-    'Album' => 'Album',
-    'Album Title' => 'Titre de l’album',
-    'Parent Album' => 'Album parent',
-    'Featured Album' => 'Album mis en avant',
-    'Set as Featured' => 'Mettre en avant',
-    'Album Link' => 'Lien de l’album',
-    'Album Cover' => 'Couverture de l’album',
-    'Album Attributes' => 'Attributs de l’album',
-    'Sub Albums' => 'Sous-albums',
-    'Destination Album' => 'Album de destination',
-    'Sort Albums' => 'Trier les albums',
-    'Quick Album Create' => 'Création rapide d’un album',
-    'Member Albums' => 'Albums des membres',
-    'Enable Member Albums' => 'Activer les albums des membres',
-    'Member Albums Root Album' => 'Album racine des albums des membres',
-    'Allow Creation under Member Root' => 'Autoriser la création sous la racine des membres',
-    'Archive Deleted Member Albums' => 'Archiver les albums de membres supprimés',
-    'Create Member Albums' => 'Créer les albums des membres',
-    'Auto Create Albums' => 'Créer automatiquement les albums',
+// Administration - global tools and watermarks
+$LANG_MG01['globalattr'] = 'Modifier globalement les albums';
+$LANG_MG01['global_attr_editor'] = 'Éditeur global des attributs d’albums';
+$LANG_MG01['global_attr_help'] = 'Modifie les attributs de tous les albums. Utilisez cette fonction avec prudence.';
+$LANG_MG01['globalperm'] = 'Modifier globalement les permissions';
+$LANG_MG01['global_perm_editor'] = 'Éditeur global des permissions d’albums';
+$LANG_MG01['global_perm_help'] = 'Modifie les permissions de tous les albums. Utilisez cette fonction avec prudence.';
+$LANG_MG01['wm_management'] = 'Filigranes';
+$LANG_MG01['watermark'] = 'Filigrane';
+$LANG_MG01['no_watermarks'] = 'Aucune image de filigrane disponible';
+$LANG_MG01['watermark_upload'] = 'Téléverser un filigrane';
+$LANG_MG01['download'] = 'Télécharger';
+$LANG_MG01['upload'] = 'Téléverser';
+$LANG_MG01['user_prefs'] = 'Paramètres MediaGallery';
+$LANG_MG01['reset_defaults'] = 'Rétablir les valeurs par défaut';
+$LANG_MG01['allow_download'] = 'Autoriser le téléchargement des médias';
+$LANG_MG01['display_album_desc'] = 'Afficher la description de l’album';
+$LANG_MG01['other'] = 'Autre';
+$LANG_MG01['image'] = 'Image';
+$LANG_MG01['audio'] = 'Audio';
+$LANG_MG01['video'] = 'Vidéo';
+$LANG_MG01['allowed_media_formats'] = 'Types de médias autorisés';
+$LANG_MG01['expand_all'] = 'Tout développer';
+$LANG_MG01['collapse_all'] = 'Tout réduire';
+$LANG_MG01['version_info'] = 'Informations de version';
+$LANG_MG01['browser_upload'] = 'Téléversement depuis le navigateur';
+$LANG_MG01['index_album_skin'] = 'Habillage de l’album racine';
+$LANG_MG01['album_display_rows'] = 'Lignes d’affichage des albums';
+$LANG_MG01['image_skin'] = 'Habillage de l’image';
+$LANG_MG01['album_skin'] = 'Habillage de l’album';
+$LANG_MG01['display_skin'] = 'Habillage de l’image affichée';
+$LANG_MG01['subalbum_select'] = 'Afficher les sous-albums dans la liste de sélection';
+$LANG_MG01['select_subalbum'] = 'Sélectionner un sous-album';
+$LANG_MG01['replace_file'] = 'Remplacer le fichier';
+$LANG_MG01['remote_media'] = 'Média distant';
+$LANG_MG01['remote_media_type'] = 'Type de média distant';
+$LANG_MG01['remote_url'] = 'URL distante';
+$LANG_MG01['remote_thumbnail'] = 'Miniature distante';
+$LANG_MG01['tn_height'] = 'Hauteur personnalisée des miniatures';
+$LANG_MG01['tn_width'] = 'Largeur personnalisée des miniatures';
+$LANG_MG01['custom'] = 'Personnalisé';
+$LANG_MG01['album_theme'] = 'Thème de l’album';
+$LANG_MG01['index_theme'] = 'Thème de l’album racine';
+$LANG_MG01['auto'] = 'Automatique';
+$LANG_MG01['left'] = 'Gauche';
+$LANG_MG01['right'] = 'Droite';
+$LANG_MG01['center'] = 'Centre';
+$LANG_MG01['display_image'] = 'Image affichée';
+$LANG_MG01['original_image'] = 'Image originale';
+$LANG_MG01['alignment'] = 'Alignement';
+$LANG_MG01['border'] = 'Bordure';
+$LANG_MG01['width'] = 'Largeur';
+$LANG_MG01['height'] = 'Hauteur';
+$LANG_MG01['source'] = 'Source du média';
+$LANG_MG01['autoplay'] = 'Lecture automatique';
+$LANG_MG01['ss_delay'] = 'Délai du diaporama';
+$LANG_MG01['search_result_options'] = 'Options des résultats de recherche';
+$LANG_MG01['search_columns'] = 'Colonnes de recherche';
+$LANG_MG01['search_rows'] = 'Lignes de recherche';
+$LANG_MG01['statistics'] = 'Statistiques';
+$LANG_MG01['media_submissions'] = 'Soumissions de médias';
+$LANG_MG01['mime_type'] = 'Type MIME';
+$LANG_MG01['miscellaneous'] = 'Plus';
+$LANG_MG01['host_environment'] = 'Environnement serveur';
 
-    // Media
-    'Upload Media' => 'Téléverser des médias',
-    'FTP Media' => 'Médias FTP',
-    'Media Queue' => 'File d’attente des médias',
-    'Media Management' => 'Gestion des médias',
-    'Manage Media' => 'Gérer les médias',
-    'Edit Media Item' => 'Modifier le média',
-    'Media Title' => 'Titre du média',
-    'Media Attributes' => 'Attributs du média',
-    'Add Media' => 'Ajouter un média',
-    'Sort Media' => 'Trier les médias',
-    'No media items found in this album' => 'Aucun média trouvé dans cet album',
-    'No caption' => 'Aucune légende',
-    'Caption' => 'Légende',
-    'Images' => 'Images',
-    'Thumbnail' => 'Miniature',
-    'Attached Thumbnail' => 'Miniature associée',
-    'Album Cover' => 'Couverture de l’album',
-    'Capture Time' => 'Date de prise de vue',
-    'Uploaded by' => 'Téléversé par',
-    'Media Capture Time' => 'Date de capture du média',
-    'Media Upload Time' => 'Date de téléversement du média',
-    'Delete Source Files' => 'Supprimer les fichiers source',
-    'Delete All Media Items in Album' => 'Supprimer tous les médias de l’album',
-    'Move All Media' => 'Déplacer tous les médias',
-    'File List' => 'Liste des fichiers',
-    'FTP Path Directory' => 'Répertoire FTP',
-    'into album' => 'dans l’album',
-    'Web Browser Upload' => 'Téléversement depuis le navigateur',
+// Errors
+$LANG_MG02['generic_error'] = 'MediaGallery a rencontré une erreur lors du traitement de votre demande. Veuillez réessayer.';
+$LANG_MG02['partial_upload'] = '%s - Le fichier n’a été que partiellement téléversé.';
+$LANG_MG02['no_file_uploaded'] = 'Aucun fichier de filigrane n’a été téléversé.';
+$LANG_MG02['missing_tmp'] = 'Dossier temporaire manquant.';
+$LANG_MG02['disk_fail'] = 'Impossible d’écrire le fichier sur le disque.';
+$LANG_MG02['unknown_err'] = 'Erreur inconnue lors du téléversement du fichier';
+$LANG_MG02['admin_access_deny'] = 'Vous ne disposez pas des droits nécessaires pour accéder à l’administration de MediaGallery.';
+$LANG_MG02['no_target_album'] = 'Aucun album de destination n’a été sélectionné.';
+$LANG_MG02['invalid_directory'] = 'Le répertoire n’existe pas';
+$LANG_MG02['go_back'] = 'Retour';
+$LANG_MG02['error'] = 'ERREUR :';
+$LANG_MG02['no_format'] = 'Aucun format sélectionné';
+$LANG_MG02['format_not_allowed'] = 'Format non autorisé';
 
-    // Display / navigation
-    'Homepage Only' => 'Page d’accueil uniquement',
-    'Display Rows' => 'Lignes affichées',
-    'Display Columns' => 'Colonnes affichées',
-    'General Options' => 'Options générales',
-    'Display Options' => 'Options d’affichage',
-    'Image Properties' => 'Propriétés de l’image',
-    'Left blocks only' => 'Blocs de gauche uniquement',
-    'Right blocks only' => 'Blocs de droite uniquement',
-    'Left and right blocks' => 'Blocs de gauche et de droite',
-    'Display Geeklog Blocks' => 'Afficher les blocs Geeklog',
-    'Show Sub-Albums in Select Box' => 'Afficher les sous-albums dans la liste de sélection',
-    'Image Skin' => 'Habillage de l’image',
-    'Album Skin' => 'Habillage de l’album',
-    'Display Image Skin' => 'Habillage de l’image affichée',
-    'Gallery View Thumbnail Size' => 'Taille des miniatures de la galerie',
-    'Custom Thumbnail Height' => 'Hauteur personnalisée des miniatures',
+// Public interface, search, sorting and slideshow
+$LANG_MG03['menulabel'] = 'Galerie multimédia';
+$LANG_MG03['updated_prompt'] = 'Mis à jour ';
+$LANG_MG03['no_media_objects'] = '<p>Cet album ne contient aucun média image</p>';
+$LANG_MG03['next'] = 'Suivant';
+$LANG_MG03['previous'] = 'Précédent';
+$LANG_MG03['home'] = 'Accueil';
+$LANG_MG03['return_to_album'] = 'Retour à l’album';
+$LANG_MG03['normal_size'] = 'Taille normale';
+$LANG_MG03['full_size'] = 'Taille originale';
+$LANG_MG03['play'] = 'Lecture';
+$LANG_MG03['stop'] = 'Arrêter';
+$LANG_MG03['ss_running'] = 'Le diaporama est en cours...';
+$LANG_MG03['ss_stopped'] = 'Le diaporama est arrêté. Cliquez sur Lecture pour reprendre.';
+$LANG_MG03['reverse'] = 'précédent';
+$LANG_MG03['forward'] = 'suivant';
+$LANG_MG03['picture_loading'] = 'Chargement de l’image...';
+$LANG_MG03['please_wait'] = 'Veuillez patienter...';
+$LANG_MG03['transition'] = 'Transition';
+$LANG_MG03['delay'] = 'Délai';
+$LANG_MG03['loop'] = 'Boucle';
+$LANG_MG03['seconds'] = 'secondes';
+$LANG_MG03['jump_to'] = 'Aller à';
+$LANG_MG03['go'] = 'OK';
+$LANG_MG03['slide_show'] = 'Diaporama';
+$LANG_MG03['page'] = 'Page';
+$LANG_MG03['of'] = 'sur';
+$LANG_MG03['image'] = 'Image';
+$LANG_MG03['comments'] = 'Commentaires';
+$LANG_MG03['views'] = 'Vues';
+$LANG_MG03['browse_album'] = 'Parcourir l’album';
+$LANG_MG03['close'] = 'Fermer';
+$LANG_MG03['rating'] = 'Note';
+$LANG_MG03['rate'] = 'Noter';
+$LANG_MG03['sort_by'] = 'Trier par';
+$LANG_MG03['sort_default'] = 'ordre par défaut';
+$LANG_MG03['sort_default_asc'] = 'ordre par défaut, croissant';
+$LANG_MG03['sort_upload'] = 'date de téléversement, décroissant';
+$LANG_MG03['sort_upload_asc'] = 'date de téléversement, croissant';
+$LANG_MG03['sort_capture'] = 'date de capture, décroissant';
+$LANG_MG03['sort_capture_asc'] = 'date de capture, croissant';
+$LANG_MG03['sort_rating'] = 'note, décroissant';
+$LANG_MG03['sort_rating_asc'] = 'note, croissant';
+$LANG_MG03['sort_views'] = 'vues, décroissant';
+$LANG_MG03['sort_views_asc'] = 'vues, croissant';
+$LANG_MG03['no_sort'] = 'Aucun tri automatique';
+$LANG_MG03['all_categories'] = 'Toutes les catégories';
+$LANG_MG03['category'] = 'Catégorie';
+$LANG_MG03['per_page'] = 'par page';
+$LANG_MG03['title_desc_keywords'] = 'Titre, description et mots-clés';
+$LANG_MG03['keywords_only'] = 'Mots-clés uniquement';
+$LANG_MG03['title_desc_only'] = 'Titre et description uniquement';
+$LANG_MG03['exact_phrase'] = 'Expression exacte';
+$LANG_MG03['any'] = 'un de ces mots';
+$LANG_MG03['all'] = 'tous ces mots';
+$LANG_MG03['sort_alpha'] = 'titre, décroissant';
+$LANG_MG03['sort_alpha_asc'] = 'titre, croissant';
+$LANG_MG03['advanced_search'] = 'Recherche avancée MediaGallery';
+$LANG_MG03['search_query'] = 'Recherche';
+$LANG_MG03['options'] = 'Options';
+$LANG_MG03['keywords'] = 'Mots-clés';
+$LANG_MG03['all_fields'] = 'Titre, description, mots-clés';
+$LANG_MG03['return_results'] = 'Afficher les résultats';
+$LANG_MG03['search'] = 'rechercher';
+$LANG_MG03['search_for'] = 'Rechercher';
+$LANG_MG03['search_in'] = 'Rechercher dans';
+$LANG_MG03['results'] = 'Résultats';
+$LANG_MG03['cancel'] = 'Annuler';
+$LANG_MG03['overview'] = 'Présentation';
+$LANG_MG03['terms'] = 'Conditions d’utilisation';
 
-    // Administration / configuration
-    'Media Gallery Administration' => 'Administration de la galerie multimédia',
-    'Media Gallery Configuration' => 'Configuration de la galerie multimédia',
-    'Media Gallery Configuration Options' => 'Options de configuration de la galerie multimédia',
-    'Media Gallery Album Maintenance' => 'Maintenance des albums de la galerie multimédia',
-    'Media Gallery Media Edit' => 'Modification des médias de la galerie multimédia',
-    'Media Gallery Usage Reports' => 'Rapports d’utilisation de la galerie multimédia',
-    'Admin Home' => 'Accueil administration',
-    'Configuration' => 'Configuration',
-    'Usage Reports' => 'Rapports d’utilisation',
-    'Usage Tracking' => 'Suivi de l’utilisation',
-    'Graphics Package' => 'Bibliothèque graphique',
-    'Graphics Package Path' => 'Chemin de la bibliothèque graphique',
-    'Allow Comments' => 'Autoriser les commentaires',
-    'Enable EXIF' => 'Activer EXIF',
-    'Enable Ratings' => 'Activer les notes',
-    'Disable EXIF Display' => 'Désactiver l’affichage EXIF',
-    'Enable Slideshow' => 'Activer le diaporama',
-    'Include in Random Image block' => 'Inclure dans le bloc d’image aléatoire',
-    'Thumbnail size' => 'Taille des miniatures',
-    'System Default' => 'Valeur par défaut du système',
-    'Date Format' => 'Format de date',
-    'Version Information' => 'Informations de version',
-    'Your installation is up to date, no updates are available for your version of Media Gallery' => 'Votre installation est à jour, aucune mise à jour n’est disponible pour votre version de MediaGallery',
-    'Unable to determine latest version of Media Gallery.' => 'Impossible de déterminer la dernière version de MediaGallery.',
-
-    // Slideshow / playback
-    'Slideshow' => 'Diaporama',
-    'Play' => 'Lecture',
-    'Stop' => 'Arrêter',
-    'Previous' => 'Précédent',
-    'Next' => 'Suivant',
-    'Home' => 'Accueil',
-    'Return to Album' => 'Retour à l’album',
-    'Normal Size' => 'Taille normale',
-    'Full Size' => 'Taille originale',
-    'Loop' => 'Boucle',
-    'Seconds' => 'Secondes',
-    'Transition' => 'Transition',
-    'Delay' => 'Délai',
-    'Picture Loading' => 'Chargement de l’image',
-    'Please Wait' => 'Veuillez patienter',
-    'Play Inline' => 'Lire dans la page',
-    'Play in Popup Window' => 'Lire dans une fenêtre contextuelle',
-    'Download to local computer' => 'Télécharger sur l’ordinateur',
-
-    // Miscellaneous
-    'Not Found' => 'Introuvable',
-    'NOT Writable' => 'NON inscriptible',
-    'Directory NOT writable' => 'Répertoire NON inscriptible',
-    'Documentation' => 'Documentation',
-    'Usage Documentation' => 'Documentation d’utilisation',
-    'PHP Information' => 'Informations PHP',
-    'Error in Autotag' => 'Erreur dans l’autotag',
-    'Thank you for your submission' => 'Merci pour votre contribution',
-    'Your media upload has been approved' => 'Votre média téléversé a été approuvé',
-    'Select Date' => 'Sélectionner une date',
-    'Select User' => 'Sélectionner un utilisateur',
-    'All Dates' => 'Toutes les dates',
-    'New Report' => 'Nouveau rapport',
-    'Quota Reports' => 'Rapports de quota',
-    'Default Member Quota' => 'Quota par défaut des membres',
-    'Small (100x100)' => 'Petite (100x100)',
-    'Medium (150x150)' => 'Moyenne (150x150)',
-    'Large (200x200)' => 'Grande (200x200)'
-);
-
-// Apply translations to every MediaGallery language array loaded by the
-// English fallback. Exact-value matching keeps keys and placeholders intact.
-foreach ($GLOBALS as $MG_FR_NAME => &$MG_FR_VALUES) {
-    if (strpos($MG_FR_NAME, 'LANG_MG') !== 0 || !is_array($MG_FR_VALUES)) {
-        continue;
-    }
-
-    array_walk_recursive($MG_FR_VALUES, function (&$MG_FR_VALUE) use ($MG_FR_TRANSLATIONS) {
-        if (is_string($MG_FR_VALUE) && isset($MG_FR_TRANSLATIONS[$MG_FR_VALUE])) {
-            $MG_FR_VALUE = $MG_FR_TRANSLATIONS[$MG_FR_VALUE];
-        }
-    });
-}
-unset($MG_FR_VALUES, $MG_FR_NAME, $MG_FR_TRANSLATIONS);
+// Template accessibility labels introduced in MediaGallery 1.8.0
+$LANG_MG03['aria_breadcrumb'] = 'Fil d’Ariane';
+$LANG_MG03['aria_album_actions'] = 'Actions de l’album';
+$LANG_MG03['aria_album_pagination'] = 'Pagination de l’album';
+$LANG_MG03['aria_album_pagination_info'] = 'Pagination et informations de l’album';
+?>
