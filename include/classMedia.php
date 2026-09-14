@@ -431,7 +431,7 @@ class Media {
                 if ($type == 2){
                     // determine what type of player we will use (WMP, QT or Flash)
                     $player = $_MG_CONF['mp3_player'];
-                    if (isset($_MG_USERPREFS['mp3_player']) && $_MG_USERPREFS['mp3_player'] != -1) {
+                    if (isset($_MG_USERPREFS['tn_size']) && $_MG_USERPREFS['tn_size'] != -1) {
                         $player = $_MG_USERPREFS['mp3_player'];
                     }
                     $new_y = 360;
@@ -445,7 +445,7 @@ class Media {
                             $new_y = 25;
                             $new_x = 350;
                             break;
-                        case 2 :
+                        case 2:
                             $new_y = 360;
                             $new_x = 580;
                             break;
@@ -654,29 +654,38 @@ class Media {
         $media_item_thumbnail = MG_getFramedImage($skin, $this->title, $url_media_item,
                                                   $media_thumbnail, $newwidth, $newheight, $media_start_link);
 
-        // MediaGallery 1.8: default album cards need one reliable, uncropped source.
-        // Use the local original for both layers when available: CSS alone creates the
-        // square crop at rest and reveals the same complete image on hover/focus.
-        // The browser reuses the identical resource for both <img> elements.
+        // MediaGallery 1.8: default album cards prefer the physical original.
+        // Passing an empty extension makes getFilePath()/getFileUrl() resolve the real
+        // extension through getMediaExt(), which is more robust for legacy libraries.
+        // CSS alone creates the square crop at rest and reveals the complete image on hover.
         $media_card_preview = $media_item_thumbnail;
-        if ($searchmode == 0 && $this->type == 0 && $this->remote != 1 && !empty($direct_url)) {
-            $card_cover_source = $direct_url;
-            $card_full_source = $direct_url;
-            $orig_preview_path = self::getFilePath('orig', $this->filename, $this->mime_ext);
-            if (file_exists($orig_preview_path)) {
-                $original_card_url = self::getFileUrl('orig', $this->filename, $this->mime_ext);
+        if ($searchmode == 0 && $this->type == 0 && $this->remote != 1) {
+            $card_cover_source = '';
+            $card_full_source = '';
+
+            $orig_preview_path = self::getFilePath('orig', $this->filename);
+            if (is_file($orig_preview_path)) {
+                $original_card_url = self::getFileUrl('orig', $this->filename);
                 $card_cover_source = $original_card_url;
                 $card_full_source = $original_card_url;
+            } elseif (!empty($direct_url)) {
+                // Legacy fallback: use the best existing display/thumbnail source only
+                // when no physical original can be resolved.
+                $card_cover_source = $direct_url;
+                $card_full_source = $direct_url;
             }
-            $card_cover_url = MG_escapeHTML($card_cover_source);
-            $card_full_url = MG_escapeHTML($card_full_source);
-            $media_card_preview = $media_start_link
-                . '<span class="mg-card-preview-stack">'
-                . '<img class="mg-card-preview-image mg-card-preview-cover" src="' . $card_cover_url
-                . '" alt="' . $caption . '" loading="lazy" decoding="async">'
-                . '<img class="mg-card-preview-image mg-card-preview-full" src="' . $card_full_url
-                . '" alt="" aria-hidden="true" loading="lazy" decoding="async">'
-                . '</span></a>';
+
+            if (!empty($card_cover_source)) {
+                $card_cover_url = MG_escapeHTML($card_cover_source);
+                $card_full_url = MG_escapeHTML($card_full_source);
+                $media_card_preview = $media_start_link
+                    . '<span class="mg-card-preview-stack">'
+                    . '<img class="mg-card-preview-image mg-card-preview-cover" src="' . $card_cover_url
+                    . '" alt="' . $caption . '" loading="lazy" decoding="async">'
+                    . '<img class="mg-card-preview-image mg-card-preview-full" src="' . $card_full_url
+                    . '" alt="" aria-hidden="true" loading="lazy" decoding="async">'
+                    . '</span></a>';
+            }
         }
 
         if ($mode == 1) {
