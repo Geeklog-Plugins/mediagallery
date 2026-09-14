@@ -1,4 +1,4 @@
-<article class="mg_album_item mg-card">
+<article class="mg_album_item mg-card {cover_orientation_class}">
   <div class="mg-card-media">
     <div class="mg_thumbnail">
       <div class="mg_thumbnail_wrapper">{media_item_thumbnail}</div>

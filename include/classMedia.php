@@ -653,6 +653,15 @@ class Media {
                 . '</a>';
         }
 
+        $media_orientation_class = 'mg-orientation-square';
+        if (is_array($media_size) && isset($media_size[0], $media_size[1]) && $media_size[0] > 0 && $media_size[1] > 0) {
+            if ($media_size[0] > ($media_size[1] * 1.15)) {
+                $media_orientation_class = 'mg-orientation-landscape';
+            } elseif ($media_size[1] > ($media_size[0] * 1.15)) {
+                $media_orientation_class = 'mg-orientation-portrait';
+            }
+        }
+
         if ($mode == 1) {
             return $media_item_thumbnail;
         }
@@ -709,6 +718,7 @@ class Media {
             'media_owner'       => $username,
             'media_item_thumbnail' => $media_item_thumbnail,
             'media_card_preview'    => $media_card_preview,
+            'media_orientation_class' => $media_orientation_class,
             'site_url'          => $_MG_CONF['site_url'],
             'lang_published'    => $LANG_MG03['published'],
             'lang_on'           => $LANG_MG03['on'],

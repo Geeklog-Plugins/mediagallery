@@ -1229,6 +1229,33 @@ function MG_albumThumbnail($album_id)
             $album_last_image = $_MG_CONF['site_url'] . '/mediaobjects/missing.png';
             $mediasize = @getimagesize($_MG_CONF['path_html'] . 'mediaobjects/missing.png');
         }
+    } else {
+        // MediaGallery 1.8: prefer the larger display derivative for album cards.
+        // Fall back to the historical thumbnail when no display image exists.
+        $display_cover_filename = '';
+        if ($cover_filename != '' && $cover_filename != '0' && strpos($cover_filename, 'tn_') !== 0) {
+            $display_cover_filename = $cover_filename;
+        } elseif (isset($filename) && $filename != '' && $filename != ' ') {
+            $display_cover_filename = $filename;
+        }
+        if ($display_cover_filename != '') {
+            list($display_cover_image, $display_cover_size) = MG_getImageUrl(
+                'disp/' . $display_cover_filename[0] . '/' . $display_cover_filename
+            );
+            if ($display_cover_size !== false) {
+                $album_last_image = $display_cover_image;
+                $mediasize = $display_cover_size;
+            }
+        }
+    }
+
+    $cover_orientation_class = 'mg-orientation-square';
+    if (is_array($mediasize) && isset($mediasize[0], $mediasize[1]) && $mediasize[0] > 0 && $mediasize[1] > 0) {
+        if ($mediasize[0] > ($mediasize[1] * 1.15)) {
+            $cover_orientation_class = 'mg-orientation-landscape';
+        } elseif ($mediasize[1] > ($mediasize[0] * 1.15)) {
+            $cover_orientation_class = 'mg-orientation-portrait';
+        }
     }
 
     $children = MG_getAlbumChildren($album_id);
@@ -1256,6 +1283,7 @@ function MG_albumThumbnail($album_id)
     $C->set_file('cell', 'album_page_album_cell.thtml');
     $C->set_var(array(
         'media_item_thumbnail' => $media_item_thumbnail,
+        'cover_orientation_class' => $cover_orientation_class,
         'u_viewalbum'          => $_MG_CONF['site_url'] . '/album.php?aid=' . $album_id .'&amp;page=1',
         'album_last_image'     => $album_last_image,
         'album_title'          => $album_data['album_title'],

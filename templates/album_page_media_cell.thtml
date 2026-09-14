@@ -1,4 +1,4 @@
-<article class="mg_media_item mg-card mg-card-compact">
+<article class="mg_media_item mg-card mg-card-compact {media_orientation_class}">
   <div class="mg-card-media">
     <div class="mg_thumbnail">
       <div class="mg_thumbnail_wrapper">{media_card_preview}{mp3_podcast}</div>
