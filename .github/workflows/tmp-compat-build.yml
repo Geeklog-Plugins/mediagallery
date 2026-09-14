@@ -1,0 +1,86 @@
+name: Temporary MediaGallery compatibility build
+
+on:
+  push:
+    branches:
+      - modernize-1.8.0
+    paths:
+      - '.github/workflows/tmp-compat-build.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix-and-build:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: modernize-1.8.0
+          fetch-depth: 0
+
+      - name: Apply Geeklog 2.1.1 date compatibility fix
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('include/classMedia.php')
+          s = p.read_text()
+          old = "$media_date_short = COM_strftime(isset($_CONF['shortdate']) ? $_CONF['shortdate'] : '%x', $media_time[1]);"
+          new = """$media_date_format = isset($_CONF['shortdate']) ? $_CONF['shortdate'] : '%x';
+        $media_date_short = function_exists('COM_strftime')
+            ? COM_strftime($media_date_format, $media_time[1])
+            : strftime($media_date_format, $media_time[1]);"""
+          if s.count(old) != 1:
+              raise SystemExit('Expected COM_strftime call not found exactly once')
+          p.write_text(s.replace(old, new, 1))
+
+      - name: Lint compatibility file with PHP 5.6
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '5.6'
+          coverage: none
+
+      - name: PHP 5.6 syntax check
+        run: php -l include/classMedia.php
+
+      - name: Build installable archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          ARCHIVE='mediagallery_1.8.0_2.1.1.zip'
+          rm -rf package
+          mkdir -p package/mediagallery dist
+          find dist -maxdepth 1 -type f \( -name 'mediagallery-*.zip' -o -name 'mediagallery_*.zip' -o -name '*.zip.sha256' \) -delete
+          rsync -a ./ package/mediagallery/ \
+            --exclude='.git/' \
+            --exclude='.gitignore' \
+            --exclude='.github/' \
+            --exclude='.build-request' \
+            --exclude='dist/' \
+            --exclude='package/' \
+            --exclude='.idea/' \
+            --exclude='tmp/'
+          cat > package/mediagallery/BUILD_INFO.txt <<EOF
+          MediaGallery 1.8.0 test archive
+          Geeklog target: 2.1.1+
+          Source branch: modernize-1.8.0
+          Compatibility fix: Geeklog 2.1.1 COM_strftime fallback
+          EOF
+          (cd package && zip -qr "../dist/${ARCHIVE}" mediagallery)
+          unzip -t "dist/${ARCHIVE}" >/dev/null
+          unzip -p "dist/${ARCHIVE}" mediagallery/include/classMedia.php | grep -q "function_exists('COM_strftime')"
+          unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/functions.inc'
+          unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/autoinstall.php'
+
+      - name: Commit fix and rebuilt archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/tmp-compat-build.yml
+          git add include/classMedia.php
+          git add -f dist/mediagallery_1.8.0_2.1.1.zip
+          git commit -m 'Support Geeklog 2.1.1 date formatting and rebuild archive [skip ci]'
+          git push origin HEAD:modernize-1.8.0
