@@ -1,5 +1,6 @@
 name: Localize active MediaGallery templates
 
+# Retry with byte-safe PHP patching
 on:
   push:
     branches:
