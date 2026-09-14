@@ -1,0 +1,37 @@
+name: Improve MediaGallery card previews
+
+on:
+  push:
+    branches: [ modernize-1.8.0 ]
+    paths:
+      - '.github/improve-card-previews-trigger'
+
+permissions:
+  contents: write
+
+jobs:
+  improve:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: modernize-1.8.0
+          fetch-depth: 0
+      - name: Apply card preview improvements
+        run: python3 tools/improve_card_previews_180.py
+      - name: Validate PHP syntax
+        run: php -l include/classMedia.php
+      - name: Validate preview wiring
+        run: |
+          grep -q 'media_card_preview' include/classMedia.php
+          grep -q '{media_card_preview}' templates/album_page_media_cell.thtml
+          grep -q 'mg-card-preview-image' public_html/style.css
+      - name: Remove temporary tooling
+        run: rm -f tools/improve_card_previews_180.py .github/workflows/improve-card-previews-180.yml .github/improve-card-previews-trigger
+      - name: Commit changes
+        run: |
+          git config user.name hostellerie
+          git config user.email hostellerie.org@gmail.com
+          git add -A
+          git commit -m "Improve MediaGallery album card previews"
+          git push origin HEAD:modernize-1.8.0
