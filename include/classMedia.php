@@ -709,7 +709,10 @@ class Media {
         } else {
             $media_time = MG_getUserDateTimeFormat($this->time);
         }
-        $media_date_short = COM_strftime(isset($_CONF['shortdate']) ? $_CONF['shortdate'] : '%x', $media_time[1]);
+        $media_date_format = isset($_CONF['shortdate']) ? $_CONF['shortdate'] : '%x';
+$media_date_short = function_exists('COM_strftime')
+    ? COM_strftime($media_date_format, $media_time[1])
+    : strftime($media_date_format, $media_time[1]);
 
         $media_title = (!empty($this->title)) ? PLG_replaceTags($this->title) : 'No Name';
 
