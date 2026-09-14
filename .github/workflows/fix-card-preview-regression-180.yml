@@ -1,0 +1,51 @@
+name: Fix MediaGallery card preview regression
+
+on:
+  push:
+    branches: [modernize-1.8.0]
+    paths:
+      - '.github/fix-card-preview-regression-trigger'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Audit missing audio player reference
+        shell: bash
+        run: |
+          echo '=== audio-player.js ==='
+          grep -RIn --exclude-dir=.git --exclude='*.zip' 'audio-player\.js' . || true
+          echo '=== audio-player ==='
+          grep -RIn --exclude-dir=.git --exclude='*.zip' 'audio-player' . || true
+          echo '=== players/ ==='
+          grep -RIn --exclude-dir=.git --exclude='*.zip' 'players/' . || true
+      - name: Fix broken card preview HTML
+        run: python3 tools/fix-card-preview-regression-180.py
+      - name: Validate PHP and generated markup source
+        shell: bash
+        run: |
+          php -l include/classMedia.php
+          grep -F 'class="mg-card-preview-stack"' include/classMedia.php
+          grep -F 'class="mg-card-preview-image mg-card-preview-cover"' include/classMedia.php
+          if grep -F '\"mg-card-preview' include/classMedia.php; then
+            echo 'Literal backslash quotes remain in card preview HTML' >&2
+            exit 1
+          fi
+          grep -F 'href="{u_viewalbum}"' templates/album_page_album_cell.thtml
+      - name: Remove temporary tooling
+        run: |
+          rm -f tools/fix-card-preview-regression-180.py
+          rm -f .github/workflows/fix-card-preview-regression-180.yml
+          rm -f .github/fix-card-preview-regression-trigger
+      - name: Commit fix
+        shell: bash
+        run: |
+          git config user.name 'hostellerie'
+          git config user.email 'hostellerie.org@gmail.com'
+          git add -A
+          git commit -m 'Restore MediaGallery card previews and links'
+          git push
