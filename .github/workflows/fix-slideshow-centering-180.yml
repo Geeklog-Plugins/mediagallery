@@ -1,0 +1,33 @@
+name: Fix MediaGallery slideshow centering
+on:
+  push:
+    paths:
+      - '.github/fix-slideshow-centering-trigger'
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: modernize-1.8.0
+      - name: Apply slideshow centering fix
+        run: python3 tools/fix_slideshow_centering_180.py
+      - name: Validate CSS change
+        run: |
+          grep -q 'box-sizing: border-box;' public_html/style.css
+          ! grep -q 'width: calc(100vw - 2rem);' public_html/style.css
+          ! grep -q 'height: calc(100vh - 2rem);' public_html/style.css
+      - name: Remove temporary tooling
+        run: |
+          rm -f tools/fix_slideshow_centering_180.py
+          rm -f .github/workflows/fix-slideshow-centering-180.yml
+          rm -f .github/fix-slideshow-centering-trigger
+      - name: Commit changes
+        run: |
+          git config user.name hostellerie
+          git config user.email hostellerie.org@gmail.com
+          git add -A
+          git commit -m 'Center MediaGallery slideshow images precisely'
+          git push origin modernize-1.8.0
