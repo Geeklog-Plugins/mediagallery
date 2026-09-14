@@ -3140,7 +3140,7 @@ a.SWFUProgressCancel:hover {
 .mg-album-default-grid .mg-card-square .mg-card-preview-cover {
   object-fit: cover;
   opacity: 1;
-  transform: scale(1.015);
+  transform: none;
   filter: brightness(1) saturate(1);
   transition: opacity .32s ease, transform .38s cubic-bezier(.2,.7,.2,1), filter .32s ease;
 }
@@ -3161,7 +3161,7 @@ a.SWFUProgressCancel:hover {
 .mg-album-default-grid .mg-card-square:hover .mg-card-preview-full,
 .mg-album-default-grid .mg-card-square:focus-within .mg-card-preview-full {
   opacity: 1;
-  transform: scale(.965);
+  transform: none;
 }
 .mg-album-default-grid .mg-card-square:hover .mg-card-media,
 .mg-album-default-grid .mg-card-square:focus-within .mg-card-media {

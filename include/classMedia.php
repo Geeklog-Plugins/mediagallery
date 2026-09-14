@@ -654,15 +654,19 @@ class Media {
         $media_item_thumbnail = MG_getFramedImage($skin, $this->title, $url_media_item,
                                                   $media_thumbnail, $newwidth, $newheight, $media_start_link);
 
-        // MediaGallery 1.8: use the display derivative for the sharp square cover
-        // and the uncropped original for the mini-lightbox whenever it exists.
+        // MediaGallery 1.8: default album cards need one reliable, uncropped source.
+        // Use the local original for both layers when available: CSS alone creates the
+        // square crop at rest and reveals the same complete image on hover/focus.
+        // The browser reuses the identical resource for both <img> elements.
         $media_card_preview = $media_item_thumbnail;
         if ($searchmode == 0 && $this->type == 0 && $this->remote != 1 && !empty($direct_url)) {
             $card_cover_source = $direct_url;
             $card_full_source = $direct_url;
             $orig_preview_path = self::getFilePath('orig', $this->filename, $this->mime_ext);
             if (file_exists($orig_preview_path)) {
-                $card_full_source = self::getFileUrl('orig', $this->filename, $this->mime_ext);
+                $original_card_url = self::getFileUrl('orig', $this->filename, $this->mime_ext);
+                $card_cover_source = $original_card_url;
+                $card_full_source = $original_card_url;
             }
             $card_cover_url = MG_escapeHTML($card_cover_source);
             $card_full_url = MG_escapeHTML($card_full_source);
