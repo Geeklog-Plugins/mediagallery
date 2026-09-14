@@ -503,11 +503,18 @@ function plugin_deletecomment_mediagallery($cid, $id, $returnBoolean)
     return $retval;
 }
 
-function plugin_getcommenturlid_mediagallery($id)
+function plugin_getcommenturlid_mediagallery($id = '')
 {
-    global $_CONF, $_MG_CONF;
-	
-	return $_MG_CONF['site_url'] . "/media.php?s=$id";
+    global $_MG_CONF;
+
+    // Geeklog 2.1.1 calls this callback without an item id and expects
+    // array(base URL, id parameter name). Newer Geeklog versions pass the id
+    // and expect the complete item URL.
+    if ($id === '' || $id === null) {
+        return array($_MG_CONF['site_url'] . '/media.php', 's');
+    }
+
+    return $_MG_CONF['site_url'] . '/media.php?s=' . rawurlencode($id);
 }
 
 /**
