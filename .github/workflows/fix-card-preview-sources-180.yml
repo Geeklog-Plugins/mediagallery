@@ -21,7 +21,7 @@ jobs:
         run: |
           set -euo pipefail
           grep -F '$card_cover_source = $direct_url;' include/classMedia.php
-          grep -F "$card_full_source = self::getFileUrl('orig'" include/classMedia.php
+          grep -F '$card_full_source = self::getFileUrl('"'"'orig'"'"'' include/classMedia.php
           grep -F '$album_full_image = $original_cover_image;' include/common.php
           php -l include/classMedia.php
           php -l include/common.php
