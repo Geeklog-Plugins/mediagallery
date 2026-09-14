@@ -9,6 +9,23 @@ def replace_required(path, old, new, all_occurrences=True):
     s = s.replace(old, new) if all_occurrences else s.replace(old, new, 1)
     p.write_text(s, encoding='utf-8')
 
+
+def patch_bytes(path, marker, addition, once=False):
+    p = Path(path)
+    data = p.read_bytes()
+    marker_b = marker.encode('ascii')
+    addition_b = addition.encode('ascii')
+    if addition_b in data:
+        return
+    count = data.count(marker_b)
+    if count == 0:
+        raise SystemExit('Binary marker not found in %s' % path)
+    if once:
+        data = data.replace(marker_b, marker_b + addition_b, 1)
+    else:
+        data = data.replace(marker_b, marker_b + addition_b)
+    p.write_bytes(data)
+
 # Canonical language keys.
 for filename, values in [
     ('language/english_utf-8.php', {
@@ -35,44 +52,29 @@ for filename, values in [
             s += "$LANG_MG03['%s'] = '%s';\n" % (key, safe)
     p.write_text(s, encoding='utf-8')
 
-# Media renderer variables.
-p = Path('include/lib-media.php')
-s = p.read_text(encoding='utf-8')
-marker = "        'lang_search'         => $LANG_MG01['search'],\n"
-addition = (
-    marker
-    + "        'lang_aria_breadcrumb' => $LANG_MG03['aria_breadcrumb'],\n"
-    + "        'lang_aria_media_actions' => $LANG_MG03['aria_media_actions'],\n"
-    + "        'lang_media_id' => $LANG_MG03['media_id_label'],\n"
+# Historical PHP files may contain legacy non-UTF-8 bytes. Patch only ASCII
+# fragments so their original byte encoding remains untouched.
+patch_bytes(
+    'include/lib-media.php',
+    "        'lang_search'         => $LANG_MG01['search'],\n",
+    "        'lang_aria_breadcrumb' => $LANG_MG03['aria_breadcrumb'],\n"
+    "        'lang_aria_media_actions' => $LANG_MG03['aria_media_actions'],\n"
+    "        'lang_media_id' => $LANG_MG03['media_id_label'],\n",
+    once=True,
 )
-if "'lang_aria_media_actions'" not in s:
-    if marker not in s:
-        raise SystemExit('lib-media language marker not found')
-    s = s.replace(marker, addition, 1)
-p.write_text(s, encoding='utf-8')
-
-# Search renderer variables in both search-page setup blocks.
-p = Path('public_html/search.php')
-s = p.read_text(encoding='utf-8')
-marker = "        'lang_search'          => $LANG_MG01['search'],\n"
-if "'lang_aria_search_results_navigation'" not in s:
-    count = s.count(marker)
-    if count < 2:
-        raise SystemExit('Expected two search language markers, found %d' % count)
-    s = s.replace(marker, marker + "        'lang_aria_search_results_navigation' => $LANG_MG03['aria_search_results_navigation'],\n")
-p.write_text(s, encoding='utf-8')
-
-# Album renderer variables used by alternate album themes.
-p = Path('public_html/album.php')
-s = p.read_text(encoding='utf-8')
-marker = "    'lang_aria_album_pagination_info' => $LANG_MG03['aria_album_pagination_info'],\n"
-if "'lang_aria_album_navigation'" not in s:
-    if marker not in s:
-        raise SystemExit('album language marker not found')
-    s = s.replace(marker, marker
-        + "    'lang_aria_album_navigation' => $LANG_MG03['aria_album_navigation'],\n"
-        + "    'lang_aria_media_list' => $LANG_MG03['aria_media_list'],\n", 1)
-p.write_text(s, encoding='utf-8')
+patch_bytes(
+    'public_html/search.php',
+    "        'lang_search'          => $LANG_MG01['search'],\n",
+    "        'lang_aria_search_results_navigation' => $LANG_MG03['aria_search_results_navigation'],\n",
+    once=False,
+)
+patch_bytes(
+    'public_html/album.php',
+    "    'lang_aria_album_pagination_info' => $LANG_MG03['aria_album_pagination_info'],\n",
+    "    'lang_aria_album_navigation' => $LANG_MG03['aria_album_navigation'],\n"
+    "    'lang_aria_media_list' => $LANG_MG03['aria_media_list'],\n",
+    once=True,
+)
 
 # Active media templates.
 for path in ['templates/view_image.thtml', 'templates/view_video.thtml', 'templates/view_audio.thtml']:
@@ -83,7 +85,6 @@ replace_required('templates/view_image.thtml', '<summary>Media ID</summary>', '<
 for path in ['templates/view_video.thtml', 'templates/view_audio.thtml']:
     replace_required(path, '<strong>ID:</strong>', '<strong>{lang_media_id}:</strong>')
 
-# Search page navigation.
 replace_required('templates/search_page.thtml', 'aria-label="Search results navigation"', 'aria-label="{lang_aria_search_results_navigation}"')
 
 # Alternate active album themes.
