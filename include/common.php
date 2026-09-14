@@ -1250,7 +1250,27 @@ function MG_albumThumbnail($album_id)
     }
 
 
-    // Keep the complete display cover; CSS handles square cropping non-destructively.
+    // Keep separate cover/full sources for the mini-lightbox. A display derivative
+    // that preserves the original ratio stays preferred; a cropped legacy derivative
+    // falls back to the original so portrait covers can be revealed completely.
+    $album_full_image = $album_last_image;
+    if ($album_data['tn_attached'] != 1 && isset($display_cover_filename) && $display_cover_filename != '') {
+        list($original_cover_image, $original_cover_size) = MG_getImageUrl(
+            'orig/' . $display_cover_filename[0] . '/' . $display_cover_filename
+        );
+        if ($original_cover_size !== false && $original_cover_size[0] > 0 && $original_cover_size[1] > 0) {
+            $use_original_cover = ($mediasize === false || $mediasize[0] < 1 || $mediasize[1] < 1);
+            if (!$use_original_cover) {
+                $original_cover_ratio = $original_cover_size[0] / $original_cover_size[1];
+                $preview_cover_ratio = $mediasize[0] / $mediasize[1];
+                $use_original_cover = abs($original_cover_ratio - $preview_cover_ratio) > 0.02;
+            }
+            if ($use_original_cover) {
+                $album_full_image = $original_cover_image;
+            }
+        }
+    }
+
     $children = MG_getAlbumChildren($album_id);
     $subalbums = count($children);
     $total_images_subalbums = MG_getMediaCount($album_id);
@@ -1278,6 +1298,7 @@ function MG_albumThumbnail($album_id)
         'media_item_thumbnail' => $media_item_thumbnail,
         'u_viewalbum'          => $_MG_CONF['site_url'] . '/album.php?aid=' . $album_id .'&amp;page=1',
         'album_last_image'     => $album_last_image,
+        'album_full_image'     => $album_full_image,
         'album_title'          => $album_data['album_title'],
         'album_media_count'    => $album_data['media_count'],
         'subalbum_media_count' => $total_images_subalbums,

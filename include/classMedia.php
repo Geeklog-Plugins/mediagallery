@@ -570,13 +570,16 @@ class Media {
         $fileSize = MG_getSize($fs_bytes);
 
         $direct_url = '';
+        $direct_preview_path = '';
         $direct_path = self::getFilePath('disp', $this->filename, $this->mime_ext);
         if (file_exists($direct_path)) {
             $direct_url = self::getFileUrl('disp', $this->filename, $this->mime_ext);
+            $direct_preview_path = $direct_path;
         } else {
             $direct_jpg_path = self::getFilePath('disp', $this->filename, 'jpg');
             if (file_exists($direct_jpg_path)) {
                 $direct_url = self::getFileUrl('disp', $this->filename, 'jpg');
+                $direct_preview_path = $direct_jpg_path;
             } elseif (!empty($this->media_thumbnail)) {
                 // Existing installations may not have a display derivative for every image.
                 // Fall back to the proven historical thumbnail instead of emitting a broken URL.
@@ -651,16 +654,38 @@ class Media {
         $media_item_thumbnail = MG_getFramedImage($skin, $this->title, $url_media_item,
                                                   $media_thumbnail, $newwidth, $newheight, $media_start_link);
 
-        // MediaGallery 1.8: default album cards use the full display preview.
-        // CSS crops it to a square at rest and reveals the complete image on hover/focus.
+        // MediaGallery 1.8: square crop at rest, complete image on hover/focus.
+        // Prefer the lighter display derivative for the full layer when it preserves
+        // the original aspect ratio. If a legacy derivative is itself cropped, use
+        // the original image so portrait media can really be revealed in full.
         $media_card_preview = $media_item_thumbnail;
         if ($searchmode == 0 && $this->type == 0 && $this->remote != 1 && !empty($direct_url)) {
-            $card_preview_url = MG_escapeHTML($direct_url);
+            $card_cover_source = !empty($this->media_thumbnail) ? $this->media_thumbnail : $direct_url;
+            $card_full_source = $direct_url;
+            $orig_preview_path = self::getFilePath('orig', $this->filename, $this->mime_ext);
+            if (file_exists($orig_preview_path)) {
+                $orig_preview_size = @getimagesize($orig_preview_path);
+                $display_preview_size = ($direct_preview_path != '') ? @getimagesize($direct_preview_path) : false;
+                if ($orig_preview_size !== false && $orig_preview_size[0] > 0 && $orig_preview_size[1] > 0) {
+                    $use_original_preview = ($display_preview_size === false
+                        || $display_preview_size[0] < 1 || $display_preview_size[1] < 1);
+                    if (!$use_original_preview) {
+                        $orig_ratio = $orig_preview_size[0] / $orig_preview_size[1];
+                        $display_ratio = $display_preview_size[0] / $display_preview_size[1];
+                        $use_original_preview = abs($orig_ratio - $display_ratio) > 0.02;
+                    }
+                    if ($use_original_preview) {
+                        $card_full_source = self::getFileUrl('orig', $this->filename, $this->mime_ext);
+                    }
+                }
+            }
+            $card_cover_url = MG_escapeHTML($card_cover_source);
+            $card_full_url = MG_escapeHTML($card_full_source);
             $media_card_preview = $media_start_link
                 . '<span class="mg-card-preview-stack">'
-                . '<img class="mg-card-preview-image mg-card-preview-cover" src="' . $card_preview_url
+                . '<img class="mg-card-preview-image mg-card-preview-cover" src="' . $card_cover_url
                 . '" alt="' . $caption . '" loading="lazy" decoding="async">'
-                . '<img class="mg-card-preview-image mg-card-preview-full" src="' . $card_preview_url
+                . '<img class="mg-card-preview-image mg-card-preview-full" src="' . $card_full_url
                 . '" alt="" aria-hidden="true" loading="lazy" decoding="async">'
                 . '</span></a>';
         }
