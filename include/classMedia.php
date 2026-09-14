@@ -431,7 +431,7 @@ class Media {
                 if ($type == 2){
                     // determine what type of player we will use (WMP, QT or Flash)
                     $player = $_MG_CONF['mp3_player'];
-                    if (isset($_MG_USERPREFS['tn_size']) && $_MG_USERPREFS['tn_size'] != -1) {
+                    if (isset($_MG_USERPREFS['mp3_player']) && $_MG_USERPREFS['mp3_player'] != -1) {
                         $player = $_MG_USERPREFS['mp3_player'];
                     }
                     $new_y = 360;
