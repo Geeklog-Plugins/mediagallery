@@ -21,19 +21,21 @@ jobs:
           fetch-depth: 0
 
       - name: Apply Geeklog 2.1.1 date compatibility fix
-        shell: python
+        shell: bash
         run: |
+          python3 - <<'PY'
           from pathlib import Path
           p = Path('include/classMedia.php')
           s = p.read_text()
           old = "$media_date_short = COM_strftime(isset($_CONF['shortdate']) ? $_CONF['shortdate'] : '%x', $media_time[1]);"
           new = """$media_date_format = isset($_CONF['shortdate']) ? $_CONF['shortdate'] : '%x';
-        $media_date_short = function_exists('COM_strftime')
-            ? COM_strftime($media_date_format, $media_time[1])
-            : strftime($media_date_format, $media_time[1]);"""
+          $media_date_short = function_exists('COM_strftime')
+              ? COM_strftime($media_date_format, $media_time[1])
+              : strftime($media_date_format, $media_time[1]);"""
           if s.count(old) != 1:
               raise SystemExit('Expected COM_strftime call not found exactly once')
           p.write_text(s.replace(old, new, 1))
+          PY
 
       - name: Lint compatibility file with PHP 5.6
         uses: shivammathur/setup-php@v2
