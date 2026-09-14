@@ -1,0 +1,90 @@
+name: Temporary slideshow containment build
+
+on:
+  push:
+    branches:
+      - modernize-1.8.0
+    paths:
+      - '.github/workflows/tmp-slideshow-contain.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix-and-build:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: modernize-1.8.0
+          fetch-depth: 0
+
+      - name: Consolidate slideshow containment CSS
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('public_html/style.css')
+          s = p.read_text()
+
+          old_stage = ".mg-slideshow-stage {\n  position: absolute;\n  inset: 0;\n  display: grid;\n  place-items: center;\n  padding: clamp(1rem, 3vw, 2.5rem);\n}"
+          new_stage = ".mg-slideshow-stage {\n  position: absolute;\n  inset: 0;\n  box-sizing: border-box;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  padding: clamp(1rem, 3vw, 2.5rem);\n  overflow: hidden;\n}"
+          assert s.count(old_stage) == 1, 'Expected primary slideshow stage block exactly once'
+          s = s.replace(old_stage, new_stage, 1)
+
+          old_image = ".mg-slideshow-image {\n  display: block;\n  width: auto;\n  max-width: 100%;\n  height: auto;\n  max-height: 100%;\n  object-fit: contain;\n  opacity: 1;\n  transform: scale(1);\n  transition: opacity .32s ease, transform .45s ease;\n  user-select: none;\n  -webkit-user-select: none;\n}"
+          new_image = ".mg-slideshow-image {\n  display: block;\n  width: auto !important;\n  height: auto !important;\n  max-width: 100% !important;\n  max-height: 100% !important;\n  object-fit: contain;\n  object-position: center center;\n  opacity: 1;\n  transform: scale(1);\n  transition: opacity .32s ease, transform .45s ease;\n  user-select: none;\n  -webkit-user-select: none;\n}"
+          assert s.count(old_image) == 1, 'Expected primary slideshow image block exactly once'
+          s = s.replace(old_image, new_image, 1)
+
+          duplicate_line = ".mg-slideshow-image { max-width: min(96vw, 100%); max-height: 94vh; }\n"
+          assert s.count(duplicate_line) == 1, 'Expected compact duplicate slideshow image rule exactly once'
+          s = s.replace(duplicate_line, '', 1)
+
+          final_block = "#mgSlideshow .mg-slideshow-stage {\n  box-sizing: border-box;\n  width: 100vw;\n  height: 100vh;\n  height: 100dvh;\n  overflow: hidden;\n}\n#mgSlideshow .mg-slideshow-stage > .mg-slideshow-image {\n  display: block;\n  width: 100%;\n  height: 100%;\n  max-width: 100%;\n  max-height: 100%;\n  margin: 0;\n  box-sizing: border-box;\n  object-fit: contain;\n  object-position: center center;\n}\n"
+          assert s.count(final_block) == 1, 'Expected final duplicate slideshow override exactly once'
+          s = s.replace(final_block, '', 1)
+
+          p.write_text(s)
+          PY
+
+      - name: Verify slideshow CSS is consolidated
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(grep -c '^\.mg-slideshow-image {' public_html/style.css)" -eq 1
+          test "$(grep -c '^\.mg-slideshow-stage {' public_html/style.css)" -eq 1
+          grep -Fq 'width: auto !important;' public_html/style.css
+          grep -Fq 'height: auto !important;' public_html/style.css
+          grep -Fq 'max-width: 100% !important;' public_html/style.css
+          grep -Fq 'max-height: 100% !important;' public_html/style.css
+
+      - name: Build installable archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          ARCHIVE='mediagallery_1.8.0_2.1.1.zip'
+          rm -rf package
+          mkdir -p package/mediagallery dist
+          find dist -maxdepth 1 -type f \( -name 'mediagallery-*.zip' -o -name 'mediagallery_*.zip' -o -name '*.zip.sha256' \) -delete
+          rsync -a ./ package/mediagallery/ --exclude='.git/' --exclude='.gitignore' --exclude='.github/' --exclude='.build-request' --exclude='dist/' --exclude='package/' --exclude='.idea/' --exclude='tmp/'
+          printf '%s\n' 'MediaGallery 1.8.0 test archive' 'Geeklog target: 2.1.1+' 'Source branch: modernize-1.8.0' 'Slideshow: viewport-contained portrait and landscape media' > package/mediagallery/BUILD_INFO.txt
+          (cd package && zip -qr "../dist/${ARCHIVE}" mediagallery)
+          unzip -t "dist/${ARCHIVE}" >/dev/null
+          unzip -p "dist/${ARCHIVE}" mediagallery/public_html/style.css | grep -Fq 'max-height: 100% !important;'
+          unzip -p "dist/${ARCHIVE}" mediagallery/functions_legacy.inc | grep -Fq "function plugin_getcommenturlid_mediagallery(\$id = '')"
+          unzip -p "dist/${ARCHIVE}" mediagallery/include/classMedia.php | grep -Fq "function_exists('COM_strftime')"
+
+      - name: Commit CSS and rebuilt archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/tmp-slideshow-contain.yml
+          git add public_html/style.css
+          git add -f dist/mediagallery_1.8.0_2.1.1.zip
+          git commit -m 'Contain slideshow media within viewport and rebuild archive [skip ci]'
+          git push origin HEAD:modernize-1.8.0
