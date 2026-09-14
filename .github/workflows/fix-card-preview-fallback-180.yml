@@ -1,0 +1,44 @@
+name: Fix MediaGallery card preview fallback
+
+on:
+  push:
+    branches: [modernize-1.8.0]
+    paths:
+      - '.github/fix-card-preview-fallback-trigger'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Patch preview fallback
+        run: python3 tools/fix-card-preview-fallback-180.py
+      - name: Validate source and templates
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l include/classMedia.php
+          grep -F "elseif (!empty(\$this->media_thumbnail))" include/classMedia.php
+          grep -F '{media_link_start}{media_title}</a>' templates/album_page_media_cell.thtml
+          grep -F '<a href="{u_viewalbum}">{album_title}</a>' templates/album_page_album_cell.thtml
+          if grep -RIn --include='*.thtml' 'audio-player\.js' templates; then
+            echo 'Stale audio-player.js template reference remains' >&2
+            exit 1
+          fi
+      - name: Remove temporary tooling
+        run: |
+          rm -f tools/fix-card-preview-fallback-180.py
+          rm -f .github/workflows/fix-card-preview-fallback-180.yml
+          rm -f .github/fix-card-preview-fallback-trigger
+      - name: Commit fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'hostellerie'
+          git config user.email 'hostellerie.org@gmail.com'
+          git add -A
+          git commit -m 'Harden MediaGallery card preview fallback'
+          git push
