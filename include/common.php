@@ -1249,19 +1249,8 @@ function MG_albumThumbnail($album_id)
         }
     }
 
-    // MediaGallery 1.8: album cards use a square cover. Prefer an existing
-    // native 200x200 crop, otherwise the current cover is cropped by CSS.
-    if ($album_data['tn_attached'] != 1 && $cover_filename != '' && $cover_filename != '0'
-            && strpos($cover_filename, 'tn_') !== 0) {
-        $square_cover = MG_getThumbPath('tn/' . $cover_filename[0] . '/' . $cover_filename, '12');
-        $square_cover = rtrim($square_cover, '.');
-        list($square_cover_url, $square_cover_size) = MG_getImageUrl($square_cover);
-        if ($square_cover_size !== false) {
-            $album_last_image = $square_cover_url;
-            $mediasize = $square_cover_size;
-        }
-    }
 
+    // Keep the complete display cover; CSS handles square cropping non-destructively.
     $children = MG_getAlbumChildren($album_id);
     $subalbums = count($children);
     $total_images_subalbums = MG_getMediaCount($album_id);

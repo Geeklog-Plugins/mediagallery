@@ -642,28 +642,12 @@ class Media {
         $media_item_thumbnail = MG_getFramedImage($skin, $this->title, $url_media_item,
                                                   $media_thumbnail, $newwidth, $newheight, $media_start_link);
 
-        // MediaGallery 1.8 default album cards use a square crop for a consistent grid.
-        // Prefer MediaGallery's native 200x200 crop when it already exists. Existing
-        // installations without that derivative fall back to the display image, which
-        // is cropped non-destructively by CSS (object-fit: cover).
+        // MediaGallery 1.8: default album cards use the full display preview.
+        // CSS crops it to a square at rest and reveals the complete image on hover/focus.
         $media_card_preview = $media_item_thumbnail;
         if ($searchmode == 0 && $this->type == 0 && $this->remote != 1 && !empty($direct_url)) {
-            $card_preview_url = $direct_url;
-            $crop_info = array(
-                'media_type'        => $this->type,
-                'mime_type'         => $this->mime_type,
-                'media_filename'    => $this->filename,
-                'media_mime_ext'    => $this->mime_ext,
-                'remote_media'      => $this->remote_url,
-                'media_tn_attached' => $this->tn_attached,
-            );
-            $crop_relative = self::getDefaultThumbnail($crop_info, '12');
-            if (strpos($crop_relative, '/') !== false
-                    && file_exists($_MG_CONF['path_mediaobjects'] . $crop_relative)) {
-                $card_preview_url = $_MG_CONF['mediaobjects_url'] . '/' . $crop_relative;
-            }
             $media_card_preview = $media_start_link
-                . '<img class="mg-card-preview-image" src="' . MG_escapeHTML($card_preview_url)
+                . '<img class="mg-card-preview-image" src="' . MG_escapeHTML($direct_url)
                 . '" alt="' . $caption . '" loading="lazy" decoding="async">'
                 . '</a>';
         }
