@@ -33,13 +33,7 @@ jobs:
           if old in s:
               s = s.replace(old, new, 1)
           marker = "    'lang_search'        => $LANG_MG01['search'],\n"
-          additions = (
-              marker
-              + "    'lang_aria_breadcrumb' => $LANG_MG03['aria_breadcrumb'],\n"
-              + "    'lang_aria_album_actions' => $LANG_MG03['aria_album_actions'],\n"
-              + "    'lang_aria_album_pagination' => $LANG_MG03['aria_album_pagination'],\n"
-              + "    'lang_aria_album_pagination_info' => $LANG_MG03['aria_album_pagination_info'],\n"
-          )
+          additions = marker + "    'lang_aria_breadcrumb' => $LANG_MG03['aria_breadcrumb'],\n" + "    'lang_aria_album_actions' => $LANG_MG03['aria_album_actions'],\n" + "    'lang_aria_album_pagination' => $LANG_MG03['aria_album_pagination'],\n" + "    'lang_aria_album_pagination_info' => $LANG_MG03['aria_album_pagination_info'],\n"
           if "'lang_aria_breadcrumb'" not in s:
               if marker not in s:
                   raise SystemExit('lang_search marker not found')
@@ -48,13 +42,7 @@ jobs:
 
           p = Path('language/english_utf-8.php')
           s = p.read_text()
-          block = """
-// MediaGallery 1.8.0 template accessibility labels
-$LANG_MG03['aria_breadcrumb'] = 'Breadcrumb';
-$LANG_MG03['aria_album_actions'] = 'Album actions';
-$LANG_MG03['aria_album_pagination'] = 'Album pagination';
-$LANG_MG03['aria_album_pagination_info'] = 'Album pagination and information';
-"""
+          block = "\n// MediaGallery 1.8.0 template accessibility labels\n$LANG_MG03['aria_breadcrumb'] = 'Breadcrumb';\n$LANG_MG03['aria_album_actions'] = 'Album actions';\n$LANG_MG03['aria_album_pagination'] = 'Album pagination';\n$LANG_MG03['aria_album_pagination_info'] = 'Album pagination and information';\n"
           if "['aria_breadcrumb']" not in s:
               pos = s.rfind('?>')
               if pos >= 0:
@@ -98,14 +86,7 @@ $LANG_MG03['aria_album_pagination_info'] = 'Album pagination and information';
           rm -rf package
           mkdir -p package/mediagallery dist
           find dist -maxdepth 1 -type f -name '*.zip' -delete
-          rsync -a ./ package/mediagallery/ \
-            --exclude='.git/' \
-            --exclude='.gitignore' \
-            --exclude='.github/' \
-            --exclude='dist/' \
-            --exclude='package/' \
-            --exclude='.idea/' \
-            --exclude='tmp/'
+          rsync -a ./ package/mediagallery/ --exclude='.git/' --exclude='.gitignore' --exclude='.github/' --exclude='dist/' --exclude='package/' --exclude='.idea/' --exclude='tmp/'
           (cd package && zip -qr "../dist/${ARCHIVE}" mediagallery)
           unzip -t "dist/${ARCHIVE}" >/dev/null
           unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/language/french_france_utf-8.php'
