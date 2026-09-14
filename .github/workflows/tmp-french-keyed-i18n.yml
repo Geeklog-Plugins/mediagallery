@@ -1,0 +1,476 @@
+name: Temporary French keyed i18n
+
+on:
+  push:
+    branches: [modernize-1.8.0]
+    paths:
+      - '.github/workflows/tmp-french-keyed-i18n.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: modernize-1.8.0
+          fetch-depth: 0
+
+      - name: Patch keyed language support
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          # 1) Remove hard-coded English accessibility labels from album template.
+          p = Path('templates/album_page.thtml')
+          s = p.read_text()
+          replacements = {
+              'aria-label="Breadcrumb"': 'aria-label="{lang_aria_breadcrumb}"',
+              'aria-label="Album actions"': 'aria-label="{lang_aria_album_actions}"',
+              'aria-label="Album pagination"': 'aria-label="{lang_aria_album_pagination}"',
+              'aria-label="Album pagination and information"': 'aria-label="{lang_aria_album_pagination_info}"',
+          }
+          for old, new in replacements.items():
+              if old not in s:
+                  raise SystemExit('Expected template text not found: ' + old)
+              s = s.replace(old, new)
+          p.write_text(s)
+
+          # 2) Make album.php provide localized labels and remove hard-coded option label.
+          p = Path('public_html/album.php')
+          s = p.read_text()
+          old = '$admin_box .= \'<option label="Options" value="">\' . $LANG_MG01[\'options\'] . \'</option>\' . LB;'
+          new = '$admin_box .= \'<option label="\' . MG_escapeHTML($LANG_MG01[\'options\']) . \'" value="">\' . $LANG_MG01[\'options\'] . \'</option>\' . LB;'
+          if old not in s:
+              raise SystemExit('Hard-coded Options label not found')
+          s = s.replace(old, new)
+          marker = "    'lang_search'        => $LANG_MG01['search'],\n"
+          insert = marker + "    'lang_aria_breadcrumb' => $LANG_MG03['aria_breadcrumb'],\n    'lang_aria_album_actions' => $LANG_MG03['aria_album_actions'],\n    'lang_aria_album_pagination' => $LANG_MG03['aria_album_pagination'],\n    'lang_aria_album_pagination_info' => $LANG_MG03['aria_album_pagination_info'],\n"
+          if marker not in s:
+              raise SystemExit('Template variable marker not found')
+          s = s.replace(marker, insert, 1)
+          p.write_text(s)
+
+          # 3) Add canonical English keys used by templates.
+          p = Path('language/english_utf-8.php')
+          s = p.read_text()
+          additions = """
+// MediaGallery 1.8.0 accessibility / template labels
+$LANG_MG03['aria_breadcrumb'] = 'Breadcrumb';
+$LANG_MG03['aria_album_actions'] = 'Album actions';
+$LANG_MG03['aria_album_pagination'] = 'Album pagination';
+$LANG_MG03['aria_album_pagination_info'] = 'Album pagination and information';
+"""
+          if "['aria_breadcrumb']" not in s:
+              pos = s.rfind('?>')
+              if pos == -1:
+                  s += additions
+              else:
+                  s = s[:pos] + additions + s[pos:]
+              p.write_text(s)
+
+          # 4) Replace the first value-based French overlay with key-based overrides.
+          french = r'''<?php
+// +---------------------------------------------------------------------------+
+// | Media Gallery Plugin - Geeklog                                            |
+// +---------------------------------------------------------------------------+
+// | French (France) UTF-8 language file                                       |
+// +---------------------------------------------------------------------------+
+// | MediaGallery 1.8.0                                                        |
+// |                                                                           |
+// | English is loaded only as a fallback for keys not translated yet.         |
+// | All French strings below override canonical LANG_MGxx keys.               |
+// +---------------------------------------------------------------------------+
+
+if (stripos($_SERVER['PHP_SELF'], basename(__FILE__)) !== false) {
+    die('This file can not be used on its own!');
+}
+
+require dirname(__FILE__) . '/english_utf-8.php';
+
+// General
+$LANG_MG00['plugin'] = 'Galerie multimédia';
+$LANG_MG00['access_denied'] = 'Accès refusé';
+$LANG_MG00['access_denied_msg'] = 'Vous ne disposez pas des droits nécessaires pour accéder à cette page.';
+$LANG_MG00['admin'] = 'Administration de la galerie multimédia';
+$LANG_MG00['warning'] = 'Attention ! Le plugin est toujours activé';
+$LANG_MG00['enabled'] = 'Désactivez le plugin avant de le désinstaller.';
+$LANG_MG00['media_col_header'] = 'Média';
+$LANG_MG00['stats_title'] = 'Les dix médias les plus consultés';
+$LANG_MG00['items_in'] = 'Éléments dans';
+$LANG_MG00['results'] = 'Résultats de recherche de la galerie multimédia';
+$LANG_MG00['hitsmsg'] = 'Vues';
+$LANG_MG00['whatsnew_prompt'] = 'derniers %s jours';
+$LANG_MG00['no_date'] = 'Aucune date';
+$LANG_MG00['stats_rate_title'] = 'Les dix médias les mieux notés';
+$LANG_MG00['rating'] = 'Note';
+$LANG_MG00['no_title'] = 'Aucun titre disponible pour ce média';
+$LANG_MG00['album'] = 'Album : ';
+$LANG_MG00['whatsnew_title'] = 'Galerie multimédia';
+$LANG_MG00['deny_msg'] = 'Accès refusé. La page a peut-être été déplacée ou supprimée, ou vous ne disposez pas des droits nécessaires.';
+
+// Administration and album management
+$LANG_MG01['help'] = 'Aide';
+$LANG_MG01['save'] = 'Enregistrer';
+$LANG_MG01['yes'] = 'Oui';
+$LANG_MG01['no'] = 'Non';
+$LANG_MG01['submit'] = 'Envoyer';
+$LANG_MG01['cancel'] = 'Annuler';
+$LANG_MG01['reset'] = 'Réinitialiser';
+$LANG_MG01['delete'] = 'Supprimer';
+$LANG_MG01['all'] = 'Tous';
+$LANG_MG01['homepage_only'] = 'Page d’accueil uniquement';
+$LANG_MG01['top'] = 'Haut';
+$LANG_MG01['bottom'] = 'Bas';
+$LANG_MG01['after_featured_articles'] = 'Après les articles à la une';
+$LANG_MG01['new_album'] = 'Nouvel album';
+$LANG_MG01['upload_media'] = 'Téléverser des médias';
+$LANG_MG01['ftp_media'] = 'Médias FTP';
+$LANG_MG01['usage_reports'] = 'Rapports d’utilisation';
+$LANG_MG01['configuration'] = 'Configuration';
+$LANG_MG01['media_queue'] = 'File d’attente des médias';
+$LANG_MG01['admin_home'] = 'Accueil administration';
+$LANG_MG01['edit_album'] = 'Modifier l’album';
+$LANG_MG01['create_album'] = 'Créer un album';
+$LANG_MG01['delete_album'] = 'Supprimer l’album';
+$LANG_MG01['album_name_desc'] = 'Titre / description de l’album';
+$LANG_MG01['albums'] = 'Albums';
+$LANG_MG01['moderate'] = 'Modérer';
+$LANG_MG01['media_management'] = 'Gestion des médias';
+$LANG_MG01['count'] = 'Nombre';
+$LANG_MG01['order'] = 'Ordre';
+$LANG_MG01['action'] = 'Action';
+$LANG_MG01['move_up'] = 'Monter';
+$LANG_MG01['move_down'] = 'Descendre';
+$LANG_MG01['rotate_left'] = 'Pivoter à gauche';
+$LANG_MG01['rotate_right'] = 'Pivoter à droite';
+$LANG_MG01['edit'] = 'Modifier';
+$LANG_MG01['caption'] = 'Légende';
+$LANG_MG01['images'] = 'Images';
+$LANG_MG01['file'] = 'Fichier';
+$LANG_MG01['directory'] = 'Répertoire';
+$LANG_MG01['description'] = 'Description';
+$LANG_MG01['capture_time'] = 'Date de prise de vue';
+$LANG_MG01['uploaded_by'] = 'Téléversé par';
+$LANG_MG01['delete_files'] = 'Supprimer les fichiers source';
+$LANG_MG01['not_writable'] = 'Répertoire non inscriptible';
+$LANG_MG01['root_level'] = 'Niveau racine (ne rien créer ici)';
+$LANG_MG01['configuration_title'] = 'Configuration de la galerie multimédia';
+$LANG_MG01['configuration_header'] = 'Options de configuration de la galerie multimédia';
+$LANG_MG01['album_maintenance'] = 'Maintenance des albums';
+$LANG_MG01['media_edit'] = 'Modification des médias';
+$LANG_MG01['usage_report_header'] = 'Rapports d’utilisation de la galerie multimédia';
+$LANG_MG01['edit_media'] = 'Modifier le média';
+$LANG_MG01['image_properties'] = 'Propriétés de l’image';
+$LANG_MG01['left_blocks_only'] = 'Blocs de gauche uniquement';
+$LANG_MG01['right_blocks_only'] = 'Blocs de droite uniquement';
+$LANG_MG01['left_right_blocks'] = 'Blocs de gauche et de droite';
+$LANG_MG01['none'] = 'Aucun';
+$LANG_MG01['no_media_objects'] = 'Aucun média trouvé dans cet album';
+$LANG_MG01['all_dates'] = 'Toutes les dates';
+$LANG_MG01['select_user'] = 'Sélectionner un utilisateur';
+$LANG_MG01['display_rows_prompt'] = 'Lignes affichées';
+$LANG_MG01['album_display_columns_prompt'] = 'Colonnes d’affichage des albums';
+$LANG_MG01['display_columns_prompt'] = 'Colonnes affichées';
+$LANG_MG01['loginrequired_prompt'] = 'Connexion requise';
+$LANG_MG01['comments_prompt'] = 'Autoriser les commentaires';
+$LANG_MG01['graphicspackage_prompt'] = 'Bibliothèque graphique';
+$LANG_MG01['graphicspackage_path_prompt'] = 'Chemin de la bibliothèque graphique';
+$LANG_MG01['displayblock_prompt'] = 'Afficher les blocs Geeklog';
+$LANG_MG01['htmlallowed'] = 'Autoriser le HTML dans les titres';
+$LANG_MG01['whatsnew'] = 'Activer l’affichage dans les nouveautés Geeklog';
+$LANG_MG01['dfid'] = 'Format de date';
+$LANG_MG01['general_options'] = 'Options générales';
+$LANG_MG01['display_options'] = 'Options d’affichage';
+$LANG_MG01['graphics_options'] = 'Bibliothèque graphique';
+$LANG_MG01['usage_tracking'] = 'Suivi de l’utilisation';
+$LANG_MG01['title'] = 'Titre';
+$LANG_MG01['item'] = 'Élément';
+$LANG_MG01['select'] = 'Sélection';
+$LANG_MG01['cover'] = 'Couverture';
+$LANG_MG01['time'] = 'Heure';
+$LANG_MG01['user_id'] = 'ID utilisateur';
+$LANG_MG01['application'] = 'Application';
+$LANG_MG01['album_title'] = 'Titre de l’album';
+$LANG_MG01['new_report'] = 'Nouveau rapport';
+$LANG_MG01['media_capture_time'] = 'Date de capture du média';
+$LANG_MG01['media_upload_time'] = 'Date de téléversement du média';
+$LANG_MG01['parent_album'] = 'Album parent';
+$LANG_MG01['featured_album'] = 'Album mis en avant';
+$LANG_MG01['set_featured'] = 'Mettre en avant';
+$LANG_MG01['position'] = 'Position';
+$LANG_MG01['topic'] = 'Sujet';
+$LANG_MG01['mod_mediatitle'] = 'Titre du média';
+$LANG_MG01['album_link'] = 'Lien de l’album';
+$LANG_MG01['status_header'] = 'État de MediaGallery';
+$LANG_MG01['status'] = 'État';
+$LANG_MG01['delete_all_media'] = 'Supprimer tous les médias de l’album';
+$LANG_MG01['move_all_media'] = 'Déplacer tous les médias';
+$LANG_MG01['mod_album'] = 'Activer la modération pour cet album';
+$LANG_MG01['moderation_group'] = 'Groupe de modération';
+$LANG_MG01['options'] = 'Options';
+$LANG_MG01['admin'] = 'Administration';
+$LANG_MG01['add_media'] = 'Ajouter un média';
+$LANG_MG01['static_sort_media'] = 'Trier les médias';
+$LANG_MG01['manage_media'] = 'Gérer les médias';
+$LANG_MG01['sort_albums'] = 'Trier les albums';
+$LANG_MG01['no_caption'] = 'Aucune légende';
+$LANG_MG01['continue'] = 'Continuer';
+$LANG_MG01['recheck'] = 'Revérifier';
+$LANG_MG01['mg_directories'] = 'Répertoires MediaGallery';
+$LANG_MG01['mg_dir_structure'] = 'Structure des répertoires MediaGallery';
+$LANG_MG01['not_found'] = 'Introuvable';
+$LANG_MG01['ascending'] = 'Croissant';
+$LANG_MG01['descending'] = 'Décroissant';
+$LANG_MG01['static_media_sort'] = 'Tri statique des médias';
+$LANG_MG01['sort_options'] = 'Options de tri';
+$LANG_MG01['order_options'] = 'Options d’ordre';
+$LANG_MG01['subalbums'] = 'Sous-albums';
+$LANG_MG01['destination_album'] = 'Album de destination';
+$LANG_MG01['move'] = 'déplacer';
+$LANG_MG01['date'] = 'Date';
+$LANG_MG01['album'] = 'Album';
+$LANG_MG01['mod_delete'] = 'Supprimer';
+$LANG_MG01['mod_approve'] = 'Approuver';
+$LANG_MG01['documentation'] = 'Documentation d’utilisation';
+$LANG_MG01['check_all'] = 'Tout sélectionner';
+$LANG_MG01['uncheck_all'] = 'Tout désélectionner';
+$LANG_MG01['autotag_error'] = 'Erreur dans l’autotag';
+$LANG_MG01['phpinfo'] = 'Informations PHP';
+$LANG_MG01['album_cover'] = 'Couverture de l’album';
+$LANG_MG01['album_attributes'] = 'Attributs de l’album';
+$LANG_MG01['media_attributes'] = 'Attributs du média';
+$LANG_MG01['attached_thumbnail'] = 'Miniature associée';
+$LANG_MG01['thumbnail'] = 'Miniature';
+$LANG_MG01['enable_exif'] = 'Activer EXIF';
+$LANG_MG01['enable_ratings'] = 'Activer les notes';
+$LANG_MG01['disable_exif'] = 'Désactiver l’affichage EXIF';
+$LANG_MG01['display_below_media'] = 'Afficher sous le média';
+$LANG_MG01['display_in_popup'] = 'Afficher dans une fenêtre contextuelle';
+$LANG_MG01['both'] = 'Les deux';
+$LANG_MG01['play_in_popup'] = 'Lire dans une fenêtre contextuelle';
+$LANG_MG01['download_to_local'] = 'Télécharger sur l’ordinateur';
+$LANG_MG01['play_inline'] = 'Lire dans la page';
+$LANG_MG01['select_date'] = 'Sélectionner une date';
+$LANG_MG01['ss_enable'] = 'Activer le diaporama';
+$LANG_MG01['ri_enable'] = 'Inclure dans le bloc d’image aléatoire';
+$LANG_MG01['tn_size'] = 'Taille des miniatures';
+$LANG_MG01['rows'] = 'Lignes affichées';
+$LANG_MG01['columns'] = 'Colonnes affichées';
+$LANG_MG01['small'] = 'Petite (100x100)';
+$LANG_MG01['medium'] = 'Moyenne (150x150)';
+$LANG_MG01['large'] = 'Grande (200x200)';
+$LANG_MG01['system_default'] = 'Valeur par défaut du système';
+$LANG_MG01['search'] = 'Rechercher';
+$LANG_MG01['globalattr'] = 'Modifier globalement les albums';
+$LANG_MG01['global_attr_editor'] = 'Éditeur global des attributs d’albums';
+$LANG_MG01['globalperm'] = 'Modifier globalement les permissions';
+$LANG_MG01['global_perm_editor'] = 'Éditeur global des permissions d’albums';
+$LANG_MG01['wm_management'] = 'Filigranes';
+$LANG_MG01['watermark'] = 'Filigrane';
+$LANG_MG01['no_watermarks'] = 'Aucune image de filigrane disponible';
+$LANG_MG01['watermark_upload'] = 'Téléverser un filigrane';
+$LANG_MG01['download'] = 'Télécharger';
+$LANG_MG01['upload'] = 'Téléverser';
+$LANG_MG01['user_prefs'] = 'Paramètres MediaGallery';
+$LANG_MG01['reset_defaults'] = 'Rétablir les valeurs par défaut';
+$LANG_MG01['allow_download'] = 'Autoriser le téléchargement des médias';
+$LANG_MG01['display_album_desc'] = 'Afficher la description de l’album';
+$LANG_MG01['other'] = 'Autre';
+$LANG_MG01['image'] = 'Image';
+$LANG_MG01['audio'] = 'Audio';
+$LANG_MG01['video'] = 'Vidéo';
+$LANG_MG01['allowed_media_formats'] = 'Types de médias autorisés';
+$LANG_MG01['expand_all'] = 'Tout développer';
+$LANG_MG01['collapse_all'] = 'Tout réduire';
+$LANG_MG01['version_info'] = 'Informations de version';
+$LANG_MG01['browser_upload'] = 'Téléversement depuis le navigateur';
+$LANG_MG01['index_album_skin'] = 'Habillage de l’album racine';
+$LANG_MG01['album_display_rows'] = 'Lignes d’affichage des albums';
+$LANG_MG01['image_skin'] = 'Habillage de l’image';
+$LANG_MG01['album_skin'] = 'Habillage de l’album';
+$LANG_MG01['display_skin'] = 'Habillage de l’image affichée';
+$LANG_MG01['subalbum_select'] = 'Afficher les sous-albums dans la liste de sélection';
+$LANG_MG01['select_subalbum'] = 'Sélectionner un sous-album';
+$LANG_MG01['replace_file'] = 'Remplacer le fichier';
+$LANG_MG01['remote_media'] = 'Média distant';
+$LANG_MG01['remote_media_type'] = 'Type de média distant';
+$LANG_MG01['remote_url'] = 'URL distante';
+$LANG_MG01['remote_thumbnail'] = 'Miniature distante';
+$LANG_MG01['tn_height'] = 'Hauteur personnalisée des miniatures';
+$LANG_MG01['tn_width'] = 'Largeur personnalisée des miniatures';
+$LANG_MG01['custom'] = 'Personnalisé';
+$LANG_MG01['album_theme'] = 'Thème de l’album';
+$LANG_MG01['index_theme'] = 'Thème de l’album racine';
+$LANG_MG01['auto'] = 'Automatique';
+$LANG_MG01['left'] = 'Gauche';
+$LANG_MG01['right'] = 'Droite';
+$LANG_MG01['center'] = 'Centre';
+$LANG_MG01['display_image'] = 'Image affichée';
+$LANG_MG01['original_image'] = 'Image originale';
+$LANG_MG01['alignment'] = 'Alignement';
+$LANG_MG01['border'] = 'Bordure';
+$LANG_MG01['width'] = 'Largeur';
+$LANG_MG01['height'] = 'Hauteur';
+$LANG_MG01['source'] = 'Source du média';
+$LANG_MG01['autoplay'] = 'Lecture automatique';
+$LANG_MG01['ss_delay'] = 'Délai du diaporama';
+$LANG_MG01['search_result_options'] = 'Options des résultats de recherche';
+$LANG_MG01['search_columns'] = 'Colonnes de recherche';
+$LANG_MG01['search_rows'] = 'Lignes de recherche';
+$LANG_MG01['statistics'] = 'Statistiques';
+$LANG_MG01['media_submissions'] = 'Soumissions de médias';
+$LANG_MG01['mime_type'] = 'Type MIME';
+$LANG_MG01['miscellaneous'] = 'Plus';
+$LANG_MG01['host_environment'] = 'Environnement serveur';
+
+// Errors
+$LANG_MG02['generic_error'] = 'MediaGallery a rencontré une erreur lors du traitement de votre demande. Veuillez réessayer.';
+$LANG_MG02['partial_upload'] = '%s - Le fichier n’a été que partiellement téléversé.';
+$LANG_MG02['no_file_uploaded'] = 'Aucun fichier de filigrane n’a été téléversé.';
+$LANG_MG02['missing_tmp'] = 'Dossier temporaire manquant.';
+$LANG_MG02['disk_fail'] = 'Impossible d’écrire le fichier sur le disque.';
+$LANG_MG02['unknown_err'] = 'Erreur inconnue lors du téléversement du fichier';
+$LANG_MG02['admin_access_deny'] = 'Vous ne disposez pas des droits nécessaires pour accéder à l’administration de MediaGallery.';
+$LANG_MG02['no_target_album'] = 'Aucun album de destination n’a été sélectionné.';
+$LANG_MG02['invalid_directory'] = 'Le répertoire n’existe pas';
+$LANG_MG02['go_back'] = 'Retour';
+$LANG_MG02['error'] = 'ERREUR :';
+$LANG_MG02['no_format'] = 'Aucun format sélectionné';
+$LANG_MG02['format_not_allowed'] = 'Format non autorisé';
+
+// Public interface, search, sorting and slideshow
+$LANG_MG03['menulabel'] = 'Galerie multimédia';
+$LANG_MG03['updated_prompt'] = 'Mis à jour ';
+$LANG_MG03['no_media_objects'] = '<p>Cet album ne contient aucun média image</p>';
+$LANG_MG03['next'] = 'Suivant';
+$LANG_MG03['previous'] = 'Précédent';
+$LANG_MG03['home'] = 'Accueil';
+$LANG_MG03['return_to_album'] = 'Retour à l’album';
+$LANG_MG03['normal_size'] = 'Taille normale';
+$LANG_MG03['full_size'] = 'Taille originale';
+$LANG_MG03['play'] = 'Lecture';
+$LANG_MG03['stop'] = 'Arrêter';
+$LANG_MG03['ss_running'] = 'Le diaporama est en cours...';
+$LANG_MG03['ss_stopped'] = 'Le diaporama est arrêté. Cliquez sur Lecture pour reprendre.';
+$LANG_MG03['reverse'] = 'précédent';
+$LANG_MG03['forward'] = 'suivant';
+$LANG_MG03['picture_loading'] = 'Chargement de l’image...';
+$LANG_MG03['please_wait'] = 'Veuillez patienter...';
+$LANG_MG03['transition'] = 'Transition';
+$LANG_MG03['delay'] = 'Délai';
+$LANG_MG03['loop'] = 'Boucle';
+$LANG_MG03['seconds'] = 'secondes';
+$LANG_MG03['jump_to'] = 'Aller à';
+$LANG_MG03['go'] = 'OK';
+$LANG_MG03['slide_show'] = 'Diaporama';
+$LANG_MG03['page'] = 'Page';
+$LANG_MG03['of'] = 'sur';
+$LANG_MG03['image'] = 'Image';
+$LANG_MG03['comments'] = 'Commentaires';
+$LANG_MG03['views'] = 'Vues';
+$LANG_MG03['browse_album'] = 'Parcourir l’album';
+$LANG_MG03['close'] = 'Fermer';
+$LANG_MG03['rating'] = 'Note';
+$LANG_MG03['rate'] = 'Noter';
+$LANG_MG03['sort_by'] = 'Trier par';
+$LANG_MG03['sort_default'] = 'ordre par défaut';
+$LANG_MG03['sort_default_asc'] = 'ordre par défaut, croissant';
+$LANG_MG03['sort_upload'] = 'date de téléversement, décroissant';
+$LANG_MG03['sort_upload_asc'] = 'date de téléversement, croissant';
+$LANG_MG03['sort_capture'] = 'date de capture, décroissant';
+$LANG_MG03['sort_capture_asc'] = 'date de capture, croissant';
+$LANG_MG03['sort_rating'] = 'note, décroissant';
+$LANG_MG03['sort_rating_asc'] = 'note, croissant';
+$LANG_MG03['sort_views'] = 'vues, décroissant';
+$LANG_MG03['sort_views_asc'] = 'vues, croissant';
+$LANG_MG03['no_sort'] = 'Aucun tri automatique';
+$LANG_MG03['all_categories'] = 'Toutes les catégories';
+$LANG_MG03['category'] = 'Catégorie';
+$LANG_MG03['per_page'] = 'par page';
+$LANG_MG03['title_desc_keywords'] = 'Titre, description et mots-clés';
+$LANG_MG03['keywords_only'] = 'Mots-clés uniquement';
+$LANG_MG03['title_desc_only'] = 'Titre et description uniquement';
+$LANG_MG03['exact_phrase'] = 'Expression exacte';
+$LANG_MG03['any'] = 'un de ces mots';
+$LANG_MG03['all'] = 'tous ces mots';
+$LANG_MG03['sort_alpha'] = 'titre, décroissant';
+$LANG_MG03['sort_alpha_asc'] = 'titre, croissant';
+$LANG_MG03['advanced_search'] = 'Recherche avancée MediaGallery';
+$LANG_MG03['search_query'] = 'Recherche';
+$LANG_MG03['options'] = 'Options';
+$LANG_MG03['keywords'] = 'Mots-clés';
+$LANG_MG03['all_fields'] = 'Titre, description, mots-clés';
+$LANG_MG03['return_results'] = 'Afficher les résultats';
+$LANG_MG03['search'] = 'rechercher';
+$LANG_MG03['search_for'] = 'Rechercher';
+$LANG_MG03['search_in'] = 'Rechercher dans';
+$LANG_MG03['results'] = 'Résultats';
+$LANG_MG03['cancel'] = 'Annuler';
+$LANG_MG03['overview'] = 'Présentation';
+$LANG_MG03['terms'] = 'Conditions d’utilisation';
+$LANG_MG03['aria_breadcrumb'] = 'Fil d’Ariane';
+$LANG_MG03['aria_album_actions'] = 'Actions de l’album';
+$LANG_MG03['aria_album_pagination'] = 'Pagination de l’album';
+$LANG_MG03['aria_album_pagination_info'] = 'Pagination et informations de l’album';
+?>
+'''
+          Path('language/french_france_utf-8.php').write_text(french)
+          PY
+
+      - name: PHP 5.6 syntax checks
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '5.6'
+          coverage: none
+      - shell: bash
+        run: |
+          php -l language/english_utf-8.php
+          php -l language/french_france_utf-8.php
+          php -l public_html/album.php
+
+      - name: Verify no known hard-coded album labels remain
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -F 'aria-label="Breadcrumb"' templates/album_page.thtml
+          ! grep -F 'aria-label="Album actions"' templates/album_page.thtml
+          ! grep -F 'aria-label="Album pagination"' templates/album_page.thtml
+          ! grep -F 'label="Options"' public_html/album.php
+          grep -F "\$LANG_MG01['search'] = 'Rechercher';" language/french_france_utf-8.php
+          grep -F "\$LANG_MG01['globalattr'] = 'Modifier globalement les albums';" language/french_france_utf-8.php
+          grep -F "\$LANG_MG01['wm_management'] = 'Filigranes';" language/french_france_utf-8.php
+
+      - name: Build installable archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          ARCHIVE='mediagallery_1.8.0_2.1.1.zip'
+          rm -rf package
+          mkdir -p package/mediagallery dist
+          find dist -maxdepth 1 -type f -name '*.zip' -delete
+          rsync -a ./ package/mediagallery/ \
+            --exclude='.git/' --exclude='.gitignore' --exclude='.github/' \
+            --exclude='dist/' --exclude='package/' --exclude='.idea/' --exclude='tmp/'
+          (
+            cd package
+            zip -qr "../dist/${ARCHIVE}" mediagallery
+          )
+          unzip -t "dist/${ARCHIVE}" >/dev/null
+          unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/language/french_france_utf-8.php'
+
+      - name: Commit source and archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/tmp-french-keyed-i18n.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add templates/album_page.thtml public_html/album.php language/english_utf-8.php language/french_france_utf-8.php
+          git add -f dist/ .github/workflows/tmp-french-keyed-i18n.yml
+          git commit -m 'Use keyed French translations across MediaGallery UI [skip ci]'
+          git push origin HEAD:modernize-1.8.0
