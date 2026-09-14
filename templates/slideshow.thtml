@@ -1,211 +1,220 @@
-<div class="mg_album_header">
-  <div class="mg_album_title"><strong>{album_title}</strong></div>
-  <div class="mg_search">{pagination}</div>
-</div>
+<!-- MediaGallery 1.8 immersive slideshow -->
+{lbslideshow}
 <!-- BEGIN noItems -->
-<div class="mg-text-center">
-  {no_images}
+<div class="mg-slideshow-empty">
+  <p>{no_images}</p>
+  <p><a href="{return_to_album_url}">{return_to_album}</a></p>
 </div>
 <!-- END noItems -->
 <!-- BEGIN slideItems -->
-<script type="text/javascript">
-//<![CDATA[
-var timer;
-var current_location = 1;
-var next_location = 1;
-var pics_loaded = 0;
-var onoff = 0;
-var direction = 1;
-var timeout_value;
-var images = new Array;
-var photo_urls = new Array;
-var photo_captions = new Array;
-var loop = 0;
-
-{photo_info}
-
-var photo_count = {photo_count};
-
-function stopOrStart() {
-    if (onoff) {
-        stop();
-    } else {
-        play();
-    }
-}
-
-function toggleLoop() {
-    loop = document.getElementById('slideshowLoop').checked ? 1 : 0;
-}
-
-function changeElementText(id, newText) {
-    var element = document.getElementById(id);
-    if (element) {
-        element.innerHTML = newText;
-    }
-}
-
-function stop() {
-    changeElementText('stopOrStartText', '{play}');
-    onoff = 0;
-    status = '{ss_stopped}';
-    clearTimeout(timer);
-}
-
-function play() {
-    changeElementText('stopOrStartText', '{stop}');
-    onoff = 1;
-    status = '{ss_running}';
-    go_to_next_photo();
-}
-
-function changeDirection() {
-    if (direction == 1) {
-        direction = -1;
-        changeElementText('changeDirText', '{forward}');
-    } else {
-        direction = 1;
-        changeElementText('changeDirText', '{reverse}');
-    }
-    preload_next_photo();
-}
-
-function preload_complete() {
-}
-
-function reset_timer() {
-    clearTimeout(timer);
-    if (onoff) {
-        var delay = document.getElementById('slideshowDelay');
-        timeout_value = delay.options[delay.selectedIndex].value * 1000;
-        timer = setTimeout(go_to_next_photo, timeout_value);
-    }
-}
-
-function wait_for_current_photo() {
-    if (!show_current_photo()) {
-        status = '{picture_loading}(' + current_location + ' {lang_of} ' + photo_count +
-                ').  {please_wait}';
-        clearTimeout(timer);
-        timer = setTimeout(wait_for_current_photo, 500);
-        return 0;
-    }
-
-    status = '{ss_running}';
-    preload_next_photo();
-    reset_timer();
-}
-
-function go_to_next_photo() {
-    current_location = next_location;
-
-    if (!show_current_photo()) {
-        wait_for_current_photo();
-        return 0;
-    }
-    preload_next_photo();
-    reset_timer();
-}
-
-function preload_next_photo() {
-    next_location = parseInt(current_location, 10) + parseInt(direction, 10);
-    if (next_location > photo_count) {
-        next_location = 1;
-        if (!loop) {
-            stop();
-        }
-    }
-    if (next_location == 0) {
-        next_location = photo_count;
-        if (!loop) {
-            stop();
-        }
-    }
-    preload_photo(next_location);
-}
-
-function show_current_photo() {
-    if (!images[current_location] || !images[current_location].complete) {
-        preload_photo(current_location);
-        return 0;
-    }
-
-    var slide = document.getElementById('slide');
-    if (slide) {
-        slide.src = images[current_location].src;
-    }
-    setCaption(photo_captions[current_location]);
-    return 1;
-}
-
-function preload_photo(index) {
-    if (pics_loaded < photo_count && !images[index]) {
-        images[index] = new Image();
-        images[index].onload = preload_complete;
-        images[index].src = photo_urls[index];
-        pics_loaded++;
-    }
-}
-
-function setCaption(text) {
-    changeElementText('caption', '[' + current_location + ' {lang_of} ' + photo_count + '] ' + text);
-}
-//]]>
-</script>
-
-<form name="TopForm" id="TopForm" action="" class="uk-form">
-  <div class="mg_navbar mg-text-center">
-    <button type="button" onclick="stopOrStart();"><span id="stopOrStartText">{play}</span></button>
-    &nbsp;&nbsp;|&nbsp;&nbsp;{full_toggle}&nbsp;&nbsp;|&nbsp;&nbsp;
-    <label for="slideshowDelay">{delay}:</label>
-    <select id="slideshowDelay" name="time" size="1" onchange="reset_timer()">
-      <option value="1">1 {seconds}</option>
-      <option value="2">2 {seconds}</option>
-      <option value="3" selected="selected">3 {seconds}</option>
-      <option value="4">4 {seconds}</option>
-      <option value="5">5 {seconds}</option>
-      <option value="10">10 {seconds}</option>
-      <option value="15">15 {seconds}</option>
-      <option value="30">30 {seconds}</option>
-      <option value="45">45 {seconds}</option>
-      <option value="60">60 {seconds}</option>
-    </select>
-    &nbsp;|&nbsp;&nbsp;
-    <input type="checkbox" id="slideshowLoop" name="loopCheck" onclick="toggleLoop();"{xhtml}>
-    <label for="slideshowLoop">{loop}</label>
+<div class="mg-slideshow-shell" id="mgSlideshow" role="region" aria-label="{album_title}">
+  <div class="mg-slideshow-stage">
+    <img id="slide" class="mg-slideshow-image" src="" alt="" draggable="false"{xhtml}>
   </div>
 
-  <div class="mg_media_detail">
-    <div class="mgFrame_default">
-      <img id="slide" name="slide" src="" alt="" style="max-width:{max_image_width}px;"{xhtml}>
+  <div class="mg-slideshow-top mg-slideshow-chrome">
+    <div class="mg-slideshow-album">{album_title}</div>
+    <a class="mg-slideshow-close" href="{return_to_album_url}" aria-label="{lang_close}" title="{lang_close}">&times;</a>
+  </div>
+
+  <button class="mg-slideshow-nav mg-slideshow-prev mg-slideshow-chrome" type="button" id="mgSlidePrev" aria-label="{lang_previous}" title="{lang_previous}">&#8249;</button>
+  <button class="mg-slideshow-nav mg-slideshow-next mg-slideshow-chrome" type="button" id="mgSlideNext" aria-label="{lang_next}" title="{lang_next}">&#8250;</button>
+
+  <div class="mg-slideshow-bottom mg-slideshow-chrome">
+    <div class="mg-slideshow-caption" id="caption" aria-live="polite"></div>
+    <div class="mg-slideshow-controls">
+      <button class="mg-slideshow-play" type="button" id="mgSlidePlay" aria-pressed="true">
+        <span id="mgSlidePlayText">{stop}</span>
+      </button>
+      <span class="mg-slideshow-counter" id="mgSlideCounter" aria-live="polite"></span>
     </div>
   </div>
+</div>
 
-  <div class="mg_navbar mg-text-center">
-    <div id="caption" aria-live="polite"></div>
-  </div>
+<script type="text/javascript">
+//<![CDATA[
+var photo_urls = [];
+var photo_captions = [];
+{photo_info}
 
-  <script type="text/javascript">
-  //<![CDATA[
-  var slide = document.getElementById('slide');
-  if (slide && photo_urls[1]) {
-      slide.src = photo_urls[1];
-  }
-  setCaption(photo_captions[1]);
-  preload_photo(1);
-{!if using_jquery}
-  $(window).load(function() {
-{!else}
-  window.addEvent('load', function () {
-{!endif}
-      changeElementText('stopOrStartText', '{stop}');
-      onoff = 1;
-      status = '{ss_running}';
-      go_to_next_photo();
-  });
-  //]]>
-  </script>
-</form>
+(function () {
+    'use strict';
+
+    var root = document.getElementById('mgSlideshow');
+    var image = document.getElementById('slide');
+    var caption = document.getElementById('caption');
+    var counter = document.getElementById('mgSlideCounter');
+    var playButton = document.getElementById('mgSlidePlay');
+    var playText = document.getElementById('mgSlidePlayText');
+    var prevButton = document.getElementById('mgSlidePrev');
+    var nextButton = document.getElementById('mgSlideNext');
+    var photoCount = {photo_count};
+    var current = 1;
+    var playing = true;
+    var timer = null;
+    var idleTimer = null;
+    var touchStartX = null;
+    var delay = 4500;
+    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (!root || !image || photoCount < 1) {
+        return;
+    }
+
+    if (reduceMotion) {
+        playing = false;
+        root.className += ' mg-reduce-motion';
+    }
+
+    function normalize(index) {
+        if (index < 1) {
+            return photoCount;
+        }
+        if (index > photoCount) {
+            return 1;
+        }
+        return index;
+    }
+
+    function updatePlayButton() {
+        playText.textContent = playing ? '{stop}' : '{play}';
+        playButton.setAttribute('aria-pressed', playing ? 'true' : 'false');
+    }
+
+    function preload(index) {
+        var preloadImage;
+        index = normalize(index);
+        if (!photo_urls[index]) {
+            return;
+        }
+        preloadImage = new Image();
+        preloadImage.src = photo_urls[index];
+    }
+
+    function schedule() {
+        window.clearTimeout(timer);
+        if (playing && photoCount > 1) {
+            timer = window.setTimeout(function () {
+                show(current + 1, true);
+            }, delay);
+        }
+    }
+
+    function show(index, fromAuto) {
+        var nextSrc;
+        current = normalize(index);
+        nextSrc = photo_urls[current];
+        if (!nextSrc) {
+            return;
+        }
+
+        root.classList.add('is-changing');
+        image.onload = function () {
+            root.classList.remove('is-changing');
+        };
+        image.src = nextSrc;
+        image.alt = photo_captions[current] || '{album_title}';
+        caption.textContent = photo_captions[current] || '';
+        counter.textContent = current + ' / ' + photoCount;
+        preload(current + 1);
+        preload(current - 1);
+
+        if (!fromAuto) {
+            schedule();
+        } else {
+            schedule();
+        }
+    }
+
+    function previous() {
+        show(current - 1, false);
+    }
+
+    function next() {
+        show(current + 1, false);
+    }
+
+    function togglePlay() {
+        playing = !playing;
+        updatePlayButton();
+        schedule();
+        showChrome();
+    }
+
+    function showChrome() {
+        root.classList.remove('is-idle');
+        window.clearTimeout(idleTimer);
+        idleTimer = window.setTimeout(function () {
+            root.classList.add('is-idle');
+        }, 2600);
+    }
+
+    prevButton.onclick = previous;
+    nextButton.onclick = next;
+    playButton.onclick = togglePlay;
+
+    if (photoCount <= 1) {
+        prevButton.style.display = 'none';
+        nextButton.style.display = 'none';
+        playButton.style.display = 'none';
+    }
+
+    document.addEventListener('keydown', function (event) {
+        var key = event.key || event.keyCode;
+        if (key === 'ArrowLeft' || key === 37) {
+            event.preventDefault();
+            previous();
+        } else if (key === 'ArrowRight' || key === 39) {
+            event.preventDefault();
+            next();
+        } else if (key === ' ' || key === 'Spacebar' || key === 32) {
+            event.preventDefault();
+            togglePlay();
+        } else if (key === 'Escape' || key === 27) {
+            window.location.href = '{return_to_album_url_js}';
+        }
+        showChrome();
+    });
+
+    root.addEventListener('mousemove', showChrome);
+    root.addEventListener('touchstart', function (event) {
+        showChrome();
+        if (event.touches && event.touches.length === 1) {
+            touchStartX = event.touches[0].clientX;
+        }
+    }, {passive: true});
+
+    root.addEventListener('touchend', function (event) {
+        var delta;
+        if (touchStartX === null || !event.changedTouches || !event.changedTouches.length) {
+            return;
+        }
+        delta = event.changedTouches[0].clientX - touchStartX;
+        touchStartX = null;
+        if (Math.abs(delta) < 45) {
+            return;
+        }
+        if (delta > 0) {
+            previous();
+        } else {
+            next();
+        }
+    }, {passive: true});
+
+    document.addEventListener('visibilitychange', function () {
+        if (document.hidden) {
+            window.clearTimeout(timer);
+        } else {
+            schedule();
+        }
+    });
+
+    updatePlayButton();
+    show(1, false);
+    showChrome();
+}());
+//]]>
+</script>
 <!-- END slideItems -->
 <!-- BEGIN photo_url -->
 {URL}

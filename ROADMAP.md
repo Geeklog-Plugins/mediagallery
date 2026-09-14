@@ -132,6 +132,7 @@ The Geeklog 2.1.1 / PHP 5.6 validation confirmed that image uploads succeed once
 - [ ] Complete a live moderator-email test through the configured Geeklog mail backend before RC.
 
 ## 8. Templates, accessibility and SEO
+- [x] Replace the legacy slideshow chrome with an immersive native lightbox-style viewer (keyboard, swipe, autoplay, reduced-motion support) while keeping album/media pages as the SEO/AI surfaces.
 
 - [x] Semantic `<h1>` album titles.
 - [x] Navigation landmarks and accessible album search control.
