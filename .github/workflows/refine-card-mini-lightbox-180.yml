@@ -1,0 +1,43 @@
+name: Refine MediaGallery card mini lightbox
+
+on:
+  push:
+    branches:
+      - modernize-1.8.0
+    paths:
+      - '.github/refine-card-mini-lightbox-trigger'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: modernize-1.8.0
+      - name: Apply mini lightbox refinement
+        run: python3 tools/refine_card_mini_lightbox_180.py
+      - name: Validate PHP syntax
+        run: |
+          php -l include/classMedia.php
+          php -l include/common.php
+      - name: Validate markup and CSS
+        run: |
+          grep -q 'mg-card-preview-stack' include/classMedia.php
+          grep -q 'mg-card-preview-full' templates/album_page_album_cell.thtml
+          grep -q 'mini-lightbox hover' public_html/style.css
+          grep -q 'object-fit: contain' public_html/style.css
+      - name: Remove temporary tooling
+        run: |
+          rm -f tools/refine_card_mini_lightbox_180.py
+          rm -f .github/workflows/refine-card-mini-lightbox-180.yml
+          rm -f .github/refine-card-mini-lightbox-trigger
+      - name: Commit changes
+        run: |
+          git config user.name hostellerie
+          git config user.email hostellerie.org@gmail.com
+          git add -A
+          git commit -m 'Add mini lightbox preview to MediaGallery cards'
+          git push origin HEAD:modernize-1.8.0
