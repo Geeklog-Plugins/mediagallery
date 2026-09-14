@@ -369,6 +369,7 @@ function MG_batchDeleteMedia($album_id, $media_id_array, $actionURL = '')
     require_once $_CONF['path'] . 'plugins/mediagallery/include/rssfeed.php';
     MG_buildFullRSS();
     MG_buildAlbumRSS($album_id);
+    MG_notifyAlbumSaved180($album_id);
     COM_redirect($actionURL);
 }
 
@@ -445,6 +446,7 @@ function MG_batchMoveMedia($album_id, $destination, $media_id_array, $actionURL 
              . "SET album_id=" . intval($destination) . ", media_order=" . intval($media_seq)
              . " WHERE album_id=" . intval($album_id) . " AND media_id='" . DB_escapeString($media_id) . "'";
         DB_query($sql);
+        PLG_itemSaved($media_id, 'mediagallery');
         $media_seq += 10;
 
         // update the media count in both albums...
@@ -469,6 +471,8 @@ function MG_batchMoveMedia($album_id, $destination, $media_id_array, $actionURL 
     MG_buildFullRSS();
     MG_buildAlbumRSS($album_id);
     MG_buildAlbumRSS($destination);
+    MG_notifyAlbumSaved180($album_id);
+    MG_notifyAlbumSaved180($destination);
 
     COM_redirect($actionURL);
 }
@@ -609,6 +613,14 @@ function MG_deleteAlbum($album_id, $target_id, $actionURL='')
     MG_buildFullRSS();
     if ($target_id != 0) MG_buildAlbumRSS($target_id);
 
+    MG_notifyAlbumDeleted180($album_id);
+    if ($target_id > 0) {
+        MG_notifyAlbumSaved180($target_id);
+    }
+    if ($album->parent > 0 && $album->parent != $target_id) {
+        MG_notifyAlbumSaved180($album->parent);
+    }
+
     COM_redirect($actionURL);
 }
 
@@ -643,6 +655,7 @@ function MG_deleteChildAlbums($album_id) {
 
     DB_delete($_TABLES['mg_media_albums'], 'album_id', intval($album_id));
     DB_delete($_TABLES['mg_albums'], 'album_id', intval($album_id));
+    MG_notifyAlbumDeleted180($album_id);
 
     $feedname = sprintf($_MG_CONF['rss_feed_name'] . "%06d", $album_id);
     $feedpath = MG_getFeedPath();

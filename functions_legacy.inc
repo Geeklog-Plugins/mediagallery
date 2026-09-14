@@ -1606,6 +1606,12 @@ function plugin_getiteminfo_mediagallery($id, $what, $uid = 0, $options = array(
 {
     global $_CONF, $_TABLES, $_MG_CONF, $LANG_MG00, $LANG_MG03;
 
+    $item180 = MG_parseItemId180($id);
+    if ($item180['type'] === 'album') {
+        return MG_getAlbumItemInfo180($item180['id'], $what, $uid);
+    }
+    $id = $item180['id'];
+
     $properties = explode(',', $what);
     $fields = array();
     foreach ($properties as $p) {
@@ -1737,9 +1743,7 @@ function plugin_getiteminfo_mediagallery($id, $what, $uid = 0, $options = array(
  */
 function plugin_idToURL_mediagallery($sub_type, $item_id)
 {
-    global $_MG_CONF;
-
-    return $_MG_CONF['site_url'].'/media.php?f=0&amp;sort=0&amp;s='.$item_id;
+    return MG_itemToURL180($item_id);
 }
 
 /**

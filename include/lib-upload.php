@@ -1430,6 +1430,7 @@ function MG_getFile($filename, $file, $album_id, $opt = array())
             if ($queue == 0) {
                 $album->media_count++;
                 DB_change($_TABLES['mg_albums'], 'media_count', $album->media_count, 'album_id', $album->id);
+                MG_notifyAlbumSaved180($album->id);
 
                 MG_updateAlbumLastUpdate($album->id);
 

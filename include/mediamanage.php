@@ -428,6 +428,7 @@ function MG_saveMedia($album_id, $actionURL = '')
     }
     require_once $_CONF['path'] . 'plugins/mediagallery/include/rssfeed.php';
     MG_buildAlbumRSS($album_id);
+    MG_notifyAlbumSaved180($album_id);
     COM_redirect($actionURL);
 }
 
@@ -1015,6 +1016,7 @@ function MG_saveMediaEdit($album_id, $media_id, $actionURL)
         echo COM_errorLog("Media Gallery: ERROR Updating image in media database");
     }
     PLG_itemSaved($media_id, 'mediagallery');
+    MG_notifyMediaAlbumsSaved180($media_id);
 
     // HTML5 playback no longer uses the old ActiveX/Flash/QuickTime option set.
     // Preserve only per-media video dimensions; historical rows stay untouched for upgrades.

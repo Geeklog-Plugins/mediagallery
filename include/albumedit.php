@@ -897,6 +897,11 @@ function MG_quickCreate($parent, $title, $desc='')
     $album->saveAlbum();
     $aid = $album->id;
 
+    MG_notifyAlbumSaved180($aid);
+    if ($album->parent > 0) {
+        MG_notifyAlbumSaved180($album->parent);
+    }
+
     require_once $_CONF['path'] . 'plugins/mediagallery/include/rssfeed.php';
     MG_buildFullRSS();
     MG_buildAlbumRSS($aid);
@@ -935,6 +940,7 @@ function MG_saveAlbum($album_id)
         $update          = 0;
     }
 
+    $old_parent = ($update == 1) ? intval($album->parent) : 0;
     $album->parent = COM_applyFilter($_POST['parentaid'], true);
     $parent_album = new mgAlbum($album->parent);
 
@@ -1290,6 +1296,14 @@ function MG_saveAlbum($album_id)
     require_once $_CONF['path'] . 'plugins/mediagallery/include/rssfeed.php';
     MG_buildFullRSS();
     MG_buildAlbumRSS($album->id);
+
+    MG_notifyAlbumSaved180($album->id);
+    if ($album->parent > 0) {
+        MG_notifyAlbumSaved180($album->parent);
+    }
+    if ($old_parent > 0 && $old_parent != $album->parent) {
+        MG_notifyAlbumSaved180($old_parent);
+    }
 
     $actionURL = $_MG_CONF['site_url'] . '/album.php?aid=' . $album->id;
     COM_redirect($actionURL);

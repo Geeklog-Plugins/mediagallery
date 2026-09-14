@@ -118,3 +118,13 @@ Record PHP warnings/notices together with the Geeklog version, PHP version, acti
 ## Structured data
 
 - Validate JSON-LD on a local image, local audio, video with attached thumbnail, video without attached thumbnail, and remote/embed media. Only the first three eligible cases should emit media structured data.
+
+## Interoperability / lifecycle events
+
+- [ ] Creating or editing a public album emits `PLG_itemSaved('album:<id>', 'mediagallery')`.
+- [ ] Making an album private causes consumers using `PLG_getItemInfo(..., uid=1)` to receive no public URL.
+- [ ] Deleting an album emits `PLG_itemDeleted('album:<id>', 'mediagallery')`, including recursive child deletion.
+- [ ] Adding, editing or deleting media keeps the existing media lifecycle event and also announces the affected album page.
+- [ ] Moving media announces the media item plus both source and destination albums.
+- [ ] `plugin_getiteminfo_mediagallery('album:<id>', 'url', 1)` returns the public album URL only when anonymously readable.
+- [ ] The same lifecycle behavior works on Geeklog 2.1.1 and 2.2.2 without requiring the newer `sub_type` argument.
