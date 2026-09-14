@@ -1,0 +1,21 @@
+/* MediaGallery 1.8 card preview hover corrections.
+ * Keep the complete portrait layer unscaled so object-fit: contain can show
+ * the full original image inside the square preview without edge clipping.
+ */
+.mg-album-default-grid .mg-card.mg-card-square .mg-card-preview-full {
+  transform: none;
+  transition: opacity .25s ease;
+}
+
+.mg-album-default-grid .mg-card.mg-card-square:hover .mg-card-preview-full,
+.mg-album-default-grid .mg-card.mg-card-square:focus-within .mg-card-preview-full {
+  opacity: 1;
+  transform: none;
+}
+
+/* Preserve the intended background-cover zoom without allowing the generic
+ * card image hover rule to override the mini-lightbox transform. */
+.mg-album-default-grid .mg-card.mg-card-square:hover .mg-card-preview-cover,
+.mg-album-default-grid .mg-card.mg-card-square:focus-within .mg-card-preview-cover {
+  transform: scale(1.045);
+}
