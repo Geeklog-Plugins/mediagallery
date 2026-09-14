@@ -14,16 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - name: Audit missing audio player reference
-        shell: bash
-        run: |
-          echo '=== audio-player.js ==='
-          grep -RIn --exclude-dir=.git --exclude='*.zip' 'audio-player\.js' . || true
-          echo '=== audio-player ==='
-          grep -RIn --exclude-dir=.git --exclude='*.zip' 'audio-player' . || true
-          echo '=== players/ ==='
-          grep -RIn --exclude-dir=.git --exclude='*.zip' 'players/' . || true
-      - name: Fix broken card preview HTML
+      - name: Fix broken card preview HTML and stale audio include
         run: python3 tools/fix-card-preview-regression-180.py
       - name: Validate PHP and generated markup source
         shell: bash
@@ -36,6 +27,10 @@ jobs:
             exit 1
           fi
           grep -F 'href="{u_viewalbum}"' templates/album_page_album_cell.thtml
+          if grep -RIn --include='*.thtml' 'players/audio-player\.js' templates; then
+            echo 'Obsolete audio-player.js include remains in templates' >&2
+            exit 1
+          fi
       - name: Remove temporary tooling
         run: |
           rm -f tools/fix-card-preview-regression-180.py
