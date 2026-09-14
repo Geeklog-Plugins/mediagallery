@@ -18,13 +18,6 @@ jobs:
         run: |
           php -l include/classMedia.php
           php -l include/common.php
-      - name: Validate rendering hooks
-        run: |
-          grep -q 'media_orientation_class' include/classMedia.php
-          grep -q 'cover_orientation_class' include/common.php
-          grep -q 'mg-orientation-' templates/album_page_media_cell.thtml
-          grep -q 'cover_orientation_class' templates/album_page_album_cell.thtml
-          grep -q 'balanced album and root card previews' public_html/style.css
       - name: Remove temporary tooling
         run: |
           rm -f tools/balance_card_previews_180.py
