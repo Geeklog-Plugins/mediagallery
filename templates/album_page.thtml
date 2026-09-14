@@ -1,5 +1,15 @@
 {lbslideshow}
 
+<style>
+/* MediaGallery 1.8: keep the complete preview image unscaled on album-card hover.
+ * The generic card hover zoom otherwise wins the cascade and clips portrait edges. */
+.mg-album-default-grid .mg-card.mg-card-square:hover .mg-card-preview-full,
+.mg-album-default-grid .mg-card.mg-card-square:focus-within .mg-card-preview-full {
+  object-fit: contain !important;
+  transform: none !important;
+}
+</style>
+
 <nav class="bc_navigation" aria-label="Breadcrumb">
 {birdseed}
 </nav>
