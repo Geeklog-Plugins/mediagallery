@@ -1,0 +1,77 @@
+name: Final MediaGallery layout tune
+
+on:
+  push:
+    branches: [ modernize-1.8.0 ]
+    paths:
+      - '.github/final-layout-tune-trigger'
+
+permissions:
+  contents: write
+
+jobs:
+  tune:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: modernize-1.8.0
+          fetch-depth: 0
+      - name: Apply CSS tune
+        shell: bash
+        run: |
+          cat >> public_html/style.css <<'EOF'
+
+/* MediaGallery 1.8 final media toolbar + immersive scaling */
+@media (min-width: 42.01rem) {
+  .mg-media-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+  .mg-media-pagination {
+    flex: 0 0 auto;
+  }
+  .mg-media-actions {
+    flex: 1 1 auto;
+    margin-left: auto;
+    justify-content: flex-end;
+    text-align: right;
+  }
+}
+
+.mg-slideshow-stage {
+  overflow: hidden;
+}
+.mg-slideshow-image {
+  width: calc(100vw - 2rem);
+  height: calc(100vh - 2rem);
+  max-width: none;
+  max-height: none;
+  object-fit: contain;
+  object-position: center center;
+}
+
+@media (max-width: 42rem) {
+  .mg-slideshow-image {
+    width: calc(100vw - 1rem);
+    height: calc(100vh - 1rem);
+  }
+}
+EOF
+      - name: Validate CSS markers
+        run: |
+          grep -q 'MediaGallery 1.8 final media toolbar + immersive scaling' public_html/style.css
+          grep -q 'object-fit: contain' public_html/style.css
+          grep -q 'justify-content: flex-end' public_html/style.css
+      - name: Remove temporary tooling
+        run: |
+          rm -f .github/workflows/final-layout-tune-180.yml .github/final-layout-tune-trigger
+      - name: Commit layout tune
+        run: |
+          git config user.name hostellerie
+          git config user.email hostellerie.org@gmail.com
+          git add -A
+          git commit -m "Refine MediaGallery media actions and slideshow scaling"
+          git push origin HEAD:modernize-1.8.0
