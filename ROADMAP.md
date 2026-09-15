@@ -1,182 +1,183 @@
 # MediaGallery 1.8.0 Roadmap
 
-MediaGallery 1.8.0 is a modernization and hardening release focused on safe upgrades, persistent media storage, Geeklog 2.1.1+ compatibility, multisite isolation, upload security, removal of obsolete playback technologies, template/SEO/accessibility improvements, and interoperability with other Geeklog plugins.
+MediaGallery 1.8.0 is a modernization, hardening and interoperability release. It keeps the existing MediaGallery data model and upgrade path while making the plugin safer on current Geeklog/PHP installations, moving user media out of the replaceable plugin directory, modernizing the public UI and exposing cleaner integration points to the Geeklog ecosystem.
 
-The working branch is `modernize-1.8.0`. The supported Geeklog baseline is 2.1.1; Geeklog 2.0.x is not a target for 1.8.0.
+**Development branch:** `modernize-1.8.0`  
+**Geeklog baseline:** 2.1.1 or newer  
+**Compatibility policy:** keep PHP 5.6-compatible syntax for legacy Geeklog 2.1.1 deployments while validating PHP 7.4, 8.1 and 8.3.
 
-This roadmap reflects the current implementation state. Completed items are checked; remaining work is concentrated around release-candidate validation and final cleanup.
+The implementation is now largely complete. Remaining work is mainly live regression testing, upgrade validation, documentation cleanup and final release-candidate packaging.
 
-## 1. Compatibility and release baseline
+## Current status
+
+### Completed foundations
+
+- [x] Geeklog 2.1.1+ baseline without Geeklog core modifications.
+- [x] PHP 5.6-compatible source syntax with PHP 7.4/8.1/8.3 lint coverage.
+- [x] Persistent media storage outside `public_html/mediagallery/`.
+- [x] Shared-code multisite isolation through each site's Geeklog paths/URLs.
+- [x] Safe 1.7.x media pre-migration tool.
+- [x] Configuration API cleanup and removal of obsolete fresh-install Flash/FlowPlayer settings.
+- [x] Upload/import/remote-media hardening.
+- [x] Modern HTML5 playback fallbacks.
+- [x] Geeklog-native moderator mail transport.
+- [x] Responsive public/admin templates, accessibility and SEO improvements.
+- [x] Structured data for media where MediaGallery owns reliable metadata.
+- [x] Public `album_list` service through `PLG_invokeService()`.
+- [x] Media and album lifecycle notifications through Geeklog plugin APIs.
+- [x] Installable 1.8.0 test ZIP generation and validation.
+
+### Remaining before RC
+
+- [ ] Complete the final live regression matrix on Geeklog 2.1.1 and 2.2.2.
+- [ ] Complete live PHP 8.2/8.3 warning/deprecation validation.
+- [ ] Validate disposable upgrades from MediaGallery 1.7.0 and 1.7.3.
+- [ ] Complete live moderation, mail, MIME mismatch, stale-temp and service permission tests.
+- [ ] Finish documentation cleanup and remove/archive misleading legacy public documentation.
+- [ ] Decide whether `functions_legacy.inc` should remain as the transitional implementation layer for 1.8.0 RC.
+- [ ] Build and validate the final RC archive.
+
+## 1. Compatibility and bootstrap
 
 - [x] Require Geeklog 2.1.1 or newer.
-- [x] Validate current runtime behavior on Geeklog 2.1.1 and 2.2.2.
-- [x] Keep syntax compatible with PHP 5.6, 7.4, 8.1 and 8.3 while this compatibility policy remains in force.
-- [x] Keep PHP lint CI green on the supported syntax range.
-- [x] Avoid Geeklog core modifications.
-- [x] Do not reintroduce the historical MediaGallery `config.php`.
+- [x] Preserve compatibility with Geeklog 2.2.2.
+- [x] Avoid Geeklog core changes.
 - [x] Preserve existing database content and administrator configuration during upgrade.
-- [x] Complete the static PHP 8.2/8.3 audit of MediaGallery-owned hot paths, including removed APIs, legacy globals, undefined variables and dynamic-property candidates.
-- [ ] Complete the live PHP 8.2/8.3 runtime warning/deprecation audit before RC.
-- [ ] Run the final regression matrix on Geeklog 2.1.1 and 2.2.2.
+- [x] Complete the static PHP 8.x audit of MediaGallery-owned hot paths.
+- [x] Keep plugin bootstrap syntax compatible with PHP 5.6.
+- [x] Correct legacy PHP block dependency loading: `phpblock_mg_maenroll()` now loads the MediaGallery helpers it needs instead of relying on page-specific bootstrap order.
+- [x] Keep `phpblock_mg_randommedia()` and member-album block behavior compatible with Geeklog 2.1.1.
+- [ ] Complete the live PHP 8.2/8.3 runtime warning/deprecation audit.
+- [ ] Run the final Geeklog 2.1.1 / 2.2.2 regression matrix.
 
 ## 2. Persistent media storage and multisite
 
 Media files are persistent user data and no longer live inside the replaceable plugin public directory.
 
-MediaGallery 1.8.0 uses:
-
 ```php
 $_MG_CONF['path_mediaobjects'] = rtrim($_CONF['path_images'], '/\\') . '/mediagallery/';
 ```
 
-The historical `public_html/mediagallery/mediaobjects/` location is a legacy migration source only.
+The historical `public_html/mediagallery/mediaobjects/` location is a migration source only.
 
 - [x] Centralize storage path/URL resolution.
-- [x] Store all 1.8 public media under `path_images/mediagallery/`.
-- [x] Keep shared-code multisite media isolated through each site's `path_images` / `images_url` pair.
-- [x] Keep temporary/upload staging isolated under each site's `path_data/mediagallery/`.
+- [x] Store 1.8 public media below `path_images/mediagallery/`.
+- [x] Isolate shared-code multisite media through `path_images` / `images_url`.
+- [x] Isolate private temporary/upload data below each site's `path_data/mediagallery/`.
 - [x] Avoid `HTTP_HOST`-derived site identity.
-- [x] Create required public/private storage directories with explicit error handling.
-- [x] Implement copy-and-verify legacy-media migration in `include/storage_180.php`.
-- [x] Never delete the legacy source automatically during migration.
-- [x] Refuse conflicting destination files instead of silently overwriting them.
-- [x] Provide `tools/migrate-media-storage.php` for safe 1.7.x pre-migration.
-- [x] Protect subsequent ZIP upgrades because persistent media now live outside `public_html/mediagallery/`.
-- [x] Propagate migration failures so a failed upgrade cannot be marked as installed successfully.
-- [x] Confirm that adding media and then re-uploading the plugin ZIP preserves existing media on tested 2.1.1/2.2.2 installations.
-- [ ] Validate the pre-migration path on disposable 1.7.0 and 1.7.3 copies.
+- [x] Create required directories with explicit error handling.
+- [x] Implement copy-and-verify legacy media migration.
+- [x] Never remove the legacy source automatically.
+- [x] Refuse conflicting destination files instead of overwriting them.
+- [x] Provide `tools/migrate-media-storage.php` for 1.7.x pre-migration.
+- [x] Propagate migration failures to the installer/upgrader.
+- [x] Confirm subsequent plugin ZIP replacement preserves media already stored below Geeklog images.
+- [ ] Validate the pre-migration path on disposable 1.7.0 and 1.7.3 installations.
 
 ### Legacy ZIP upgrade rule
 
-Geeklog's plugin uploader replaces the old public plugin directory before loading the new plugin's upgrade code. A 1.7.x installation still storing media in `public_html/mediagallery/mediaobjects/` must therefore run the provided pre-migration tool before uploading the 1.8 ZIP.
+Geeklog replaces the old public plugin directory before loading the new plugin's upgrade code. A 1.7.x installation still storing media below `public_html/mediagallery/mediaobjects/` must therefore run the provided pre-migration tool before uploading the 1.8 ZIP.
 
-## 3. Configuration API cleanup
+## 3. Configuration cleanup
 
-- [x] Add `include/config_180.php` for runtime configuration and 1.8 migration.
-- [x] Add missing Configuration API entries without resetting existing values.
-- [x] Correctly distinguish missing settings from valid `0` / `false` settings.
-- [x] Keep calculated/internal values out of administrator-editable configuration.
-- [x] Remove fresh-install FlowPlayer configuration.
-- [x] Remove fresh-install Flash Media configuration controls.
-- [x] Keep obsolete legacy rows harmless on upgraded sites where deletion has not yet been proven safe.
-- [ ] Verify whether obsolete 1.7.x Flash/FlowPlayer `conf_values` rows can be safely removed on both Geeklog 2.1.1 and 2.2.2.
-- [x] Review remaining legacy playback-related controls and remove settings with no useful HTML5 equivalent.
+- [x] Add `include/config_180.php` for runtime configuration and migration.
+- [x] Add missing Configuration API entries without resetting valid existing values.
+- [x] Keep runtime-derived paths and URLs outside administrator-editable configuration.
+- [x] Remove fresh-install FlowPlayer and Flash controls.
+- [x] Remove playback controls with no useful HTML5 equivalent from maintained interfaces.
+- [x] Preserve harmless legacy configuration rows on upgraded sites where automatic deletion is not yet proven safe.
+- [ ] Decide whether obsolete 1.7.x Flash/FlowPlayer rows can be removed safely on both supported Geeklog lines.
 
-## 4. Upload, import and remote-media security
+## 4. Upload, import, batch and remote-media security
 
-- [x] Geeklog CSRF protection on browser upload, Remote Media and FTP import forms.
-- [x] Correct browser slot association for captions, descriptions, keywords, category, attached thumbnail and DNC.
-- [x] Correct DNC handling and preservation of originals when requested.
-- [x] Real format conversion when DNC is disabled instead of only changing MIME/extension metadata.
-- [x] Unsafe executable/server-side filename rejection.
-- [x] Defense-in-depth filename validation inside `MG_getFile()`.
-- [x] FTP source confinement with `realpath()`.
-- [x] Revalidation of hidden FTP paths and recursive batch sources.
-- [x] Batch continuation/cancellation ownership validation.
-- [x] CLI import filename protection.
-- [x] Harden ZIP extraction against path traversal, unsafe temporary paths, symlinks, excessive entry counts and declared uncompressed payloads above 1 GiB before extraction.
-- [x] Harden recursive CLI imports by refusing symbolic links and preserving the intended subdirectory-to-subalbum mapping.
-- [x] Remote Media restricted to public HTTP(S), with private/reserved/localhost rejection, redirect blocking and bounded downloads.
-- [x] Root Album (`album_id=0`) upload prevention.
-- [x] Prefer content-derived MIME (`getID3`, then `fileinfo`) and validate MIME/extension coherence for explicitly handled formats while leaving unknown extensions generic.
-- [ ] Live-test MIME mismatch rejection and generic-file compatibility on Geeklog 2.1.1 and 2.2.2.
-- [x] Clean deterministic upload-failure and special-image `wip` temporary files.
-- [x] Add conservative stale-temp cleanup for genuinely interrupted/killed requests: private MediaGallery tmp only, 48-hour age threshold, no symlink traversal, and at most one scan per hour.
-- [ ] Live-test stale-temp cleanup with old and recent files/directories on Geeklog 2.1.1 and 2.2.2.
-- [x] Add CSRF protection to global album permission/attribute mutations and watermark manage/upload/delete mutations while preserving their existing access rules.
-- [x] Harden album/static sort mutations with Geeklog CSRF tokens and revalidate static-sort album write access server-side.
-- [x] Harden resize/rebuild confirmations, media manager save/delete/move/batch actions and direct rotation with Geeklog CSRF tokens; direct rotation now uses POST and revalidates album write access plus album/media membership.
-- [x] Revalidate media edit/reset mutations server-side and correct reset handlers to read their posted album id.
-- [x] Bind posted media IDs to the authorized album before manager edits, batch delete/move/rotate/watermark, cover selection and normal media editing.
-- [x] Remove the orphaned legacy batch-caption mutation; make batch continuation/cancellation POST+CSRF only and bind session deletion to the owning user (administrator override).
-- [x] Audit and repair Geeklog-native moderation: preserve core POST/CSRF handling, revalidate `mediagallery.admin` and queued album/media membership, correctly promote queue rows into active media tables on approval, fully remove rejected queue rows/files, and allow moderation edit/save without granting configuration access.
-- [ ] Live-test the full moderation queue/edit/approve/reject flow on Geeklog 2.1.1 and 2.2.2.
-- [x] Remove the orphaned legacy asynchronous upload endpoint and its dedicated `MG_saveUpload()` handler after confirming the active browser upload uses `admin.php` / `MG_saveUserUpload()`.
+- [x] Geeklog CSRF protection on browser upload, Remote Media and FTP import entry forms.
+- [x] Correct browser slot association for captions, descriptions, keywords, categories, thumbnails and DNC.
+- [x] Preserve originals correctly when DNC requests it.
+- [x] Perform real format conversion instead of MIME/extension-only changes.
+- [x] Reject unsafe executable/server-side filenames.
+- [x] Defense-in-depth validation inside `MG_getFile()`.
+- [x] Constrain FTP sources with `realpath()` and reject escaping symlinks.
+- [x] Harden recursive CLI imports and preserve nested directory-to-album mapping.
+- [x] Harden ZIP extraction against traversal, unsafe temp paths, symlinks, excessive entry counts and oversized declared payloads.
+- [x] Restrict Remote Media to bounded public HTTP(S) resources and reject localhost/private/reserved targets and redirects.
+- [x] Prevent uploads into the synthetic Root Album (`album_id=0`).
+- [x] Prefer content-derived MIME detection and validate explicitly handled MIME/extension pairs.
+- [x] Clean deterministic upload failure and image-conversion temporary files.
+- [x] Add conservative stale-temp cleanup for interrupted requests.
+- [x] Protect album/global/watermark/sort/resize/rebuild/media-manager mutations with appropriate access and CSRF checks.
+- [x] Bind posted media IDs to the authorized album before manager, batch and normal edit mutations.
+- [x] Remove the orphaned legacy batch-caption mutation.
+- [x] Repair Geeklog-native moderation approval/rejection and queued media promotion/removal.
+- [x] Remove the orphaned asynchronous upload endpoint and unused `MG_saveUpload()` path.
 
-## 5. Image-processing backend requirements
+### Geeklog 2.1.1 batch compatibility
 
-Image upload requires a working image-processing backend for thumbnail/display generation. PDF/ZIP uploads can work even when no image backend is available.
+- [x] Keep batch start operations protected by normal Geeklog CSRF validation.
+- [x] Make batch continuation/cancellation POST-only.
+- [x] Validate the server-generated batch `session_id` and session ownership on every continuation.
+- [x] Allow administrator override only where already permitted by MediaGallery.
+- [x] Do not require Geeklog 2.1.1's referer-bound one-time token for internal batch continuation, avoiding false “security token expired” failures.
 
-The Geeklog 2.1.1 / PHP 5.6 validation confirmed that image uploads succeed once GD is installed.
+### Remaining live security tests
 
-- [x] Confirm image upload on Geeklog 2.1.1 / PHP 5.6 with GD available.
-- [x] Confirm persistent image output under `images/mediagallery/`.
-- [x] Add centralized runtime capability detection for GD, ImageMagick and NetPBM.
+- [ ] MIME mismatch rejection and generic-file compatibility.
+- [ ] Stale-temp cleanup with recent vs stale trees.
+- [ ] Full moderation upload/edit/approve/reject flow.
+- [ ] Batch continuation/cancellation as owner, another user and administrator.
+
+## 5. Image processing
+
+- [x] Confirm image upload on Geeklog 2.1.1 / PHP 5.6 with GD installed.
+- [x] Store generated image derivatives under persistent `images/mediagallery/` storage.
+- [x] Centralize GD, ImageMagick and NetPBM capability detection.
 - [x] Guard resize, conversion, rotation and watermark operations before backend-specific calls.
-- [x] Return a clear MediaGallery error when the configured backend is unavailable instead of reaching undefined image functions.
-- [x] Document image-backend requirements in the development README.
-- [ ] Validate the new missing-backend error live once with GD intentionally disabled on the Geeklog 2.1.1/PHP 5.6 test instance.
+- [x] Return a clear error when the configured image backend is unavailable.
+- [ ] Validate the missing-backend error live once with GD intentionally disabled on the 2.1.1/PHP 5.6 test instance.
 
 ## 6. Playback modernization
 
 - [x] Remove executable Flash playback from default rendering.
-- [x] Replace QuickTime/Windows Media ActiveX paths with HTML5 video/audio or download fallback.
+- [x] Replace QuickTime/Windows Media ActiveX paths with HTML5 playback or download fallback.
 - [x] Route MPEG/MOV/MP4 through maintained HTML5 rendering.
-- [x] Move MP3/WMA playback to HTML5 audio where meaningful.
-- [x] Replace FLV/SWF playback with safe download fallbacks.
-- [x] Replace XSPF Flash play-all/radio paths with maintained album/playlist fallbacks.
-- [x] Redirect legacy `fslideshow.php` to the maintained slideshow.
-- [x] Remove unused SWF binaries, SWFObject helper code and duplicate obsolete JavaScript assets.
-- [x] Remove fresh-install SWF configuration dependencies.
-- [x] Fix undefined `$media_size_disp` use in legacy popup/download rendering.
-- [x] Keep only playback dimensions/mode behavior that still affects HTML5 rendering; legacy ActiveX/QuickTime-specific flags remain compatibility data and are ignored by maintained templates.
-- [x] Preserve legacy per-media playback rows for upgrade/custom-skin compatibility, but do not reintroduce obsolete player behavior in maintained HTML5 templates.
-- [x] Retire generated `mms:` playback links; legacy playback mode 3 now falls back to the normal MediaGallery download path.
+- [x] Use HTML5 audio for supported audio where meaningful.
+- [x] Replace FLV/SWF execution with safe download fallbacks.
+- [x] Retire generated `mms:` links.
+- [x] Replace obsolete XSPF/Flash play-all paths with maintained album/playlist behavior.
+- [x] Redirect old `fslideshow.php` entry points to the maintained slideshow.
+- [x] Remove unused SWF binaries, SWFObject helpers and obsolete duplicate assets.
+- [x] Preserve legacy playback rows only as upgrade/custom-skin compatibility data.
 
 ## 7. Email modernization
 
-- [x] Replace the bundled PHPMailer-based moderator notification path.
-- [x] Use Geeklog `COM_mail()` transport.
-- [x] Provide HTML and plaintext notification templates.
-- [x] Preserve notification permissions and throttle behavior.
-- [ ] Complete a live moderator-email test through the configured Geeklog mail backend before RC.
+- [x] Replace bundled PHPMailer moderator notifications.
+- [x] Use Geeklog `COM_mail()`.
+- [x] Provide HTML and plaintext templates.
+- [x] Preserve notification permissions and throttling.
+- [ ] Complete a live moderator-email test through the configured Geeklog backend.
 
-## 8. Templates, accessibility and SEO
-- [x] Replace the legacy slideshow chrome with an immersive native lightbox-style viewer (keyboard, swipe, autoplay, reduced-motion support) while keeping album/media pages as the SEO/AI surfaces.
+## 8. Templates, accessibility, image quality and SEO
 
-- [x] Semantic `<h1>` album titles.
-- [x] Navigation landmarks and accessible album search control.
-- [x] Semantic thumbnail wrappers.
-- [x] Canonical URLs on individual media pages.
-- [x] Self-canonical album pagination while excluding sort variants.
-- [x] Page-number suffix in album titles on page 2+.
-- [x] Correct sort-form page indexing.
-- [x] Improve HTML attribute escaping in media popup output.
-- [x] Review remaining inline presentation styles.
-  - [x] Remove dead playback templates and migrate the largest active public/admin static style clusters to responsive CSS.
-  - [x] Resolve all static inline presentation styles; retain only justified runtime dimensions used by responsive autotag/media sizing.
-- [x] Modernize default album/search/media rendering with responsive CSS Grid/Flexbox, semantic media/card headings and responsive thumbnail frames.
-- [x] Modernize bundled file-list, podcast, jQuery gallery and SimpleViewer skins for responsive layouts and semantic album headings.
-- [x] Complete final public markup audit: one H1 per Podcast page, semantic repeated-card headings, non-link anchors and table-free member enrollment.
-- [x] Modernize the default media-detail page with semantic article/figure markup, separated navigation/actions, compact metadata and normalized keyword tags.
-- [x] Modernize the default album page with centered auto-fit cards, compact metadata, unified controls and a responsive footer.
-- [x] Refine Root Album and media-detail controls: use Geeklog short-date formatting, lighter subalbum cards and compact media actions.
-- [x] Simplify default album cards to title, short date, views/comments only; keep rating, tags and technical detail on media-detail pages.
-- [x] Replace the public advanced-search presentation tables with a semantic responsive search form.
-- [x] Modernize secondary public autotag, random-block, fullscreen-slideshow and maintained HTML5 audio rendering for responsive output.
-- [x] Modernize active media popups, public profile tables and remaining audio fragments for responsive rendering.
-- [x] Add canonical-safe meta descriptions for public album and media pages from existing editorial descriptions.
-- [x] Remove the legacy IE-only slideshow transition code and keep browser-neutral slideshow controls.
-- [x] Audit attribute escaping across all frame/theme variants.
-- [x] Centralize HTML escaping for framed-image attributes, media edit/manage values, lightbox links and advanced-search values.
-- [x] Replace the lightbox slideshow href-injection workaround with valid escaped album-action attributes across maintained album themes.
-- [x] Escape editable album/category values and generated admin option labels when rendering form controls.
-- [x] Remove dynamic property URLs from inline JavaScript and preserve lightbox slideshow actions on media detail views.
-- [x] Remove translated delete-confirmation text from JavaScript string literals and escape it for HTML data attributes.
-- [x] Escape persisted legacy playback text/color values when rendering maintained edit-form attributes.
-- [x] Review keyboard accessibility and form labeling across remaining admin/public templates.
-  - [x] Connect primary album/category, batch, export and user-quota controls to explicit labels; retain already-valid implicit FTP radio labels.
-  - [x] Remove obsolete per-media playback controls instead of labeling settings that no longer affect HTML5 rendering; retain only video width/height controls.
-  - [x] Label generated media-manager controls, row fields, destination album and batch-action selectors without changing array bindings.
-  - [x] Label global album-management update controls plus member/purge/session/watermark maintenance forms.
-- [x] Add structured data only where MediaGallery has reliable source data and does not conflict with Geeklog core/theme output.
-  - [x] Emit conservative JSON-LD for local `ImageObject` / `AudioObject`, and `VideoObject` only when a real attached thumbnail and upload date are available.
-  - [x] Skip remote/embedded media whose content, thumbnail or publication metadata MediaGallery does not own.
-  - [x] Do not add album-level `CollectionPage` JSON-LD while generic page-schema ownership may belong to Geeklog core/themes.
+- [x] Replace legacy slideshow chrome with a native responsive lightbox-style viewer.
+- [x] Add semantic H1 album titles and improved heading hierarchy.
+- [x] Add navigation landmarks and labelled search/admin controls.
+- [x] Modernize album, media, search, file-list, podcast and bundled gallery skins.
+- [x] Replace presentation tables where maintained public forms can use semantic responsive markup.
+- [x] Improve escaping of attributes, edit values, links and translated confirmation text.
+- [x] Add canonical media URLs.
+- [x] Add self-canonical album pagination and exclude sort variants.
+- [x] Add page-number suffixes to paginated album titles.
+- [x] Add canonical-safe meta descriptions from existing album/media editorial descriptions.
+- [x] Add conservative media JSON-LD (`ImageObject`, `AudioObject`, eligible `VideoObject`).
+- [x] Avoid album-level generic page schema where ownership may belong to Geeklog/theme output.
+- [x] Improve album-card thumbnail sharpness by using the original local image as the visual source when available, cropping with `object-fit` rather than scaling small square derivatives.
+- [x] Remove persistent thumbnail/lightbox scale transforms that amplified blur and made portrait media appear artificially square.
+- [ ] Complete final visual regression across the bundled skins and representative portrait/landscape media.
 
 ## 9. Interoperability and public API
 
-MediaGallery 1.8.0 exposes album discovery through Geeklog's native service convention:
+MediaGallery exposes content to other Geeklog plugins through Geeklog APIs rather than requiring direct access to `mg_*` tables.
+
+### Album discovery service
 
 ```php
 PLG_invokeService(
@@ -194,58 +195,100 @@ PLG_invokeService(
 ```
 
 - [x] Implement `album_list` through `PLG_invokeService()`.
-- [x] Reuse MediaGallery permission and album-tree rules rather than expose raw `mg_*` tables.
+- [x] Reuse MediaGallery permissions and album-tree rules.
 - [x] Preserve valid `member_album_root = 0` semantics.
 - [ ] Complete live tests as owner, non-owner, anonymous user and administrator.
 
+### Content lifecycle events
+
+Media IDs keep their historical raw IDs for backward compatibility. Albums use the portable namespace `album:<id>` so Geeklog 2.1.1 can distinguish album objects without relying on the newer `sub_type` argument.
+
+- [x] Keep existing media `PLG_itemSaved()` events.
+- [x] Keep media `PLG_itemDeleted()` events.
+- [x] Emit `PLG_itemSaved('album:<id>', 'mediagallery')` on album creation/update.
+- [x] Emit `PLG_itemDeleted('album:<id>', 'mediagallery')` on album deletion, including recursive child deletion.
+- [x] Notify affected album pages when media are added, edited, deleted or reordered.
+- [x] Notify source and destination albums when media are moved.
+- [x] Notify old/new parent album listings when albums are moved.
+- [x] Extend `plugin_getiteminfo_mediagallery()` to resolve namespaced album objects.
+- [x] Return anonymous album URLs only for publicly readable, non-hidden albums.
+- [x] Extend `plugin_idToURL_mediagallery()` so consumers can resolve deterministic album URLs, including deletion notifications.
+- [x] Deduplicate repeated album lifecycle notifications during a single request.
+- [x] Keep the implementation generic: MediaGallery does not call IndexNow directly.
+- [ ] Live-test the full chain with IndexNow 1.3.0 on Geeklog 2.1.1 and 2.2.2.
+
+This contract is intended to serve IndexNow, XML Sitemap, Hub and future connectors without coupling MediaGallery to any one consumer.
+
+See `docs/SERVICES.md` for the service and lifecycle API contract.
+
 ## 10. Code modernization and cleanup
 
-- [x] Prefer Geeklog APIs where practical instead of duplicating core behavior.
+- [x] Prefer Geeklog APIs over duplicate internal mechanisms where practical.
 - [x] Add Geeklog 2.1.1 input compatibility without core changes.
-- [x] Validate request/array values in several historically unsafe paths.
-- [x] Centralize 1.8 storage/runtime compatibility helpers.
-- [x] Remove dead Flash/ActiveX playback assets and code paths already replaced.
-- [x] Complete static PHP 8.x warning/deprecation cleanup in MediaGallery-owned hot paths, including RSS/feed generation, JPEG/EXIF metadata paths and register_globals-era logging.
-- [ ] Complete live PHP 8.2/8.3 warning/deprecation validation on Geeklog 2.1.1 and 2.2.2.
-- [ ] Fold `functions_legacy.inc` back into a clean final bootstrap if practical before RC.
-- [ ] Remove confirmed dead compatibility branches once final supported versions are fixed.
-- [x] Review and harden ZIP extraction plus remaining recursive CLI import paths.
+- [x] Centralize 1.8 runtime/storage/security/interoperability helpers.
+- [x] Remove dead Flash/ActiveX playback paths already replaced.
+- [x] Complete the static PHP 8.x warning/deprecation cleanup in owned hot paths.
+- [x] Harden ZIP extraction and recursive CLI paths.
+- [ ] Complete live PHP 8.2/8.3 warning/deprecation validation.
+- [ ] Decide whether folding `functions_legacy.inc` back into a single final bootstrap is worth the regression risk before RC.
+- [ ] Remove only compatibility branches proven dead for the final supported matrix.
 
-## 11. Distribution
+## 11. Documentation
+
+### Current 1.8 documentation
+
+- [x] `ROADMAP.md` tracks implementation and RC status.
+- [x] `README.md` is the repository landing page for the 1.8 branch.
+- [x] `TESTING-1.8.md` contains the regression checklist.
+- [x] `IMPLEMENTATION_NOTES.md` records implementation details and design decisions.
+- [x] `docs/SERVICES.md` documents the supported plugin service/interoperability API.
+
+### Legacy documentation audit
+
+- [x] Identify `docs/INSTALL` as obsolete (MediaGallery 1.6.10 / Geeklog 1.4 / PHP 4-era requirements).
+- [x] Identify `public_html/docs/upgrade.html` as obsolete (MediaGallery 1.6.0-era installation instructions).
+- [x] Identify `public_html/docs/english/mediagallery.html` as incomplete legacy configuration documentation with stale references.
+- [x] Keep historical changelogs available as project history, clearly separated from 1.8 instructions.
+- [ ] Decide whether the large `public_html/docs/usage*.html` guides contain enough still-valid end-user material to modernize, or move them to a clearly labelled legacy archive.
+- [ ] Remove obsolete installation/configuration documents from the public installable tree before RC so they cannot contradict 1.8 instructions.
+- [ ] Refresh upgrade/install documentation around the persistent-storage preflight and current Geeklog baseline.
+
+## 12. Distribution
 
 - [x] Use one installable archive: `dist/mediagallery_1.8.0_2.1.1.zip`.
 - [x] Keep one top-level `mediagallery/` directory in the ZIP.
-- [x] Exclude `.github/`, `dist/`, `.gitignore` and build-only directories.
+- [x] Exclude `.github/`, `dist/`, `.gitignore` and build-only content.
 - [x] Validate archive filenames against Geeklog 2.2.2 filename rules.
-- [x] Validate presence of the 1.8 storage and migration helpers in the archive.
-- [x] Rebuild the test archive automatically after every validated branch change, excluding `dist/**` to prevent loops.
-- [ ] Rebuild the final RC archive only after remaining source/documentation changes are complete.
+- [x] Validate required 1.8 migration/storage helpers in the archive.
+- [x] Automatically rebuild the test archive after validated branch changes without creating build loops.
+- [ ] Ensure obsolete public documentation is not shipped in the RC archive.
+- [ ] Rebuild and validate the final RC archive after source/documentation cleanup.
 
-## 12. Release-candidate validation matrix
+## 13. Release-candidate validation matrix
 
 ### Fresh installs
 
 - [ ] Fresh 1.8.0 on Geeklog 2.1.1.
 - [ ] Fresh 1.8.0 on Geeklog 2.2.2.
-- [ ] Confirm Configuration UI has no obsolete FlowPlayer/Flash controls.
+- [ ] Confirm Configuration UI has no obsolete Flash/FlowPlayer controls.
 - [ ] Confirm upload/edit/delete, thumbnail generation, RSS, search and comments.
-- [ ] Confirm clear failure/message when no image backend is available.
+- [ ] Confirm clear failure when no image backend is available.
 
 ### Upgrades
 
 - [ ] Upgrade disposable MediaGallery 1.7.0 copy.
 - [ ] Upgrade disposable MediaGallery 1.7.3 copy.
-- [ ] Run pre-migration to `images/mediagallery/` and verify source remains untouched.
+- [ ] Run pre-migration to `images/mediagallery/` and verify the source remains untouched.
 - [ ] Confirm migration is idempotent.
-- [ ] Confirm conflicting destination files fail safely without overwrite.
-- [ ] Confirm legacy upgrade without preflight is refused when local-media rows exist but files are unavailable.
+- [ ] Confirm conflicting destination files fail without overwrite.
+- [ ] Confirm a legacy upgrade without the required preflight is refused safely.
 - [ ] Confirm administrator settings are preserved.
 
 ### Multisite
 
 - [ ] Shared plugin code with separate DB/table prefix or databases.
 - [ ] Separate `path_images`, `images_url` and `path_data`.
-- [ ] Confirm Site A cannot write into or serve Site B's storage.
+- [ ] Confirm Site A cannot write into or serve Site B storage.
 - [ ] Confirm temporary/upload directories are isolated.
 
 ### Upload/security regression
@@ -256,37 +299,35 @@ PLG_invokeService(
 - [ ] Executable/double-extension/unknown-MIME rejection.
 - [ ] Remote Media public/private/redirect/oversize cases.
 - [ ] FTP valid source, forged outside path, unsafe extension and escaping symlink.
-- [ ] ZIP import: normal archive, `../` traversal member, symbolic-link member, excessive entry count and >1 GiB declared uncompressed payload.
-- [ ] CLI recursive import: normal nested directories, symlink source rejection and correct subdirectory-to-subalbum placement.
-- [ ] Batch continuation/cancellation as owner, another user and administrator.
-- [ ] Moderated upload/edit/approve/reject with forged album/media binding attempts.
-- [ ] Stale-temp cleanup keeps recent/active entries and removes only fully stale trees.
+- [ ] ZIP import normal and hostile archives.
+- [ ] CLI recursive import normal nested directories and symlink rejection.
+- [ ] Batch continuation/cancellation ownership matrix.
+- [ ] Moderated upload/edit/approve/reject with forged bindings.
+- [ ] Stale-temp cleanup age-boundary tests.
 
-### Functional regression
+### Functional/interoperability regression
 
 - [ ] Moderator email HTML/plaintext through Geeklog mail backend.
-- [ ] `album_list` service permissions matrix.
-- [ ] Media/album canonical output with multiple skins and paginated sort variants.
-- [ ] Standard RSS and podcast feed generation under PHP 8.3 without warnings/deprecations.
-- [ ] MP3/WMA/MOV/ASF/SWF/FLV legacy-media rendering.
-- [ ] ASF/MOV popup/download paths without undefined-variable warnings.
-- [ ] Existing `fslideshow.php` URLs and `fslideshow` autotags.
+- [ ] `album_list` permission matrix.
+- [ ] Media/album canonical output with multiple skins and pagination.
+- [ ] RSS/podcast generation under PHP 8.3 without warnings.
+- [ ] Legacy audio/video fallback paths without warnings.
+- [ ] Existing `fslideshow.php` URLs/autotags.
+- [ ] MediaGallery → IndexNow save/delete notifications for media and albums.
+- [ ] Public-to-private album transition does not expose a public URL through `PLG_getItemInfo(..., uid=1)`.
+- [ ] Media move updates the media plus source/destination album URLs.
 
-## 13. Final RC cleanup
-
-Before producing the 1.8.0 release candidate:
+## 14. Final RC cleanup
 
 - [x] Add explicit image-backend capability detection and clear error reporting.
+- [x] Complete the major public template/accessibility/SEO modernization.
+- [x] Add generic album/media lifecycle interoperability.
 - [ ] Finish live PHP 8.2/8.3 runtime audit.
-- [ ] Resolve remaining dead playback/configuration controls.
-- [ ] Decide fate of `functions_legacy.inc`; the legacy async upload endpoint has been removed.
-- [ ] Complete remaining template/accessibility cleanup without breaking custom skins.
-- [ ] Update final `CHANGELOG`, `README` and upgrade documentation.
-- [ ] Run the full live-test matrix above.
+- [ ] Finish documentation cleanup and current install/upgrade instructions.
+- [ ] Decide final `functions_legacy.inc` structure.
+- [ ] Run the full live-test matrix.
 - [ ] Build and validate the RC ZIP.
 
 ## Release principle
 
-MediaGallery 1.8.0 should be safer to upgrade than 1.7.x, keep persistent user media outside replaceable plugin code, work naturally in single-site and shared-code multisite installations, use Geeklog-native services and mail where available, and fail explicitly when required runtime capabilities such as image processing are missing.
-
-- [x] Final public visual polish: meaningful untitled-media fallback, zero-vote rating suppression, compact Search/Options UI, lighter metadata and immersive controls.
+MediaGallery 1.8.0 should be safer to upgrade than 1.7.x, preserve user media outside replaceable plugin code, work naturally in single-site and shared-code multisite installations, provide modern accessible public output, use Geeklog-native APIs wherever practical, expose content changes to the wider Geeklog ecosystem, and fail explicitly when required runtime capabilities are unavailable.
