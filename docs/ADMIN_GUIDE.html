@@ -1,0 +1,83 @@
+<article class="mediagallery-admin-guide">
+<h1>MediaGallery 1.8.0 Administrator Guide</h1>
+<p>MediaGallery is a media-management plugin for Geeklog. This guide is intended for site administrators and documents the maintained 1.8.0 behavior.</p>
+
+<h2>Requirements</h2>
+<p>MediaGallery 1.8.0 targets Geeklog 2.1.1 or newer, including Geeklog 2.2.2. The source keeps PHP 5.6-compatible syntax for legacy Geeklog 2.1.1 deployments while development also covers newer PHP versions.</p>
+<p>Image uploads require a configured image-processing backend: GD, ImageMagick or NetPBM. If the selected backend is unavailable, MediaGallery reports the problem rather than continuing into an undefined image-processing call.</p>
+
+<h2>Albums and media</h2>
+<p>Albums can be nested and have their own title, description, owner, visibility, permissions, sorting, cover and display settings. The synthetic Root Album is the top of the tree and does not accept direct media uploads.</p>
+<p>Media items can carry titles, descriptions, keywords, category information, ownership data and optional attached thumbnails. Administrators can edit, move, delete, rotate, watermark and reorder permitted media through the maintained interfaces.</p>
+
+<h2>Uploads and imports</h2>
+<p>Browser upload, Remote Media and FTP/import entry points use Geeklog security checks. MediaGallery rejects unsafe executable/server-side filenames and validates explicitly handled MIME/extension combinations.</p>
+<ul>
+<li>Browser uploads preserve the options associated with each upload slot.</li>
+<li>Remote Media accepts bounded public HTTP(S) sources and rejects localhost/private/reserved targets and redirects.</li>
+<li>FTP imports are confined to the configured import area.</li>
+<li>ZIP imports reject traversal paths, symbolic links and unsafe/excessive payloads.</li>
+<li>Recursive CLI imports reject symbolic links and preserve nested directory-to-album mapping.</li>
+</ul>
+
+<h2>Batch processing</h2>
+<p>Long-running operations use MediaGallery batch sessions. The sensitive action that starts a batch keeps Geeklog's normal CSRF checks.</p>
+<p>On Geeklog 2.1.1, continuation and cancellation are POST-only and use the server-generated MediaGallery session identifier plus session ownership validation. They deliberately do not require Geeklog 2.1.1's referer-bound one-time CSRF token on every internal continuation step, which avoids false “security token expired” failures.</p>
+
+<h2>Permissions, member albums and moderation</h2>
+<p>MediaGallery uses Geeklog's security model. Album access is revalidated server-side for maintained mutations; hiding controls in the interface is not treated as authorization.</p>
+<p>Member albums allow eligible users to manage their own gallery area when enabled. Hidden or non-public albums are not exposed as public items through the 1.8 interoperability layer.</p>
+<p>Moderated uploads are kept in the Geeklog/MediaGallery queue until approval. The 1.8 flow revalidates queued album/media relationships and administrator rights before promoting or rejecting queued content.</p>
+
+<h2>Playback and slideshow</h2>
+<p>Maintained playback no longer executes Flash, ActiveX or QuickTime browser plugins. Audio/video uses native HTML5 where practical, with safe download/fallback behavior for unsupported legacy formats such as FLV or SWF.</p>
+<p>The maintained slideshow provides keyboard navigation, touch/swipe behavior, autoplay controls and reduced-motion consideration. Album and media pages remain the primary indexable content surfaces.</p>
+
+<h2>SEO and accessibility</h2>
+<ul>
+<li>semantic album/media headings and modern responsive markup;</li>
+<li>canonical URLs for media and paginated albums;</li>
+<li>meta descriptions derived from editorial album/media descriptions;</li>
+<li>conservative JSON-LD for eligible local image/audio/video items;</li>
+<li>improved form labels, keyboard behavior and escaping;</li>
+<li>sharper album cards using local originals when available instead of scaling small square derivatives.</li>
+</ul>
+
+<h2>Persistent media storage</h2>
+<p>MediaGallery 1.8.0 stores persistent user media below Geeklog's configured image root, not inside the replaceable public plugin directory.</p>
+<pre><code>$_MG_CONF['path_mediaobjects'] = rtrim($_CONF['path_images'], '/\\') . '/mediagallery/';</code></pre>
+<p>A typical single-site location is <code>public_html/images/mediagallery/</code>. Shared-code multisite installations can provide site-specific <code>path_images</code>, <code>images_url</code> and <code>path_data</code> values to keep each site's media and temporary data isolated.</p>
+
+<h3>Upgrading from MediaGallery 1.7.x</h3>
+<p><strong>Important:</strong> if the existing site still stores media under <code>public_html/mediagallery/mediaobjects/</code>, run the supplied pre-migration tool before uploading the 1.8.0 ZIP:</p>
+<pre><code>php tools/migrate-media-storage.php /path/to/geeklog</code></pre>
+<p>The tool copies and verifies the files into persistent storage and deliberately leaves the legacy source untouched.</p>
+
+<h2>Configuration</h2>
+<p>Administrator-editable values use Geeklog's Configuration API. MediaGallery 1.8.0 does not restore the historical manually edited plugin <code>config.php</code>. Runtime-derived plugin URLs, template paths and media storage paths are calculated from Geeklog configuration.</p>
+<p>Fresh installs no longer expose obsolete Flash/FlowPlayer settings.</p>
+
+<h2>Interoperability</h2>
+<p>MediaGallery exposes content through Geeklog plugin APIs rather than requiring consumers to query <code>mg_*</code> tables directly.</p>
+<p>The read-only <code>album_list</code> service is available through <code>PLG_invokeService()</code>. Media lifecycle events keep historical media IDs, while albums use namespaced IDs such as <code>album:52</code>.</p>
+<p>Album/media changes can therefore be consumed generically by IndexNow, XML Sitemap, Hub and future connectors. MediaGallery does not call those plugins directly.</p>
+
+<h2>Troubleshooting</h2>
+<h3>Images fail but other files upload</h3>
+<p>Check the configured image-processing backend. For GD, verify that the PHP GD extension is loaded. For ImageMagick or NetPBM, verify that the configured binaries are executable by PHP.</p>
+
+<h3>Batch operation reports an expired token on Geeklog 2.1.1</h3>
+<p>Use a current 1.8.0 build. The maintained batch continuation no longer depends on the legacy referer-bound token at each continuation step.</p>
+
+<h3>Member-album PHP block reports a missing helper</h3>
+<p>Use the current 1.8.0 block implementation. The member-album PHP block loads the shared MediaGallery helpers it needs explicitly.</p>
+
+<h3>Media disappear during a 1.7.x to 1.8.0 ZIP upgrade</h3>
+<p>Restore from backup if necessary. Do not retry the ZIP upgrade until the legacy media tree has been pre-migrated to persistent storage.</p>
+
+<h3>Portrait cards look soft or square</h3>
+<p>Current 1.8.0 cards prefer the local original as the visual source when available and use CSS cropping rather than enlarging old square derivatives. Confirm the deployed files are from the current branch and clear any theme/browser cache.</p>
+
+<h2>Related developer documentation</h2>
+<p>The repository contains additional private project documentation: <code>README.md</code>, <code>UPGRADE</code>, <code>ROADMAP.md</code>, <code>TESTING-1.8.md</code>, <code>IMPLEMENTATION_NOTES.md</code>, <code>docs/CHANGELOG.md</code> and <code>docs/SERVICES.md</code>.</p>
+</article>
