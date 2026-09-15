@@ -1,66 +1,62 @@
-# MediaGallery documentation inventory
+# MediaGallery documentation
 
-This directory contains a mixture of current MediaGallery 1.8.0 development documentation and historical documentation inherited from older MediaGallery releases.
+This directory contains the maintained project documentation that belongs with MediaGallery 1.8.0, plus the historical changelog and GPL license text.
 
-Only documents explicitly listed as **current** below should be treated as authoritative for MediaGallery 1.8.0.
+The obsolete MediaGallery 1.6/1.7 installation guides, Japanese translations and duplicated legacy archives have been removed from the `modernize-1.8.0` branch. Japanese documentation can be recreated later by the Japanese community if a maintained 1.8 translation is wanted.
 
 ## Current 1.8.0 documentation
 
-The main current documents live at the repository root:
+The primary documentation lives at the repository root:
 
-- [`../README.md`](../README.md) — project overview, compatibility, storage and upgrade preflight;
+- [`../README.md`](../README.md) — project overview, compatibility, major 1.8 changes and upgrade preflight;
+- [`../UPGRADE`](../UPGRADE) — current 1.7.x → 1.8.0 upgrade rules and persistent-storage migration;
 - [`../ROADMAP.md`](../ROADMAP.md) — implementation status and remaining release-candidate work;
-- [`../TESTING-1.8.md`](../TESTING-1.8.md) — regression/live-test checklist;
-- [`../IMPLEMENTATION_NOTES.md`](../IMPLEMENTATION_NOTES.md) — design and implementation notes;
-- [`SERVICES.md`](SERVICES.md) — public `PLG_invokeService()` and lifecycle-event interoperability contract.
+- [`../TESTING-1.8.md`](../TESTING-1.8.md) — regression and live-test checklist;
+- [`../IMPLEMENTATION_NOTES.md`](../IMPLEMENTATION_NOTES.md) — design and implementation notes.
 
 ## Files in `docs/`
 
-| File | Status for 1.8.0 | Notes |
+| File | Status | Purpose |
 | --- | --- | --- |
-| `SERVICES.md` | **Current** | Maintained 1.8 interoperability documentation. |
-| `ChangeLog` | Historical reference | Useful release history through 1.7.x, but it is not yet the final 1.8 changelog. |
-| `INSTALL` | **Obsolete** | Describes MediaGallery 1.6.10, Geeklog 1.4 and PHP 4-era installation. Do not use for 1.8. |
-| `INSTALL_ja` | **Obsolete** | Historical Japanese installation documentation; must not be used for a 1.8 upgrade. |
-| `gpl.txt` | Relevant license copy | GPLv2 license text; still relevant. |
-| `older/` | Historical archive | Retained only for project history/reference. |
+| `README.md` | Current | Documentation index. |
+| `SERVICES.md` | Current | `PLG_invokeService()` and lifecycle-event interoperability contract. |
+| `ChangeLog` | Historical | Release history through the 1.7.x line; retained for project history. |
+| `gpl.txt` | Current | GPLv2 license text. |
 
-The root `README_ja` is also historical (1.7.2.4-era) and requires a separate translation/update decision before 1.8 RC.
+## Public user documentation
 
-## `public_html/docs/` audit
+The web-visible documentation has deliberately been reduced to one maintained guide:
 
-The files below are installed under the web-visible MediaGallery tree. They are therefore more problematic when stale because administrators can mistake them for current 1.8 documentation.
+- [`../public_html/docs/usage.html`](../public_html/docs/usage.html) — MediaGallery 1.8.0 user/administrator guide.
 
-| Path | Status | Recommendation before 1.8 RC |
-| --- | --- | --- |
-| `public_html/docs/index.html` | Empty placeholder | Remove unless required to prevent directory listing on a supported server configuration. |
-| `public_html/docs/upgrade.html` | **Obsolete** | MediaGallery 1.6.0-era install/upgrade guide. Remove from the public package or replace with current 1.8 instructions. |
-| `public_html/docs/english/mediagallery.html` | **Obsolete/incomplete** | Contains stale configuration references and placeholder descriptions. Remove from the public package or rewrite. |
-| `public_html/docs/usage.html` | Mixed historical value | Large 1.6-era user guide. Some conceptual sections (albums, media, permissions, autotags) remain useful, but installation, configuration, storage, batch and playback sections are outdated. Review before deciding whether to modernize or archive. |
-| `public_html/docs/usage_ja.html` | Mixed historical value | Japanese historical user guide; same issue as `usage.html`, plus translation maintenance. |
-| `public_html/docs/images/` | Depends on legacy guides | Keep only if a retained/modernized guide still references the images. |
-| `public_html/docs/mediaGallery_logo.png` | Cosmetic/historical | Keep only if a current document uses it. |
+The 1.8 user guide covers:
 
-### Why the old public guides are not authoritative
+- requirements and image-processing backends;
+- albums, media items and member albums;
+- browser upload, remote media, FTP/ZIP/CLI import behavior;
+- media management and Geeklog 2.1.1-compatible batch sessions;
+- permissions and moderation;
+- HTML5 playback and slideshow behavior;
+- search, RSS, SEO, accessibility and structured data;
+- persistent media storage and the mandatory 1.7.x pre-migration step;
+- Configuration API behavior;
+- MediaGallery service/lifecycle interoperability;
+- common troubleshooting cases.
 
-The legacy public documentation predates major 1.8 changes, including:
+## Removed legacy documentation
 
-- Geeklog 2.1.1+ as the supported baseline;
-- persistent storage below Geeklog's image root rather than the replaceable plugin directory;
-- the mandatory 1.7.x media pre-migration step before ZIP upgrades;
-- removal of active Flash/ActiveX playback paths;
-- current upload/import security behavior;
-- Geeklog-native Configuration API usage;
-- current batch-session behavior on Geeklog 2.1.1;
-- current public service/lifecycle interoperability APIs.
+The following classes of files were intentionally removed because they were obsolete, duplicated or likely to mislead 1.8 users:
 
-## RC documentation cleanup plan
+- MediaGallery 1.6.x `INSTALL` / `upgrade.html` instructions;
+- incomplete legacy configuration documentation under `public_html/docs/english/`;
+- the old 1.6-era `usage.html` and Japanese `usage_ja.html` guides;
+- `README_ja` and `INSTALL_ja` from the 1.7.x Japanese distribution;
+- duplicated files under `docs/older/`;
+- empty public documentation placeholders;
+- legacy documentation icons/logo no longer used by the rewritten guide.
 
-Before MediaGallery 1.8.0 RC:
+## Documentation policy for 1.8
 
-1. keep the repository root `README.md` as the primary entry point;
-2. create/retain one current install/upgrade guide focused on 1.7.x → 1.8.0 and fresh 1.8.0 installs;
-3. remove obsolete install/configuration documents from the web-visible package;
-4. decide whether `usage.html` is worth modernizing or should move to a clearly labelled historical archive;
-5. update the final changelog with the 1.8.0 modernization work;
-6. decide whether Japanese documentation is updated for 1.8.0 or explicitly shipped as legacy-only material.
+MediaGallery 1.8.0 documentation should describe the current code, not preserve obsolete operational instructions merely for historical completeness. Historical release information can remain in `ChangeLog`, while installation, upgrade and usage instructions must match the supported Geeklog 2.1.1+ baseline and the persistent-storage model.
+
+Future translations should be based on the maintained 1.8 documents rather than on the removed 1.6/1.7 guides.
