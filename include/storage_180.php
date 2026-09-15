@@ -127,6 +127,26 @@ function MG_inventoryMediaStorage180($root)
 }
 
 /**
+ * Return true only for historical user media that belongs in persistent
+ * storage. Packaged placeholder files such as index.html are deliberately
+ * excluded, even when they live below orig/, disp/, tn/ or covers/.
+ */
+function MG_isUserMediaFile180($relative)
+{
+    $normalized = str_replace('\\', '/', (string) $relative);
+
+    if (!preg_match('~^(orig|disp|tn|covers)/~', $normalized)) {
+        return false;
+    }
+
+    if (strtolower(basename($normalized)) === 'index.html') {
+        return false;
+    }
+
+    return true;
+}
+
+/**
  * Check whether a storage root contains user-generated media rather than only
  * the packaged MediaGallery placeholder/type icons at the root.
  */
@@ -138,12 +158,7 @@ function MG_mediaStorageHasUserContent180($root)
     }
 
     foreach ($inventory['files'] as $relative => $size) {
-        $relative = str_replace('\\', '/', $relative);
-        if (strpos($relative, 'orig/') === 0
-            || strpos($relative, 'disp/') === 0
-            || strpos($relative, 'tn/') === 0
-            || strpos($relative, 'covers/') === 0
-        ) {
+        if (MG_isUserMediaFile180($relative)) {
             return true;
         }
     }
@@ -189,8 +204,7 @@ function MG_countPendingMediaStorage180($source = null)
 
     $pending = 0;
     foreach ($inventory['files'] as $relative => $expectedSize) {
-        $normalized = str_replace('\\', '/', $relative);
-        if (!preg_match('~^(orig|disp|tn|covers)/~', $normalized)) {
+        if (!MG_isUserMediaFile180($relative)) {
             continue;
         }
 
@@ -260,12 +274,11 @@ function MG_migrateMediaStorage180($source = null)
     }
 
     // Only user-generated media belongs in persistent storage. Packaged
-    // fallback/type images remain in the plugin's public mediaobjects folder.
+    // fallback/type images and index.html placeholders remain in the plugin.
     $filtered = array();
     $filteredBytes = 0;
     foreach ($sourceInventory['files'] as $relative => $size) {
-        $normalized = str_replace('\\', '/', $relative);
-        if (!preg_match('~^(orig|disp|tn|covers)/~', $normalized)) {
+        if (!MG_isUserMediaFile180($relative)) {
             continue;
         }
         $filtered[$relative] = $size;
