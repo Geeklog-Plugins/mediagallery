@@ -22,7 +22,6 @@
       <div class="mg-envcheck-buttons">
       {!endif}
         <input class="uk-button uk-button-default" type="submit" name="mode" value="{lang_recheck}"{xhtml}>
-        <input class="uk-button uk-button-default" type="submit" name="mode" value="{lang_continue}"{xhtml}>
       </div>
     </div>
   </div>
