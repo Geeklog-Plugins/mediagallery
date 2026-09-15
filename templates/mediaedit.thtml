@@ -245,8 +245,16 @@
   font-weight: 600;
 }
 
+/* Maintenance actions are deliberately smaller than the main editor actions. */
 .mg-media-editor .mg-metric input[type="submit"] {
-  width: 100%;
+  width: auto;
+  min-width: 0;
+  padding: 5px 10px;
+  font-size: .86em;
+  font-weight: 600;
+  line-height: 1.3;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .mg-media-editor .mg_submit.mg-edit-actions {
@@ -255,6 +263,7 @@
   z-index: 20;
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
   margin: 20px 0 0;
   padding: 14px 0;
@@ -262,21 +271,45 @@
   background: inherit;
 }
 
+/* Default secondary action size. */
 .mg-media-editor .mg-edit-actions input[type="submit"],
 .mg-media-editor .mg-edit-actions input[type="reset"] {
-  min-width: 110px;
-  padding: 8px 16px;
+  min-width: 0;
+  padding: 7px 13px;
+  font-size: .92em;
+  line-height: 1.35;
   border-radius: 5px;
   cursor: pointer;
 }
 
+/* Save is the primary action and gets the strongest visual weight. */
 .mg-media-editor .mg-edit-actions .mg-action-save {
-  min-width: 130px;
+  min-width: 104px;
+  padding: 9px 20px;
+  font-size: 1em;
   font-weight: 700;
 }
 
+/* Cancel is important, but visually secondary to Save. */
+.mg-media-editor .mg-edit-actions .mg-action-cancel {
+  min-width: 88px;
+}
+
+/* Reset is an auxiliary action, so keep it compact. */
+.mg-media-editor .mg-edit-actions .mg-action-reset {
+  min-width: 76px;
+  padding-left: 11px;
+  padding-right: 11px;
+  font-size: .88em;
+}
+
+/* Delete remains isolated on the right without competing with Save. */
 .mg-media-editor .mg-edit-actions .mg-action-delete {
+  min-width: 88px;
   margin-left: auto;
+  padding: 8px 16px;
+  font-size: .92em;
+  font-weight: 700;
 }
 
 .mg-media-editor .mg-extra-options {
@@ -324,7 +357,11 @@
 
   .mg-media-editor .mg-edit-actions input[type="submit"],
   .mg-media-editor .mg-edit-actions input[type="reset"] {
-    flex: 1 1 auto;
+    flex: 0 1 auto;
+  }
+
+  .mg-media-editor .mg-edit-actions .mg-action-save {
+    flex: 1 1 100%;
   }
 
   .mg-media-editor .mg-edit-actions .mg-action-delete {
@@ -435,8 +472,8 @@
 
     <div class="mg_submit mg-edit-actions">
       <input type="submit" name="mode" value="{lang_save}" class="mg-action-save"{xhtml}>
-      <input type="submit" name="mode" value="{lang_cancel}"{xhtml}>
-      <input type="reset" value="{lang_reset}"{xhtml}>
+      <input type="submit" name="mode" value="{lang_cancel}" class="mg-action-cancel"{xhtml}>
+      <input type="reset" value="{lang_reset}" class="mg-action-reset"{xhtml}>
       <input type="submit" name="mode" value="{lang_delete}" class="mg-action-delete" data-confirm="{lang_delete_confirm}" onclick="return confirm(this.getAttribute('data-confirm'));"{xhtml}>
       <input type="hidden" name="rpath" value="{rpath}"{xhtml}>
       <input type="hidden" value="{album_id}" name="album_id"{xhtml}>
