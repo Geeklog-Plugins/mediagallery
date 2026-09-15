@@ -54,18 +54,14 @@ function gdVersion($user_ver = 0)
 {
    if (! extension_loaded('gd')) { return; }
    static $gd_ver = 0;
-   // Just accept the specified setting if it's 1.
    if ($user_ver == 1) { $gd_ver = 1; return 1; }
-   // Use the static variable if function was called previously.
    if ($user_ver !=2 && $gd_ver > 0) { return $gd_ver; }
-   // Use the gd_info() function if possible.
    if (function_exists('gd_info')) {
        $ver_info = gd_info();
        preg_match('/\d/', $ver_info['GD Version'], $match);
        $gd_ver = $match[0];
        return $match[0];
    }
-   // If phpinfo() is disabled use a specified / fail-safe choice...
    if (preg_match('/phpinfo/', ini_get('disable_functions'))) {
        if ($user_ver == 2) {
            $gd_ver = 2;
@@ -75,7 +71,6 @@ function gdVersion($user_ver = 0)
            return 1;
        }
    }
-   // ...otherwise use phpinfo().
    ob_start();
    phpinfo(8);
    $info = ob_get_contents();
@@ -84,7 +79,7 @@ function gdVersion($user_ver = 0)
    preg_match('/\d/', $info, $match);
    $gd_ver = $match[0];
    return $match[0];
-} // End gdVersion()
+}
 
 function MG_checkEnvironment($storageMessage = '', $storageSuccess = true)
 {
@@ -104,60 +99,36 @@ function MG_checkEnvironment($storageMessage = '', $storageSuccess = true)
     $T->set_var('CRow2', '');
 
     if (ini_get('safe_mode') != 1) {
-
         switch ($_CONF['image_lib']) {
-            case 'imagemagick' :    // ImageMagick
+            case 'imagemagick' :
                 $binary = 'convert' . ((PHP_OS == 'WINNT') ? '.exe' : '');
                 clearstatcache();
                 if (! @file_exists($_MG_CONF['path_to_imagemagick'] . $binary)) {
-                    $T->set_var(array(
-                        'config_item'   =>  'ImageMagick Programs',
-                        'status'        =>  '<span style="color:red">' .  $LANG_MG01['not_found'] . '</span>'
-                    ));
+                    $T->set_var(array('config_item' => 'ImageMagick Programs','status' => '<span style="color:red">' .  $LANG_MG01['not_found'] . '</span>'));
                 } else {
-                    $T->set_var(array(
-                        'config_item'   =>  'ImageMagick Programs',
-                        'status'        =>  '<span style="color:green">' . $LANG_MG01['ok'] . '</span>'
-                    ));
+                    $T->set_var(array('config_item' => 'ImageMagick Programs','status' => '<span style="color:green">' . $LANG_MG01['ok'] . '</span>'));
                 }
                 $T->parse('CRow2', 'CheckRow2', true);
                 break;
-
-            case 'netpbm' :    // NetPBM
+            case 'netpbm' :
                 $binary = 'jpegtopnm' . ((PHP_OS == 'WINNT') ? '.exe' : '');
                 clearstatcache();
                 if (! @file_exists($_CONF['path_to_netpbm'] . $binary)) {
-                    $T->set_var(array(
-                        'config_item'   =>  'NetPBM Programs',
-                        'status'        =>  '<span style="color:red">' . $LANG_MG01['not_found'] . '</span>'
-                    ));
+                    $T->set_var(array('config_item' => 'NetPBM Programs','status' => '<span style="color:red">' . $LANG_MG01['not_found'] . '</span>'));
                 } else {
-                    $T->set_var(array(
-                        'config_item'   =>  'NetPBM Programs',
-                        'status'        =>  '<span style="color:green">' . $LANG_MG01['ok'] . '</span>'
-                    ));
+                    $T->set_var(array('config_item' => 'NetPBM Programs','status' => '<span style="color:green">' . $LANG_MG01['ok'] . '</span>'));
                 }
                 $T->parse('CRow2', 'CheckRow2', true);
                 break;
-
-            case 'gdlib' :        // GD Libs
+            case 'gdlib' :
                 if ($gdv = gdVersion()) {
                     if ($gdv >=2) {
-                        $T->set_var(array(
-                            'config_item'   =>  'GD Libraries',
-                            'status'        =>  '<span style="color:green">v2 Installed</span>'
-                        ));
+                        $T->set_var(array('config_item' => 'GD Libraries','status' => '<span style="color:green">v2 Installed</span>'));
                     } else {
-                        $T->set_var(array(
-                            'config_item'   =>  'GD Libraries',
-                            'status'        =>  '<span style="color:yellow">v1 Installed</span>'
-                        ));
+                        $T->set_var(array('config_item' => 'GD Libraries','status' => '<span style="color:yellow">v1 Installed</span>'));
                     }
                 } else {
-                    $T->set_var(array(
-                        'config_item'   =>  'GD Libraries',
-                        'status'        =>  '<span style="color:red">' . $LANG_MG01['not_found'] . '</span>'
-                    ));
+                    $T->set_var(array('config_item' => 'GD Libraries','status' => '<span style="color:red">' . $LANG_MG01['not_found'] . '</span>'));
                 }
                 $T->parse('CRow2', 'CheckRow2', true);
                 break;
@@ -167,15 +138,9 @@ function MG_checkEnvironment($storageMessage = '', $storageSuccess = true)
             $binary = '/jhead' . ((PHP_OS == 'WINNT') ? '.exe' : '');
             clearstatcache();
             if (! @file_exists($_MG_CONF['jhead_path'] . $binary)) {
-                $T->set_var(array(
-                    'config_item'   =>  'jhead Program',
-                    'status'        =>  '<span style="color:red">' .  $LANG_MG01['not_found'] . '</span>'
-                ));
+                $T->set_var(array('config_item' => 'jhead Program','status' => '<span style="color:red">' .  $LANG_MG01['not_found'] . '</span>'));
             } else {
-                $T->set_var(array(
-                    'config_item'   =>  'jhead Program',
-                    'status'        =>  '<span style="color:green">' . $LANG_MG01['ok'] . '</span>'
-                ));
+                $T->set_var(array('config_item' => 'jhead Program','status' => '<span style="color:green">' . $LANG_MG01['ok'] . '</span>'));
             }
             $T->parse('CRow2', 'CheckRow2', true);
         }
@@ -184,15 +149,9 @@ function MG_checkEnvironment($storageMessage = '', $storageSuccess = true)
             $binary = '/jpegtran' . ((PHP_OS == 'WINNT') ? '.exe' : '');
             clearstatcache();
             if (! @file_exists($_MG_CONF['jpegtran_path'] . $binary)) {
-                $T->set_var(array(
-                    'config_item'   =>  'jpegtran Program',
-                    'status'        =>  '<span style="color:red">' .  $LANG_MG01['not_found'] . '</span>'
-                ));
+                $T->set_var(array('config_item' => 'jpegtran Program','status' => '<span style="color:red">' .  $LANG_MG01['not_found'] . '</span>'));
             } else {
-                $T->set_var(array(
-                    'config_item'   =>  'jpegtran Program',
-                    'status'        =>  '<span style="color:green">' . $LANG_MG01['ok'] . '</span>'
-                ));
+                $T->set_var(array('config_item' => 'jpegtran Program','status' => '<span style="color:green">' . $LANG_MG01['ok'] . '</span>'));
             }
             $T->parse('CRow2', 'CheckRow2', true);
         }
@@ -201,15 +160,9 @@ function MG_checkEnvironment($storageMessage = '', $storageSuccess = true)
             $binary = '/ffmpeg' . ((PHP_OS == 'WINNT') ? '.exe' : '');
             clearstatcache();
             if (! @file_exists($_MG_CONF['ffmpeg_path'] . $binary)) {
-                $T->set_var(array(
-                    'config_item'   =>  'ffmpeg Program',
-                    'status'        =>  '<span style="color:red">' .  $LANG_MG01['not_found'] . '</span>'
-                ));
+                $T->set_var(array('config_item' => 'ffmpeg Program','status' => '<span style="color:red">' .  $LANG_MG01['not_found'] . '</span>'));
             } else {
-                $T->set_var(array(
-                    'config_item'   =>  'ffmpeg Program',
-                    'status'        =>  '<span style="color:green">' . $LANG_MG01['ok'] . '</span>'
-                ));
+                $T->set_var(array('config_item' => 'ffmpeg Program','status' => '<span style="color:green">' . $LANG_MG01['ok'] . '</span>'));
             }
             $T->parse('CRow2', 'CheckRow2', true);
         }
@@ -218,23 +171,14 @@ function MG_checkEnvironment($storageMessage = '', $storageSuccess = true)
             $binary = '/unzip' . ((PHP_OS == 'WINNT') ? '.exe' : '');
             clearstatcache();
             if (! @file_exists($_MG_CONF['zip_path'] . $binary)) {
-                $T->set_var(array(
-                    'config_item'   =>  'unzip Program',
-                    'status'        =>  '<span style="color:red">' .  $LANG_MG01['not_found'] . '</span>'
-                ));
+                $T->set_var(array('config_item' => 'unzip Program','status' => '<span style="color:red">' .  $LANG_MG01['not_found'] . '</span>'));
             } else {
-                $T->set_var(array(
-                    'config_item'   =>  'unzip Program',
-                    'status'        =>  '<span style="color:green">' . $LANG_MG01['ok'] . '</span>'
-                ));
+                $T->set_var(array('config_item' => 'unzip Program','status' => '<span style="color:green">' . $LANG_MG01['ok'] . '</span>'));
             }
             $T->parse('CRow2', 'CheckRow2', true);
         }
     } else {
-        $T->set_var(array(
-            'config_item'   =>  'Program Locations',
-            'status'        =>  '<span style="color:red">Unable to check because of safe_mode restrictions</span>',
-        ));
+        $T->set_var(array('config_item' => 'Program Locations','status' => '<span style="color:red">Unable to check because of safe_mode restrictions</span>'));
         $T->parse('CRow2', 'CheckRow2', true);
     }
 
@@ -244,128 +188,81 @@ function MG_checkEnvironment($storageMessage = '', $storageSuccess = true)
         $T->parse('CRow1', 'CheckRow1', true);
     }
 
-    // Now Check the directory permissions...
-
     $T->set_var('CRow2', '');
     $T->set_var('config_title', $LANG_MG01['mg_dir_structure']);
-
     $errCount = 0;
 
-    // check tmp path
-
     if (! is_writable($_MG_CONF['tmp_path'])) {
-        $T->set_var(array(
-            'config_item'   =>  'tmp Path',
-            'status'        =>  '<span style="color:red">' .  $LANG_MG01['not_writable'] . '</span>'
-        ));
+        $T->set_var(array('config_item' => 'tmp Path','status' => '<span style="color:red">' .  $LANG_MG01['not_writable'] . '</span>'));
         $T->parse('CRow2', 'CheckRow2', true);
     } else {
-        $T->set_var(array(
-            'config_item'   =>  'tmp Path',
-            'status'        =>  '<span style="color:green">' . $LANG_MG01['ok'] . '</span>'
-        ));
+        $T->set_var(array('config_item' => 'tmp Path','status' => '<span style="color:green">' . $LANG_MG01['ok'] . '</span>'));
         $T->parse('CRow2', 'CheckRow2', true);
     }
-    //      Now check directory permissions...
+
     $loopy=array('1','2','3','4','5','6','7','8','9','0','a','b','c','d','e','f');
     $elements = count($loopy);
-    // do orig
     for ($i=0; $i<$elements; $i++) {
         if (! is_writable($_MG_CONF['path_mediaobjects'] . 'orig/' . $loopy[$i])) {
             $errCount++;
-            $T->set_var(array(
-                'config_item'   =>  $_MG_CONF['path_mediaobjects'] . 'orig/' . $loopy[$i],
-                'status'        =>  '<span style="color:red">' . $LANG_MG01['not_writable'] . '</span>'
-            ));
+            $T->set_var(array('config_item' => $_MG_CONF['path_mediaobjects'] . 'orig/' . $loopy[$i],'status' => '<span style="color:red">' . $LANG_MG01['not_writable'] . '</span>'));
             $T->parse('CRow2', 'CheckRow2', true);
         }
     }
-
     for ($i=0; $i<$elements; $i++) {
         if (! is_writable($_MG_CONF['path_mediaobjects'] . 'disp/' . $loopy[$i])) {
-            $T->set_var(array(
-                'config_item'   =>  $_MG_CONF['path_mediaobjects'] . 'disp/' . $loopy[$i],
-                'status'        =>  '<span style="color:red">' . $LANG_MG01['not_writable'] . '</span>'
-            ));
+            $T->set_var(array('config_item' => $_MG_CONF['path_mediaobjects'] . 'disp/' . $loopy[$i],'status' => '<span style="color:red">' . $LANG_MG01['not_writable'] . '</span>'));
             $errCount++;
             $T->parse('CRow2', 'CheckRow2', true);
         }
     }
-
     for ($i=0; $i<$elements; $i++) {
         if (! is_writable($_MG_CONF['path_mediaobjects'] . 'tn/' . $loopy[$i])) {
-            $T->set_var(array(
-                'config_item'   =>  $_MG_CONF['path_mediaobjects'] . 'tn/' . $loopy[$i],
-                'status'        =>  '<span style="color:red">' . $LANG_MG01['not_writable'] . '</span>'
-            ));
+            $T->set_var(array('config_item' => $_MG_CONF['path_mediaobjects'] . 'tn/' . $loopy[$i],'status' => '<span style="color:red">' . $LANG_MG01['not_writable'] . '</span>'));
             $T->parse('CRow2', 'CheckRow2', true);
             $errCount++;
         }
     }
-
     if (! is_writable($_MG_CONF['path_mediaobjects'] . 'covers/')) {
-        $T->set_var(array(
-            'config_item'   =>  $_MG_CONF['path_mediaobjects'] . 'covers/',
-            'status'        =>  '<span style="color:red">' . $LANG_MG01['not_writable'] . '</span>'
-        ));
+        $T->set_var(array('config_item' => $_MG_CONF['path_mediaobjects'] . 'covers/','status' => '<span style="color:red">' . $LANG_MG01['not_writable'] . '</span>'));
         $T->parse('CRow2', 'CheckRow2', true);
         $errCount++;
     }
-
     if ($errCount == 0) {
-        $T->set_var(array(
-            'config_item'       =>  $LANG_MG01['mg_directories'],
-            'status'            =>  '<span style="color:green">' . $LANG_MG01['ok'] . '</span>'
-        ));
+        $T->set_var(array('config_item' => $LANG_MG01['mg_directories'],'status' => '<span style="color:green">' . $LANG_MG01['ok'] . '</span>'));
         $T->parse('CRow2', 'CheckRow2', true);
     }
-
     $T->parse('CRow1', 'CheckRow1', true);
 
-    // Verify persistent user storage separately from packaged plugin images.
     $T->set_var('CRow2', '');
     $T->set_var('config_title', $LANG_MG01['media_storage']);
 
     $expectedStorage = MG_getMediaStorageTarget180();
-    $activePath = isset($_MG_CONF['path_mediaobjects'])
-        ? rtrim($_MG_CONF['path_mediaobjects'], '/\\') . '/' : '';
-    $activeUrl = isset($_MG_CONF['mediaobjects_url'])
-        ? rtrim($_MG_CONF['mediaobjects_url'], '/') : '';
-    $expectedPath = $expectedStorage !== false
-        ? rtrim($expectedStorage['path'], '/\\') . '/' : '';
-    $pathMatches = $expectedPath !== ''
-        && rtrim(str_replace('\\', '/', $activePath), '/')
-            === rtrim(str_replace('\\', '/', $expectedPath), '/');
-    $storageRootOk = $activePath !== '' && is_dir($activePath)
-        && is_readable($activePath) && is_writable($activePath);
+    $activePath = isset($_MG_CONF['path_mediaobjects']) ? rtrim($_MG_CONF['path_mediaobjects'], '/\\') . '/' : '';
+    $activeUrl = isset($_MG_CONF['mediaobjects_url']) ? rtrim($_MG_CONF['mediaobjects_url'], '/') : '';
+    $expectedPath = $expectedStorage !== false ? rtrim($expectedStorage['path'], '/\\') . '/' : '';
+    $pathMatches = $expectedPath !== '' && rtrim(str_replace('\\', '/', $activePath), '/') === rtrim(str_replace('\\', '/', $expectedPath), '/');
+    $storageRootOk = $activePath !== '' && is_dir($activePath) && is_readable($activePath) && is_writable($activePath);
 
     $T->set_var(array(
         'config_item' => $LANG_MG01['active_media_path'],
-        'status' => '<code>' . htmlspecialchars($activePath, ENT_QUOTES, 'UTF-8') . '</code> '
-            . ($storageRootOk
-                ? '<span style="color:green">' . $LANG_MG01['ok'] . '</span>'
-                : '<span style="color:red">' . $LANG_MG01['storage_root_invalid'] . '</span>'),
+        'status' => '<code>' . htmlspecialchars($activePath, ENT_QUOTES, 'UTF-8') . '</code> ' . ($storageRootOk ? '<span style="color:green">' . $LANG_MG01['ok'] . '</span>' : '<span style="color:red">' . $LANG_MG01['storage_root_invalid'] . '</span>'),
     ));
     $T->parse('CRow2', 'CheckRow2', true);
     if (!$pathMatches) {
         $T->set_var(array(
             'config_item' => $LANG_MG01['expected_media_path'],
-            'status' => $expectedPath === ''
-                ? '<span style="color:red">' . $LANG_MG01['storage_unresolved'] . '</span>'
-                : '<code>' . htmlspecialchars($expectedPath, ENT_QUOTES, 'UTF-8') . '</code> '
-                    . '<span style="color:red">' . $LANG_MG01['storage_path_mismatch'] . '</span>',
+            'status' => $expectedPath === '' ? '<span style="color:red">' . $LANG_MG01['storage_unresolved'] . '</span>' : '<code>' . htmlspecialchars($expectedPath, ENT_QUOTES, 'UTF-8') . '</code> <span style="color:red">' . $LANG_MG01['storage_path_mismatch'] . '</span>',
         ));
         $T->parse('CRow2', 'CheckRow2', true);
     }
     $T->set_var(array(
         'config_item' => $LANG_MG01['active_media_url'],
-        'status' => '<a href="' . htmlspecialchars($activeUrl, ENT_QUOTES, 'UTF-8') . '">'
-            . htmlspecialchars($activeUrl, ENT_QUOTES, 'UTF-8') . '</a>',
+        'status' => '<a href="' . htmlspecialchars($activeUrl, ENT_QUOTES, 'UTF-8') . '">' . htmlspecialchars($activeUrl, ENT_QUOTES, 'UTF-8') . '</a>',
     ));
     $T->parse('CRow2', 'CheckRow2', true);
 
-    $assetRoot = isset($_MG_CONF['path_mediaassets'])
-        ? rtrim($_MG_CONF['path_mediaassets'], '/\\') . '/' : '';
+    $assetRoot = isset($_MG_CONF['path_mediaassets']) ? rtrim($_MG_CONF['path_mediaassets'], '/\\') . '/' : '';
     $validAssets = 0;
     $invalidAssets = array();
     foreach (MG_getRequiredMediaAssets180() as $asset) {
@@ -380,37 +277,25 @@ function MG_checkEnvironment($storageMessage = '', $storageSuccess = true)
     $assetStatus = '<code>' . htmlspecialchars($assetRoot, ENT_QUOTES, 'UTF-8') . '</code><br>'
         . '<span style="color:' . (empty($invalidAssets) ? 'green' : 'red') . '">'
         . sprintf($LANG_MG01['valid_media_assets'], $validAssets, $assetCount) . '</span>';
-    $T->set_var(array(
-        'config_item' => $LANG_MG01['plugin_media_assets'],
-        'status' => $assetStatus,
-    ));
+    $T->set_var(array('config_item' => $LANG_MG01['plugin_media_assets'],'status' => $assetStatus));
     $T->parse('CRow2', 'CheckRow2', true);
     foreach ($invalidAssets as $asset) {
-        $T->set_var(array(
-            'config_item' => htmlspecialchars($asset, ENT_QUOTES, 'UTF-8'),
-            'status' => '<span style="color:red">' . $LANG_MG01['invalid_media_asset'] . '</span>',
-        ));
+        $T->set_var(array('config_item' => htmlspecialchars($asset, ENT_QUOTES, 'UTF-8'),'status' => '<span style="color:red">' . $LANG_MG01['invalid_media_asset'] . '</span>'));
         $T->parse('CRow2', 'CheckRow2', true);
     }
 
     if ($storageMessage !== '') {
         $T->set_var(array(
             'config_item' => $LANG_MG01['storage_operation'],
-            'status' => '<span style="color:' . ($storageSuccess ? 'green' : 'red') . '">'
-                . htmlspecialchars($storageMessage, ENT_QUOTES, 'UTF-8') . '</span>',
+            'status' => '<span style="color:' . ($storageSuccess ? 'green' : 'red') . '">' . htmlspecialchars($storageMessage, ENT_QUOTES, 'UTF-8') . '</span>',
         ));
         $T->parse('CRow2', 'CheckRow2', true);
     }
     $T->parse('CRow1', 'CheckRow1', true);
 
-    // check php.ini settings...
-
     $T->set_var('CRow2', '');
     $T->set_var('config_title', $LANG_MG01['php_ini_settings']);
-
-    $inichecks = array('upload_max_filesize', 'file_uploads', 'post_max_size', 'max_execution_time',
-                       'memory_limit', 'max_input_time', 'safe_mode', 'upload_tmp_dir');
-
+    $inichecks = array('upload_max_filesize', 'file_uploads', 'post_max_size', 'max_execution_time','memory_limit', 'max_input_time', 'safe_mode', 'upload_tmp_dir');
     for ($i=0; $i < count($inichecks); $i++) {
         $iniValue = ini_get($inichecks[$i]);
         if ($iniValue === false || $iniValue === '') {
@@ -418,24 +303,17 @@ function MG_checkEnvironment($storageMessage = '', $storageSuccess = true)
         } else {
             $iniValue = htmlspecialchars((string) $iniValue, ENT_QUOTES, 'UTF-8');
         }
-        $T->set_var(array(
-            'config_item'   =>  $inichecks[$i],
-            'status'        =>  $iniValue
-        ));
+        $T->set_var(array('config_item' => $inichecks[$i],'status' => $iniValue));
         $T->parse('CRow2', 'CheckRow2', true);
     }
-
     $T->parse('CRow1', 'CheckRow1', true);
 
-    // Count pending files once so the UI can explain why synchronization is offered.
+    // Count only real historical user media. The explanatory copy itself is
+    // taken from the active MediaGallery language file; only the numeric count
+    // is generated here.
     $pendingMediaCount = MG_countPendingMediaStorage180();
-    if ($pendingMediaCount === 1) {
-        $pendingMediaMessage = '1 historical media file needs synchronization.';
-    } else {
-        $pendingMediaMessage = $pendingMediaCount . ' historical media files need synchronization.';
-    }
     $repairStorageHelp = $pendingMediaCount > 0
-        ? $pendingMediaMessage . ' ' . $LANG_MG01['repair_media_storage_help']
+        ? '<strong>' . (int) $pendingMediaCount . '</strong> &mdash; ' . $LANG_MG01['repair_media_storage_help']
         : $LANG_MG01['repair_media_storage_help'];
 
     $T->set_var(array(
@@ -453,10 +331,6 @@ function MG_checkEnvironment($storageMessage = '', $storageSuccess = true)
     $retval .= $T->finish($T->get_var('output'));
     return $retval;
 }
-
-/**
-* Main
-*/
 
 $mode = '';
 if (isset($_POST['mode'])) {
@@ -481,15 +355,10 @@ if ($action === 'repair_media_storage') {
             $storageSuccess = false;
             $storageMessage = $LANG_MG01['repair_media_storage_failed'];
         } else {
-            // Copy and verify user media, but retain the historical source so
-            // that this administrative operation remains recoverable.
             $storageSuccess = MG_migrateMediaStorage180($legacy);
             if ($storageSuccess) {
                 $storageMessage = $LANG_MG01['repair_media_storage_success'];
-                COM_errorLog(
-                    'MediaGallery: persistent media storage synchronized from ' . $legacy
-                    . ' to ' . $target['path'] . '; source files retained.'
-                );
+                COM_errorLog('MediaGallery: persistent media storage synchronized from ' . $legacy . ' to ' . $target['path'] . '; source files retained.');
             } else {
                 $storageMessage = $LANG_MG01['repair_media_storage_failed'];
             }
