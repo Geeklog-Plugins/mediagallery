@@ -336,57 +336,59 @@ function MG_checkEnvironment($storageMessage = '', $storageSuccess = true)
     $pathMatches = $expectedPath !== ''
         && rtrim(str_replace('\\', '/', $activePath), '/')
             === rtrim(str_replace('\\', '/', $expectedPath), '/');
+    $storageRootOk = $activePath !== '' && is_dir($activePath)
+        && is_readable($activePath) && is_writable($activePath);
 
     $T->set_var(array(
         'config_item' => $LANG_MG01['active_media_path'],
-        'status' => htmlspecialchars($activePath, ENT_QUOTES, 'UTF-8'),
+        'status' => '<code>' . htmlspecialchars($activePath, ENT_QUOTES, 'UTF-8') . '</code> '
+            . ($storageRootOk
+                ? '<span style="color:green">' . $LANG_MG01['ok'] . '</span>'
+                : '<span style="color:red">' . $LANG_MG01['storage_root_invalid'] . '</span>'),
     ));
     $T->parse('CRow2', 'CheckRow2', true);
-    $T->set_var(array(
-        'config_item' => $LANG_MG01['expected_media_path'],
-        'status' => $expectedPath === ''
-            ? '<span style="color:red">' . $LANG_MG01['storage_unresolved'] . '</span>'
-            : htmlspecialchars($expectedPath, ENT_QUOTES, 'UTF-8')
-                . ($pathMatches ? ' <span style="color:green">' . $LANG_MG01['ok'] . '</span>'
-                    : ' <span style="color:red">' . $LANG_MG01['storage_path_mismatch'] . '</span>'),
-    ));
-    $T->parse('CRow2', 'CheckRow2', true);
+    if (!$pathMatches) {
+        $T->set_var(array(
+            'config_item' => $LANG_MG01['expected_media_path'],
+            'status' => $expectedPath === ''
+                ? '<span style="color:red">' . $LANG_MG01['storage_unresolved'] . '</span>'
+                : '<code>' . htmlspecialchars($expectedPath, ENT_QUOTES, 'UTF-8') . '</code> '
+                    . '<span style="color:red">' . $LANG_MG01['storage_path_mismatch'] . '</span>',
+        ));
+        $T->parse('CRow2', 'CheckRow2', true);
+    }
     $T->set_var(array(
         'config_item' => $LANG_MG01['active_media_url'],
-        'status' => htmlspecialchars($activeUrl, ENT_QUOTES, 'UTF-8'),
-    ));
-    $T->parse('CRow2', 'CheckRow2', true);
-
-    $storageRootOk = $activePath !== '' && is_dir($activePath)
-        && is_readable($activePath) && is_writable($activePath);
-    $T->set_var(array(
-        'config_item' => $LANG_MG01['media_storage_root'],
-        'status' => $storageRootOk
-            ? '<span style="color:green">' . $LANG_MG01['ok'] . '</span>'
-            : '<span style="color:red">' . $LANG_MG01['storage_root_invalid'] . '</span>',
+        'status' => '<a href="' . htmlspecialchars($activeUrl, ENT_QUOTES, 'UTF-8') . '">'
+            . htmlspecialchars($activeUrl, ENT_QUOTES, 'UTF-8') . '</a>',
     ));
     $T->parse('CRow2', 'CheckRow2', true);
 
     $assetRoot = isset($_MG_CONF['path_mediaassets'])
         ? rtrim($_MG_CONF['path_mediaassets'], '/\\') . '/' : '';
-    $T->set_var(array(
-        'config_item' => $LANG_MG01['plugin_media_assets'],
-        'status' => htmlspecialchars($assetRoot, ENT_QUOTES, 'UTF-8'),
-    ));
-    $T->parse('CRow2', 'CheckRow2', true);
-
+    $validAssets = 0;
+    $invalidAssets = array();
     foreach (MG_getRequiredMediaAssets180() as $asset) {
         $assetPath = $assetRoot . $asset;
-        $size = @getimagesize($assetPath);
         if (MG_validateMediaAsset180($assetPath)) {
-            $status = '<span style="color:green">' . $LANG_MG01['ok'] . '</span>'
-                . ' (' . (int) $size[0] . ' × ' . (int) $size[1] . ')';
+            $validAssets++;
         } else {
-            $status = '<span style="color:red">' . $LANG_MG01['invalid_media_asset'] . '</span>';
+            $invalidAssets[] = $asset;
         }
+    }
+    $assetCount = count(MG_getRequiredMediaAssets180());
+    $assetStatus = '<code>' . htmlspecialchars($assetRoot, ENT_QUOTES, 'UTF-8') . '</code><br>'
+        . '<span style="color:' . (empty($invalidAssets) ? 'green' : 'red') . '">'
+        . sprintf($LANG_MG01['valid_media_assets'], $validAssets, $assetCount) . '</span>';
+    $T->set_var(array(
+        'config_item' => $LANG_MG01['plugin_media_assets'],
+        'status' => $assetStatus,
+    ));
+    $T->parse('CRow2', 'CheckRow2', true);
+    foreach ($invalidAssets as $asset) {
         $T->set_var(array(
             'config_item' => htmlspecialchars($asset, ENT_QUOTES, 'UTF-8'),
-            'status' => $status,
+            'status' => '<span style="color:red">' . $LANG_MG01['invalid_media_asset'] . '</span>',
         ));
         $T->parse('CRow2', 'CheckRow2', true);
     }
@@ -410,9 +412,15 @@ function MG_checkEnvironment($storageMessage = '', $storageSuccess = true)
                        'memory_limit', 'max_input_time', 'safe_mode', 'upload_tmp_dir');
 
     for ($i=0; $i < count($inichecks); $i++) {
+        $iniValue = ini_get($inichecks[$i]);
+        if ($iniValue === false || $iniValue === '') {
+            $iniValue = '&mdash;';
+        } else {
+            $iniValue = htmlspecialchars((string) $iniValue, ENT_QUOTES, 'UTF-8');
+        }
         $T->set_var(array(
             'config_item'   =>  $inichecks[$i],
-            'status'        =>  ini_get($inichecks[$i])
+            'status'        =>  $iniValue
         ));
         $T->parse('CRow2', 'CheckRow2', true);
     }

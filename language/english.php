@@ -200,6 +200,7 @@ $LANG_MG01 = array (
     'active_media_url'          => 'Active media URL',
     'media_storage_root'        => 'Storage root',
     'plugin_media_assets'       => 'Plugin image resources',
+    'valid_media_assets'        => '%d of %d required images are valid',
     'storage_unresolved'        => 'Unable to resolve the persistent storage target',
     'storage_path_mismatch'     => 'Active path does not match the expected path',
     'storage_root_invalid'      => 'Directory missing, unreadable or not writable',

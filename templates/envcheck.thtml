@@ -1,20 +1,24 @@
 <form action="{s_form_action}" method="post" class="compact uk-form">
-  <div class="admin_basic" id="admin-editor">
+  <div class="admin_basic mg-envcheck" id="admin-editor">
 <!-- BEGIN CheckRow1 -->
-    <h3>{config_title}</h3>
-    <dl class="form_block">
+    <section class="mg-envcheck-section">
+      <h3 class="mg-envcheck-title">{config_title}</h3>
+      <dl class="form_block mg-envcheck-list">
 <!-- BEGIN CheckRow2 -->
-      <dt>{config_item}</dt>
-      <dd>{status}</dd>
+        <dt>{config_item}</dt>
+        <dd>{status}</dd>
 <!-- END CheckRow2 -->
-    </dl>
+      </dl>
+    </section>
 <!-- END CheckRow1 -->
-    <div class="mg_submit">
-      <p>{repair_storage_help}</p>
+    <div class="mg_submit mg-envcheck-actions">
+      <p class="mg-envcheck-help">{repair_storage_help}</p>
       <input type="hidden" name="{gltoken_name}" value="{gltoken}"{xhtml}>
-      <button type="submit" name="action" value="repair_media_storage">{lang_repair_storage}</button>&nbsp;&nbsp;
-      <input type="submit" name="mode" value="{lang_recheck}"{xhtml}>&nbsp;&nbsp;
-      <input type="submit" name="mode" value="{lang_continue}"{xhtml}>
+      <div class="mg-envcheck-buttons">
+        <button class="uk-button uk-button-primary" type="submit" name="action" value="repair_media_storage">{lang_repair_storage}</button>
+        <input class="uk-button uk-button-default" type="submit" name="mode" value="{lang_recheck}"{xhtml}>
+        <input class="uk-button uk-button-default" type="submit" name="mode" value="{lang_continue}"{xhtml}>
+      </div>
     </div>
   </div>
 </form>

@@ -517,6 +517,86 @@ a.SWFUProgressCancel:hover {
   margin-bottom: 10px;
 }
 
+.mg-envcheck {
+  max-width: 1100px;
+}
+
+.mg-envcheck-section {
+  margin: 0 0 18px;
+  overflow: hidden;
+  border: 1px solid rgba(127, 127, 127, .3);
+  border-radius: 4px;
+}
+
+.mg-envcheck-title {
+  margin: 0;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(127, 127, 127, .3);
+  background: rgba(127, 127, 127, .08);
+  font-size: 1.1rem;
+}
+
+.mg-envcheck-list {
+  display: grid;
+  grid-template-columns: minmax(190px, 30%) minmax(0, 1fr);
+  margin: 0;
+  padding: 0;
+}
+
+.mg-envcheck-list dt,
+.mg-envcheck-list dd {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(127, 127, 127, .18);
+}
+
+.mg-envcheck-list dt {
+  font-weight: 600;
+}
+
+.mg-envcheck-list dd:nth-last-child(-n+2),
+.mg-envcheck-list dt:nth-last-child(-n+2) {
+  border-bottom: 0;
+}
+
+.mg-envcheck-list code {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.mg-envcheck-actions {
+  padding: 14px 16px;
+  border: 1px solid rgba(127, 127, 127, .3);
+  border-radius: 4px;
+  background: rgba(127, 127, 127, .06);
+}
+
+.mg-envcheck-help {
+  margin: 0 0 12px;
+}
+
+.mg-envcheck-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@media (max-width: 640px) {
+  .mg-envcheck-list {
+    display: block;
+  }
+
+  .mg-envcheck-list dt {
+    padding-bottom: 3px;
+    border-bottom: 0;
+  }
+
+  .mg-envcheck-list dd {
+    padding-top: 3px;
+  }
+}
+
 .mg_album_header {
   background-color: #E6E6E6;
   color: #666666;

@@ -150,6 +150,7 @@ $LANG_MG01['expected_media_path'] = 'Chemin attendu des médias';
 $LANG_MG01['active_media_url'] = 'URL active des médias';
 $LANG_MG01['media_storage_root'] = 'Racine du stockage';
 $LANG_MG01['plugin_media_assets'] = 'Ressources images du plugin';
+$LANG_MG01['valid_media_assets'] = '%d image(s) requise(s) valide(s) sur %d';
 $LANG_MG01['storage_unresolved'] = 'Impossible de déterminer le stockage persistant attendu';
 $LANG_MG01['storage_path_mismatch'] = 'Le chemin actif ne correspond pas au chemin attendu';
 $LANG_MG01['storage_root_invalid'] = 'Répertoire absent, illisible ou non inscriptible';
