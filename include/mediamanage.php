@@ -211,7 +211,7 @@ function MG_imageAdmin($album_id, $page, $actionURL = '')
                     //$height = 75;
                     $width = 150;
                     $height = 112;
-                    $thumbnail = $_MG_CONF['mediaobjects_url'] . '/missing.png';
+                    $thumbnail = $_MG_CONF['mediaassets_url'] . '/missing.png';
                 }
 
                 $cat_select = '<select id="mg-media-category-' . $counter . '" name="cat_id[]" aria-label="'

@@ -37,6 +37,34 @@ if (strpos(strtolower($_SERVER['PHP_SELF']), strtolower(basename(__FILE__))) !==
 
 require_once $_CONF['path'] . 'plugins/mediagallery/include/common.php';
 
+function MG_hasUsableImageSize180($size)
+{
+    return is_array($size)
+        && isset($size[0], $size[1])
+        && (int) $size[0] > 0
+        && (int) $size[1] > 0;
+}
+
+/**
+ * Return dimensions that are always safe for aspect-ratio calculations.
+ */
+function MG_getSafeImageSize180($filename, $context = '')
+{
+    $size = @getimagesize($filename);
+    if (MG_hasUsableImageSize180($size)) {
+        return array((int) $size[0], (int) $size[1]);
+    }
+
+    COM_errorLog(
+        'MediaGallery: unable to read valid image dimensions'
+        . ($context !== '' ? ' for ' . $context : '')
+        . ': ' . $filename,
+        1
+    );
+
+    return array(200, 150);
+}
+
 function MG_helper_getContainer($media, $align, $container)
 {
     $allowedAlign = array('left', 'right', 'center');
@@ -801,7 +829,7 @@ function MG_autotags($op, $content = '', $autotag = '')
                         $src = 'tn';
                         break;
                 }
-                if ($media_size == false) {
+                if (!MG_hasUsableImageSize180($media_size)) {
                     continue;
                 }
 
@@ -949,7 +977,7 @@ function MG_autotags($op, $content = '', $autotag = '')
                         $src = 'tn';
                         break;
                 }
-                if ($media_size == false) {
+                if (!MG_hasUsableImageSize180($media_size)) {
                     continue;
                 }
 
@@ -1078,15 +1106,15 @@ function MG_autotags($op, $content = '', $autotag = '')
                     $tnImage = $_MG_CONF['mediaobjects_url'] . '/' . $tfn . $ext;
                     $tnFileName = $_MG_CONF['path_mediaobjects'] . $tfn . $ext;
                 } else {
-                    $tnImage = $_MG_CONF['mediaobjects_url'] . '/empty.png';
-                    $tnFileName = $_MG_CONF['path_mediaobjects'] . 'empty.png';
+                    $tnImage = $_MG_CONF['mediaassets_url'] . '/empty.png';
+                    $tnFileName = $_MG_CONF['path_mediaassets'] . 'empty.png';
                 }
             }
             $media_size = @getimagesize($tnFileName);
-            if ($media_size == false) {
-                $tnImage = $_MG_CONF['mediaobjects_url'] . '/missing.png';
-                $tnFileName = $_MG_CONF['path_mediaobjects'] . 'missing.png';
-                $media_size = @getimagesize($tnFileName);
+            if (!MG_hasUsableImageSize180($media_size)) {
+                $tnImage = $_MG_CONF['mediaassets_url'] . '/missing.png';
+                $tnFileName = $_MG_CONF['path_mediaassets'] . 'missing.png';
+                $media_size = MG_getSafeImageSize180($tnFileName, 'album autotag ' . $parm1);
             }
             if ($width > 0 && $height == 0) {
                 $ratio = $media_size[0] / $width;
@@ -1262,7 +1290,14 @@ function MG_autotags($op, $content = '', $autotag = '')
             }
 
             $mediaSize = @getimagesize($media_thumbnail_file);
-            if ($mediaSize == false) return str_replace($autotag['tagstr'], '', $content);
+            if (!MG_hasUsableImageSize180($mediaSize)) {
+                COM_errorLog(
+                    'MediaGallery: unable to read valid image dimensions for media autotag '
+                    . $parm1 . ': ' . $media_thumbnail_file,
+                    1
+                );
+                return str_replace($autotag['tagstr'], '', $content);
+            }
             if ($autotag['tag'] == 'oimage' || $src == 'orig') {
                 $newwidth  = $mediaSize[0];
                 $newheight = $mediaSize[1];

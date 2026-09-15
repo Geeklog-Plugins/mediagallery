@@ -193,6 +193,24 @@ function MG_migrateMediaStorage180($source = null)
         return false;
     }
 
+    // Only user-generated media belongs in persistent storage. Packaged
+    // fallback/type images remain in the plugin's public mediaobjects folder.
+    $filtered = array();
+    $filteredBytes = 0;
+    foreach ($sourceInventory['files'] as $relative => $size) {
+        $normalized = str_replace('\\', '/', $relative);
+        if (!preg_match('~^(orig|disp|tn|covers)/~', $normalized)) {
+            continue;
+        }
+        $filtered[$relative] = $size;
+        $filteredBytes += $size;
+    }
+    $sourceInventory = array(
+        'files' => $filtered,
+        'count' => count($filtered),
+        'bytes' => $filteredBytes,
+    );
+
     // Fresh installs and already-migrated sites may have no historical files.
     if ($sourceInventory['count'] === 0) {
         return true;
@@ -255,4 +273,43 @@ function MG_migrateMediaStorage180($source = null)
     );
 
     return true;
+}
+
+/**
+ * Return the packaged images required when a requested media file is missing.
+ */
+function MG_getRequiredMediaAssets180()
+{
+    return array(
+        'audio.png',
+        'empty.png',
+        'flash.png',
+        'flv.png',
+        'generic.png',
+        'googlevideo.png',
+        'missing.png',
+        'pdf.png',
+        'quicktime.png',
+        'remote.png',
+        'video.png',
+        'wmp.png',
+        'youtube.png',
+        'zip.png',
+    );
+}
+
+/**
+ * Verify that a file is a readable image with usable dimensions.
+ */
+function MG_validateMediaAsset180($filename)
+{
+    if (!is_file($filename) || is_link($filename) || !is_readable($filename)) {
+        return false;
+    }
+
+    $size = @getimagesize($filename);
+    return is_array($size)
+        && isset($size[0], $size[1])
+        && (int) $size[0] > 0
+        && (int) $size[1] > 0;
 }

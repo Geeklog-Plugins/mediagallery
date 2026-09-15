@@ -10,6 +10,9 @@
     </dl>
 <!-- END CheckRow1 -->
     <div class="mg_submit">
+      <p>{repair_storage_help}</p>
+      <input type="hidden" name="{gltoken_name}" value="{gltoken}"{xhtml}>
+      <button type="submit" name="action" value="repair_media_storage">{lang_repair_storage}</button>&nbsp;&nbsp;
       <input type="submit" name="mode" value="{lang_recheck}"{xhtml}>&nbsp;&nbsp;
       <input type="submit" name="mode" value="{lang_continue}"{xhtml}>
     </div>

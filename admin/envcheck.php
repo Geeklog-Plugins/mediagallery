@@ -86,7 +86,7 @@ function gdVersion($user_ver = 0)
    return $match[0];
 } // End gdVersion()
 
-function MG_checkEnvironment()
+function MG_checkEnvironment($storageMessage = '', $storageSuccess = true)
 {
     global $_CONF,  $_MG_CONF, $LANG_MG01, $_TABLES;
 
@@ -322,6 +322,85 @@ function MG_checkEnvironment()
 
     $T->parse('CRow1', 'CheckRow1', true);
 
+    // Verify persistent user storage separately from packaged plugin images.
+    $T->set_var('CRow2', '');
+    $T->set_var('config_title', $LANG_MG01['media_storage']);
+
+    $expectedStorage = MG_getMediaStorageTarget180();
+    $activePath = isset($_MG_CONF['path_mediaobjects'])
+        ? rtrim($_MG_CONF['path_mediaobjects'], '/\\') . '/' : '';
+    $activeUrl = isset($_MG_CONF['mediaobjects_url'])
+        ? rtrim($_MG_CONF['mediaobjects_url'], '/') : '';
+    $expectedPath = $expectedStorage !== false
+        ? rtrim($expectedStorage['path'], '/\\') . '/' : '';
+    $pathMatches = $expectedPath !== ''
+        && rtrim(str_replace('\\', '/', $activePath), '/')
+            === rtrim(str_replace('\\', '/', $expectedPath), '/');
+
+    $T->set_var(array(
+        'config_item' => $LANG_MG01['active_media_path'],
+        'status' => htmlspecialchars($activePath, ENT_QUOTES, 'UTF-8'),
+    ));
+    $T->parse('CRow2', 'CheckRow2', true);
+    $T->set_var(array(
+        'config_item' => $LANG_MG01['expected_media_path'],
+        'status' => $expectedPath === ''
+            ? '<span style="color:red">' . $LANG_MG01['storage_unresolved'] . '</span>'
+            : htmlspecialchars($expectedPath, ENT_QUOTES, 'UTF-8')
+                . ($pathMatches ? ' <span style="color:green">' . $LANG_MG01['ok'] . '</span>'
+                    : ' <span style="color:red">' . $LANG_MG01['storage_path_mismatch'] . '</span>'),
+    ));
+    $T->parse('CRow2', 'CheckRow2', true);
+    $T->set_var(array(
+        'config_item' => $LANG_MG01['active_media_url'],
+        'status' => htmlspecialchars($activeUrl, ENT_QUOTES, 'UTF-8'),
+    ));
+    $T->parse('CRow2', 'CheckRow2', true);
+
+    $storageRootOk = $activePath !== '' && is_dir($activePath)
+        && is_readable($activePath) && is_writable($activePath);
+    $T->set_var(array(
+        'config_item' => $LANG_MG01['media_storage_root'],
+        'status' => $storageRootOk
+            ? '<span style="color:green">' . $LANG_MG01['ok'] . '</span>'
+            : '<span style="color:red">' . $LANG_MG01['storage_root_invalid'] . '</span>',
+    ));
+    $T->parse('CRow2', 'CheckRow2', true);
+
+    $assetRoot = isset($_MG_CONF['path_mediaassets'])
+        ? rtrim($_MG_CONF['path_mediaassets'], '/\\') . '/' : '';
+    $T->set_var(array(
+        'config_item' => $LANG_MG01['plugin_media_assets'],
+        'status' => htmlspecialchars($assetRoot, ENT_QUOTES, 'UTF-8'),
+    ));
+    $T->parse('CRow2', 'CheckRow2', true);
+
+    foreach (MG_getRequiredMediaAssets180() as $asset) {
+        $assetPath = $assetRoot . $asset;
+        $size = @getimagesize($assetPath);
+        if (MG_validateMediaAsset180($assetPath)) {
+            $status = '<span style="color:green">' . $LANG_MG01['ok'] . '</span>'
+                . ' (' . (int) $size[0] . ' × ' . (int) $size[1] . ')';
+        } else {
+            $status = '<span style="color:red">' . $LANG_MG01['invalid_media_asset'] . '</span>';
+        }
+        $T->set_var(array(
+            'config_item' => htmlspecialchars($asset, ENT_QUOTES, 'UTF-8'),
+            'status' => $status,
+        ));
+        $T->parse('CRow2', 'CheckRow2', true);
+    }
+
+    if ($storageMessage !== '') {
+        $T->set_var(array(
+            'config_item' => $LANG_MG01['storage_operation'],
+            'status' => '<span style="color:' . ($storageSuccess ? 'green' : 'red') . '">'
+                . htmlspecialchars($storageMessage, ENT_QUOTES, 'UTF-8') . '</span>',
+        ));
+        $T->parse('CRow2', 'CheckRow2', true);
+    }
+    $T->parse('CRow1', 'CheckRow1', true);
+
     // check php.ini settings...
 
     $T->set_var('CRow2', '');
@@ -342,7 +421,11 @@ function MG_checkEnvironment()
 
     $T->set_var(array(
         'lang_recheck'  => $LANG_MG01['recheck'],
-        'lang_continue' => $LANG_MG01['continue']
+        'lang_continue' => $LANG_MG01['continue'],
+        'lang_repair_storage' => $LANG_MG01['repair_media_storage'],
+        'repair_storage_help' => $LANG_MG01['repair_media_storage_help'],
+        'gltoken_name' => CSRF_TOKEN,
+        'gltoken' => SEC_createToken(),
     ));
 
     $T->parse('output', 'admin');
@@ -361,6 +444,38 @@ if (isset($_POST['mode'])) {
     $mode = COM_applyFilter($_GET['mode']);
 }
 
+$storageMessage = '';
+$storageSuccess = true;
+$action = isset($_POST['action']) ? COM_applyFilter($_POST['action']) : '';
+
+if ($action === 'repair_media_storage') {
+    if (!SEC_checkToken()) {
+        $storageSuccess = false;
+        $storageMessage = $LANG_MG01['invalid_security_token'];
+        COM_errorLog('MediaGallery: storage migration rejected because of an invalid CSRF token.', 1);
+    } else {
+        $target = MG_getMediaStorageTarget180();
+        $legacy = MG_getLegacyMediaStorage180();
+        if ($target === false || !MG_prepareMediaStorage180($target['path'])) {
+            $storageSuccess = false;
+            $storageMessage = $LANG_MG01['repair_media_storage_failed'];
+        } else {
+            // Copy and verify user media, but retain the historical source so
+            // that this administrative operation remains recoverable.
+            $storageSuccess = MG_migrateMediaStorage180($legacy);
+            if ($storageSuccess) {
+                $storageMessage = $LANG_MG01['repair_media_storage_success'];
+                COM_errorLog(
+                    'MediaGallery: persistent media storage synchronized from ' . $legacy
+                    . ' to ' . $target['path'] . '; source files retained.'
+                );
+            } else {
+                $storageMessage = $LANG_MG01['repair_media_storage_failed'];
+            }
+        }
+    }
+}
+
 if ($mode == $LANG_MG01['continue']) {
     COM_redirect($_MG_CONF['admin_url'] . 'index.php');
 }
@@ -372,7 +487,7 @@ $T->set_var(array(
     'site_url'       => $_MG_CONF['site_url'],
     'lang_admin'     => $LANG_MG00['admin'],
     'xhtml'          => XHTML,
-    'admin_body'     => MG_checkEnvironment(),
+    'admin_body'     => MG_checkEnvironment($storageMessage, $storageSuccess),
     'title'          => $LANG_MG01['env_check'],
 ));
 $T->parse('output', 'admin');

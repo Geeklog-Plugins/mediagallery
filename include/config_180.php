@@ -88,6 +88,8 @@ function MG_applyRuntimeConfiguration180()
 
     $_MG_CONF['path_html'] = $_CONF['path_html'] . 'mediagallery/';
     $_MG_CONF['site_url'] = $_CONF['site_url'] . '/mediagallery';
+    $_MG_CONF['path_mediaassets'] = $_MG_CONF['path_html'] . 'mediaobjects/';
+    $_MG_CONF['mediaassets_url'] = $_MG_CONF['site_url'] . '/mediaobjects';
     $_MG_CONF['admin_url'] = $_CONF['site_admin_url'] . '/plugins/mediagallery/';
     $_MG_CONF['path_admin'] = $_CONF['path_html'] . 'admin/plugins/mediagallery/';
     $_MG_CONF['template_path'] = $_CONF['path'] . 'plugins/mediagallery/templates';
