@@ -1,6 +1,6 @@
 # MediaGallery documentation
 
-This directory contains the maintained project documentation that belongs with MediaGallery 1.8.0, plus the historical changelog and GPL license text.
+This directory contains the maintained project documentation that belongs with MediaGallery 1.8.0, plus the GPL license text.
 
 The obsolete MediaGallery 1.6/1.7 installation guides, Japanese translations and duplicated legacy archives have been removed from the `modernize-1.8.0` branch. Japanese documentation can be recreated later by the Japanese community if a maintained 1.8 translation is wanted.
 
@@ -19,8 +19,8 @@ The primary documentation lives at the repository root:
 | File | Status | Purpose |
 | --- | --- | --- |
 | `README.md` | Current | Documentation index. |
+| `CHANGELOG.md` | Current | MediaGallery 1.8.0 development changelog plus a concise legacy history. |
 | `SERVICES.md` | Current | `PLG_invokeService()` and lifecycle-event interoperability contract. |
-| `ChangeLog` | Historical | Release history through the 1.7.x line; retained for project history. |
 | `gpl.txt` | Current | GPLv2 license text. |
 
 ## Public user documentation
@@ -52,11 +52,12 @@ The following classes of files were intentionally removed because they were obso
 - the old 1.6-era `usage.html` and Japanese `usage_ja.html` guides;
 - `README_ja` and `INSTALL_ja` from the 1.7.x Japanese distribution;
 - duplicated files under `docs/older/`;
+- the old plain-text excerpted `docs/ChangeLog`;
 - empty public documentation placeholders;
 - legacy documentation icons/logo no longer used by the rewritten guide.
 
 ## Documentation policy for 1.8
 
-MediaGallery 1.8.0 documentation should describe the current code, not preserve obsolete operational instructions merely for historical completeness. Historical release information can remain in `ChangeLog`, while installation, upgrade and usage instructions must match the supported Geeklog 2.1.1+ baseline and the persistent-storage model.
+MediaGallery 1.8.0 documentation should describe the current code, not preserve obsolete operational instructions merely for historical completeness. Release history is maintained in `CHANGELOG.md`, while installation, upgrade and usage instructions must match the supported Geeklog 2.1.1+ baseline and the persistent-storage model.
 
 Future translations should be based on the maintained 1.8 documents rather than on the removed 1.6/1.7 guides.
