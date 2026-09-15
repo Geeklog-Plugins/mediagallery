@@ -13,7 +13,7 @@
 // | Based on the Media Gallery Plugin for glFusion CMS                       |
 // | Copyright (C) 2002-2009 by the following authors:                        |
 // |                                                                          |
-// | Mark R. Evans          mark AT glfusion DOT org                          |
+// | Mark R. Evans          mark AT glfusion DOT org                           |
 // +--------------------------------------------------------------------------+
 // |                                                                          |
 // | This program is free software; you can redistribute it and/or            |
@@ -427,12 +427,23 @@ function MG_checkEnvironment($storageMessage = '', $storageSuccess = true)
 
     $T->parse('CRow1', 'CheckRow1', true);
 
+    // Count pending files once so the UI can explain why synchronization is offered.
+    $pendingMediaCount = MG_countPendingMediaStorage180();
+    if ($pendingMediaCount === 1) {
+        $pendingMediaMessage = '1 historical media file needs synchronization.';
+    } else {
+        $pendingMediaMessage = $pendingMediaCount . ' historical media files need synchronization.';
+    }
+    $repairStorageHelp = $pendingMediaCount > 0
+        ? $pendingMediaMessage . ' ' . $LANG_MG01['repair_media_storage_help']
+        : $LANG_MG01['repair_media_storage_help'];
+
     $T->set_var(array(
         'lang_recheck'  => $LANG_MG01['recheck'],
         'lang_continue' => $LANG_MG01['continue'],
         'lang_repair_storage' => $LANG_MG01['repair_media_storage'],
-        'repair_storage_help' => $LANG_MG01['repair_media_storage_help'],
-        'storage_migration_needed' => MG_mediaStorageNeedsMigration180() ? 'true' : '',
+        'repair_storage_help' => $repairStorageHelp,
+        'storage_migration_needed' => $pendingMediaCount > 0 ? 'true' : '',
         'media_storage_current' => $LANG_MG01['media_storage_current'],
         'gltoken_name' => CSRF_TOKEN,
         'gltoken' => SEC_createToken(),
