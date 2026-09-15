@@ -576,6 +576,12 @@ a.SWFUProgressCancel:hover {
   margin: 0 0 12px;
 }
 
+.mg-envcheck-current {
+  margin: 0 0 12px;
+  color: #237804;
+  font-weight: 600;
+}
+
 .mg-envcheck-buttons {
   display: flex;
   flex-wrap: wrap;

@@ -432,6 +432,8 @@ function MG_checkEnvironment($storageMessage = '', $storageSuccess = true)
         'lang_continue' => $LANG_MG01['continue'],
         'lang_repair_storage' => $LANG_MG01['repair_media_storage'],
         'repair_storage_help' => $LANG_MG01['repair_media_storage_help'],
+        'storage_migration_needed' => MG_mediaStorageNeedsMigration180() ? 'true' : '',
+        'media_storage_current' => $LANG_MG01['media_storage_current'],
         'gltoken_name' => CSRF_TOKEN,
         'gltoken' => SEC_createToken(),
     ));

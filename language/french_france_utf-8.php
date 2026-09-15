@@ -159,6 +159,7 @@ $LANG_MG01['storage_operation'] = 'Synchronisation du stockage';
 $LANG_MG01['repair_media_storage'] = 'Synchroniser le stockage des médias';
 $LANG_MG01['repair_media_storage_help'] = 'Copie et vérifie uniquement les médias utilisateur historiques (originaux, affichages, miniatures et couvertures) dans le dossier persistant. Les images du plugin restent dans son dossier et les fichiers source sont conservés.';
 $LANG_MG01['repair_media_storage_success'] = 'La synchronisation des médias utilisateur est terminée.';
+$LANG_MG01['media_storage_current'] = 'Aucun média utilisateur historique ne nécessite de synchronisation.';
 $LANG_MG01['repair_media_storage_failed'] = 'La synchronisation a échoué. Consultez le journal Geeklog pour connaître le chemin concerné.';
 $LANG_MG01['invalid_security_token'] = 'Le jeton de sécurité est invalide ou expiré. Rechargez cette page puis recommencez.';
 $LANG_MG01['not_found'] = 'Introuvable';

@@ -214,6 +214,7 @@ $LANG_MG01 = array (
     'repair_media_storage'      => 'メディアストレージを同期',
     'repair_media_storage_help' => '過去のユーザーメディア（オリジナル、表示画像、サムネイル、カバー）のみを永続画像ディレクトリへコピーして検証します。プラグイン画像とコピー元ファイルはそのまま保持されます。',
     'repair_media_storage_success' => 'ユーザーメディアの同期が完了しました。',
+    'media_storage_current'      => '同期が必要な過去のユーザーメディアはありません。',
     'repair_media_storage_failed' => '同期に失敗しました。対象パスはGeeklogのエラーログで確認してください。',
     'invalid_security_token'    => 'セキュリティトークンが無効か期限切れです。ページを再読み込みして再試行してください。',
     'ok'                        => 'OK',

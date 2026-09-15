@@ -209,6 +209,7 @@ $LANG_MG01 = array (
     'repair_media_storage'      => 'Synchronize media storage',
     'repair_media_storage_help' => 'Copies and verifies historical user media (originals, display images, thumbnails and covers) in the persistent images directory. Plugin images remain in the plugin directory and source files are retained.',
     'repair_media_storage_success' => 'User media synchronization completed successfully.',
+    'media_storage_current'      => 'No historical user media needs to be synchronized.',
     'repair_media_storage_failed' => 'Synchronization failed. See the Geeklog error log for the affected path.',
     'invalid_security_token'    => 'The security token is invalid or has expired. Reload this page and try again.',
     'ok'                        => 'OK',

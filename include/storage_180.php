@@ -152,6 +152,57 @@ function MG_mediaStorageHasUserContent180($root)
 }
 
 /**
+ * Check whether historical user media still needs to be synchronized.
+ * Matching files in the persistent target make this check idempotent even
+ * though the historical source is deliberately retained.
+ */
+function MG_mediaStorageNeedsMigration180($source = null)
+{
+    $target = MG_getMediaStorageTarget180();
+    if ($target === false) {
+        return false;
+    }
+
+    if ($source === null || $source === '') {
+        $source = MG_getLegacyMediaStorage180();
+    }
+    if ($source === '') {
+        return false;
+    }
+
+    $source = rtrim($source, '/\\') . '/';
+    $targetPath = rtrim($target['path'], '/\\') . '/';
+    if (rtrim(str_replace('\\', '/', $source), '/')
+        === rtrim(str_replace('\\', '/', $targetPath), '/')
+    ) {
+        return false;
+    }
+
+    $inventory = MG_inventoryMediaStorage180($source);
+    if ($inventory === false) {
+        return false;
+    }
+
+    foreach ($inventory['files'] as $relative => $expectedSize) {
+        $normalized = str_replace('\\', '/', $relative);
+        if (!preg_match('~^(orig|disp|tn|covers)/~', $normalized)) {
+            continue;
+        }
+
+        $destination = $targetPath . $relative;
+        clearstatcache(true, $destination);
+        if (!is_file($destination)
+            || is_link($destination)
+            || filesize($destination) !== $expectedSize
+        ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
  * Safely copy historical media to the 1.8.0 persistent images directory.
  *
  * The source is never deleted here. Each new file is copied to a temporary
