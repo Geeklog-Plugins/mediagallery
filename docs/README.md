@@ -1,12 +1,12 @@
 # MediaGallery documentation
 
-This directory contains the maintained project documentation that belongs with MediaGallery 1.8.0, plus the GPL license text.
+This directory contains the maintained project and administrator documentation for MediaGallery 1.8.0, plus the GPL license text.
 
 The obsolete MediaGallery 1.6/1.7 installation guides, Japanese translations and duplicated legacy archives have been removed from the `modernize-1.8.0` branch. Japanese documentation can be recreated later by the Japanese community if a maintained 1.8 translation is wanted.
 
 ## Current 1.8.0 documentation
 
-The primary documentation lives at the repository root:
+The primary development/release documentation lives at the repository root:
 
 - [`../README.md`](../README.md) — project overview, compatibility, major 1.8 changes and upgrade preflight;
 - [`../UPGRADE`](../UPGRADE) — current 1.7.x → 1.8.0 upgrade rules and persistent-storage migration;
@@ -19,45 +19,51 @@ The primary documentation lives at the repository root:
 | File | Status | Purpose |
 | --- | --- | --- |
 | `README.md` | Current | Documentation index. |
+| `ADMIN_GUIDE.html` | Current/private | Administrator guide rendered only through protected MediaGallery administration. |
 | `CHANGELOG.md` | Current | MediaGallery 1.8.0 development changelog plus a concise legacy history. |
 | `SERVICES.md` | Current | `PLG_invokeService()` and lifecycle-event interoperability contract. |
 | `gpl.txt` | Current | GPLv2 license text. |
 
-## Public user documentation
+## Administrator guide
 
-The web-visible documentation has deliberately been reduced to one maintained guide:
+The MediaGallery guide is intentionally **not stored in the public web tree**.
 
-- [`../public_html/docs/usage.html`](../public_html/docs/usage.html) — MediaGallery 1.8.0 user/administrator guide.
+The Help item in the MediaGallery administration menu points to:
 
-The 1.8 user guide covers:
+```text
+/admin/plugins/mediagallery/help.php
+```
 
-- requirements and image-processing backends;
-- albums, media items and member albums;
-- browser upload, remote media, FTP/ZIP/CLI import behavior;
-- media management and Geeklog 2.1.1-compatible batch sessions;
-- permissions and moderation;
-- HTML5 playback and slideshow behavior;
-- search, RSS, SEO, accessibility and structured data;
-- persistent media storage and the mandatory 1.7.x pre-migration step;
-- Configuration API behavior;
-- MediaGallery service/lifecycle interoperability;
-- common troubleshooting cases.
+That endpoint:
 
-## Removed legacy documentation
+1. loads Geeklog normally;
+2. requires the `mediagallery.admin` right;
+3. loads the private `docs/ADMIN_GUIDE.html` fragment from the plugin directory;
+4. renders it inside the normal Geeklog/MediaGallery administration interface.
 
-The following classes of files were intentionally removed because they were obsolete, duplicated or likely to mislead 1.8 users:
+This keeps operational documentation available where administrators expect it without publishing a static `/mediagallery/docs/usage.html` URL to all site visitors.
 
-- MediaGallery 1.6.x `INSTALL` / `upgrade.html` instructions;
+The administrator guide covers requirements, albums/media, upload/import security, batch processing, permissions, moderation, playback, SEO/accessibility, persistent storage, upgrade preflight, configuration, interoperability and troubleshooting.
+
+## Removed legacy/public documentation
+
+The following classes of files were intentionally removed because they were obsolete, duplicated or unnecessarily public:
+
+- MediaGallery 1.6.x `INSTALL`, `upgrade.html` and old `install_doc*.html` instructions;
 - incomplete legacy configuration documentation under `public_html/docs/english/`;
-- the old 1.6-era `usage.html` and Japanese `usage_ja.html` guides;
+- the old public `usage.html` and Japanese `usage_ja.html` guides;
 - `README_ja` and `INSTALL_ja` from the 1.7.x Japanese distribution;
 - duplicated files under `docs/older/`;
 - the old plain-text excerpted `docs/ChangeLog`;
 - empty public documentation placeholders;
-- legacy documentation icons/logo no longer used by the rewritten guide.
+- legacy documentation icons/logo no longer used.
+
+The `public_html/docs/` tree is no longer needed for administrator documentation in 1.8.0.
 
 ## Documentation policy for 1.8
 
-MediaGallery 1.8.0 documentation should describe the current code, not preserve obsolete operational instructions merely for historical completeness. Release history is maintained in `CHANGELOG.md`, while installation, upgrade and usage instructions must match the supported Geeklog 2.1.1+ baseline and the persistent-storage model.
+MediaGallery 1.8.0 documentation should describe the current code and should be exposed only to the audience that needs it. Repository development/release documentation stays with the source tree; administrator operational help is private and rendered through an authenticated plugin-admin endpoint.
+
+Release history is maintained in `CHANGELOG.md`. Installation, upgrade and administrative instructions must match the Geeklog 2.1.1+ baseline and the persistent-storage model.
 
 Future translations should be based on the maintained 1.8 documents rather than on the removed 1.6/1.7 guides.
