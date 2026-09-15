@@ -10,13 +10,6 @@
   box-sizing: border-box;
 }
 
-.mg-media-editor .mg-media-preview-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(220px, 1fr);
-  gap: 18px;
-  margin-bottom: 18px;
-}
-
 .mg-media-editor .mg-edit-card {
   min-width: 0;
   margin: 0 0 18px;
@@ -43,8 +36,67 @@
   padding: 0;
 }
 
-.mg-media-editor .mg-preview-pane,
-.mg-media-editor .mg-thumbnail-pane {
+.mg-media-editor .mg-primary-card {
+  padding: 22px;
+}
+
+.mg-media-editor .mg-primary-title {
+  margin-bottom: 16px;
+}
+
+.mg-media-editor .mg-primary-title label {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 1.05em;
+  font-weight: 700;
+}
+
+.mg-media-editor .mg-primary-title input[type="text"] {
+  width: 100%;
+  padding: 9px 10px;
+  font-size: 1.12em;
+  font-weight: 600;
+}
+
+.mg-media-editor .mg-primary-description label {
+  display: block;
+  margin-bottom: 7px;
+  font-weight: 600;
+}
+
+.mg-media-editor .mg-primary-description textarea {
+  width: 100%;
+  min-height: 110px;
+}
+
+.mg-media-editor .mg-primary-meta {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 18px;
+  margin-top: 16px;
+}
+
+.mg-media-editor .mg-primary-meta-item label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.mg-media-editor .mg-primary-meta-item input[type="text"],
+.mg-media-editor .mg-primary-meta-item select {
+  width: 100%;
+  max-width: 100%;
+}
+
+.mg-media-editor .mg-admin-overview {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(300px, .85fr);
+  gap: 18px;
+  align-items: start;
+  margin-bottom: 18px;
+}
+
+.mg-media-editor .mg-preview-pane {
   text-align: center;
 }
 
@@ -73,13 +125,14 @@
   align-items: start;
 }
 
-.mg-media-editor .mg-edit-grid > .mg-edit-card {
-  margin: 0;
+.mg-media-editor .mg-edit-grid > .mg-edit-card,
+.mg-media-editor .mg-edit-grid > div > .mg-edit-card:last-child {
+  margin-bottom: 0;
 }
 
 .mg-media-editor .form_block {
   display: grid;
-  grid-template-columns: minmax(170px, 34%) minmax(0, 1fr);
+  grid-template-columns: minmax(160px, 34%) minmax(0, 1fr);
   column-gap: 18px;
   row-gap: 0;
   margin: 0;
@@ -118,7 +171,6 @@
 }
 
 .mg-media-editor textarea {
-  min-height: 100px;
   resize: vertical;
 }
 
@@ -141,8 +193,25 @@
   margin: 0;
 }
 
-.mg-media-editor .mg-media-meta {
-  margin-bottom: 18px;
+.mg-media-editor .mg-admin-status .form_block {
+  grid-template-columns: minmax(125px, 38%) minmax(0, 1fr);
+}
+
+.mg-media-editor .mg-thumbnail-block {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(127, 127, 127, .14);
+  text-align: center;
+}
+
+.mg-media-editor .mg-thumbnail-block strong {
+  display: block;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.mg-media-editor .mg-capture-time {
+  line-height: 1.8;
 }
 
 .mg-media-editor .mg_submit.mg-edit-actions {
@@ -185,14 +254,16 @@
 }
 
 @media (max-width: 900px) {
-  .mg-media-editor .mg-media-preview-grid,
-  .mg-media-editor .mg-edit-grid {
+  .mg-media-editor .mg-admin-overview,
+  .mg-media-editor .mg-edit-grid,
+  .mg-media-editor .mg-primary-meta {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 640px) {
-  .mg-media-editor .mg-edit-card {
+  .mg-media-editor .mg-edit-card,
+  .mg-media-editor .mg-primary-card {
     padding: 14px;
   }
 
@@ -231,26 +302,123 @@
 </style>
 
 <div class="mg-media-editor">
-  <div class="mg-media-preview-grid">
-    <section class="mg-edit-card mg-preview-pane">
-      <h3 class="mg-card-title">{lang_media_item}</h3>
-      <div class="mg-preview-content">
-        {preview}
-        <img src="{media_thumbnail}" alt=""{xhtml}>{preview_end}
+  <form name="media" enctype="multipart/form-data" method="post" action="{s_form_action}" class="MG_editform compact uk-form">
+    <section class="mg-edit-card mg-primary-card">
+      <div class="mg-primary-title">
+        <label for="media_title">{lang_title}</label>
+        <input type="text" name="media_title" id="media_title" value="{media_title}" class="size6"{xhtml}>
       </div>
-      <div class="mg-media-rotate-controls">
-        <div class="mg-float-left">{s_rotate_left}</div>
-        <div class="mg-float-right">{s_rotate_right}</div>
+
+      <div class="mg-primary-description">
+        <label for="media_desc">{description}</label>
+        <textarea name="media_desc" id="media_desc" cols="60" rows="4" class="size6">{media_desc}</textarea>
+      </div>
+
+      <div class="mg-primary-meta">
+        <div class="mg-primary-meta-item">
+          <label for="media_keywords">{lang_keywords}</label>
+          <input type="text" name="media_keywords" id="media_keywords" value="{media_keywords}" class="size6"{xhtml}>
+        </div>
+        <div class="mg-primary-meta-item">
+          <label>{lang_category}</label>
+          {cat_select}
+        </div>
       </div>
     </section>
 
-    <section class="mg-edit-card mg-thumbnail-pane">
-      <h3 class="mg-card-title">{lang_attached_thumbnail}</h3>
-      <div class="mg-thumbnail-content">{attached_thumbnail}</div>
-    </section>
-  </div>
+    <div class="mg-admin-overview">
+      <section class="mg-edit-card mg-preview-pane">
+        <h3 class="mg-card-title">{lang_media_item}</h3>
+        <div class="mg-preview-content">
+          {preview}
+          <img src="{media_thumbnail}" alt=""{xhtml}>{preview_end}
+        </div>
+        <div class="mg-media-rotate-controls">
+          <div class="mg-float-left">{s_rotate_left}</div>
+          <div class="mg-float-right">{s_rotate_right}</div>
+        </div>
+      </section>
 
-  <form method="post" action="{site_url}/admin.php" class="compact uk-form mg-media-meta">
+      <fieldset class="mg-edit-card mg-admin-status">
+        <legend>{lang_media_attributes}</legend>
+        <dl class="form_block">
+          <dt><label>{uploaded_by}</label></dt>
+          <dd>{username}</dd>
+
+          <dt><label for="original_filename">{lang_original_filename}</label></dt>
+          <dd><input type="text" name="original_filename" id="original_filename" value="{original_filename}" class="size6"{xhtml}></dd>
+
+          <dt><label>{capture_time}</label></dt>
+          <dd class="mg-capture-time">{media_time}<br{xhtml}>{month_select} / {day_select} / {year_select}<br{xhtml}>{hour_select}&nbsp;:&nbsp;{minute_select}</dd>
+        </dl>
+
+        <div class="mg-thumbnail-block">
+          <strong>{lang_attached_thumbnail}</strong>
+          <div class="mg-thumbnail-content">{attached_thumbnail}</div>
+        </div>
+      </fieldset>
+    </div>
+
+    <div class="mg-edit-grid">
+      <fieldset class="mg-edit-card">
+        <legend>{lang_attached_thumbnail}</legend>
+        <dl class="form_block">
+          <dt><label for="attachtn">{lang_attached_thumbnail}</label></dt>
+          <dd>
+            <div class="mg-file-control">
+              <label for="attachtn"><input type="checkbox" name="attachtn" id="attachtn" value="1" {at_tn_checked}{xhtml}> {lang_attached_thumbnail}</label>
+              <input type="file" name="attthumb" id="attthumb"{xhtml}>
+            </div>
+          </dd>
+
+          <dt><label for="replacefile">{lang_replacefile}</label></dt>
+          <dd>
+            <div class="mg-file-control">
+              <label for="replacefile"><input type="checkbox" name="replacefile" id="replacefile" value="1"{xhtml}> {lang_replacefile}</label>
+              <input type="file" name="repfilename" id="repfilename"{xhtml}>
+            </div>
+          </dd>
+
+          <dt><label for="remoteurl">{lang_remote_url}</label></dt>
+          <dd><input type="text" name="remoteurl" id="remoteurl" value="{remoteurl}" class="size6"{xhtml}></dd>
+        </dl>
+      </fieldset>
+
+      <fieldset class="mg-edit-card">
+        <legend>{lang_artist}</legend>
+        <dl class="form_block">
+          <dt><label for="artist">{lang_artist}</label></dt>
+          <dd><input type="text" name="artist" id="artist" value="{artist}" class="size6"{xhtml}></dd>
+
+          <dt><label for="musicalbum">{lang_music_album}</label></dt>
+          <dd><input type="text" name="musicalbum" id="musicalbum" value="{musicalbum}" class="size6"{xhtml}></dd>
+
+          <dt><label for="genre">{lang_genre}</label></dt>
+          <dd><input type="text" name="genre" id="genre" value="{genre}" class="size6"{xhtml}></dd>
+        </dl>
+      </fieldset>
+    </div>
+
+    <div class="mg_submit mg-edit-actions">
+      <input type="submit" name="mode" value="{lang_save}" class="mg-action-save"{xhtml}>
+      <input type="submit" name="mode" value="{lang_cancel}"{xhtml}>
+      <input type="reset" value="{lang_reset}"{xhtml}>
+      <input type="submit" name="mode" value="{lang_delete}" class="mg-action-delete" data-confirm="{lang_delete_confirm}" onclick="return confirm(this.getAttribute('data-confirm'));"{xhtml}>
+      <input type="hidden" name="rpath" value="{rpath}"{xhtml}>
+      <input type="hidden" value="{album_id}" name="album_id"{xhtml}>
+      <input type="hidden" value="{media_id}" name="mid"{xhtml}>
+      <input type="hidden" value="{queue}" name="queue"{xhtml}>
+      <input type="hidden" name="action" value="savemedia"{xhtml}>
+      <input type="hidden" name="{gltoken_name}" value="{gltoken}"{xhtml}>
+    </div>
+
+    <div class="mg-extra-options">
+      {playback_options}
+      {media_exif_info}
+    </div>
+  </form>
+
+  <form method="post" action="{site_url}/admin.php" class="compact uk-form">
     <fieldset class="mg-edit-card">
       <legend>{lang_media_attributes}</legend>
       <dl class="form_block">
@@ -280,93 +448,5 @@
     <input type="hidden" value="{media_id}" name="mid"{xhtml}>
     <input type="hidden" value="{queue}" name="queue"{xhtml}>
     <input type="hidden" name="{gltoken_name}" value="{gltoken}"{xhtml}>
-  </form>
-
-  <form name="media" enctype="multipart/form-data" method="post" action="{s_form_action}" class="MG_editform compact uk-form">
-    <div class="mg-edit-grid">
-      <fieldset class="mg-edit-card">
-        <legend>{lang_mediaattributes}</legend>
-        <dl class="form_block">
-          <dt><label>{uploaded_by}</label></dt>
-          <dd>{username}</dd>
-
-          <dt><label for="original_filename">{lang_original_filename}</label></dt>
-          <dd><input type="text" name="original_filename" id="original_filename" value="{original_filename}" class="size6"{xhtml}></dd>
-
-          <dt><label for="media_title">{lang_title}</label></dt>
-          <dd><input type="text" name="media_title" id="media_title" value="{media_title}" class="size6"{xhtml}></dd>
-
-          <dt><label for="media_desc">{description}</label></dt>
-          <dd><textarea name="media_desc" id="media_desc" cols="60" rows="4" class="size6">{media_desc}</textarea></dd>
-
-          <dt><label for="media_keywords">{lang_keywords}</label></dt>
-          <dd><input type="text" name="media_keywords" id="media_keywords" value="{media_keywords}" class="size6"{xhtml}></dd>
-
-          <dt><label>{lang_category}</label></dt>
-          <dd>{cat_select}</dd>
-
-          <dt><label>{capture_time}</label></dt>
-          <dd>{media_time}<br{xhtml}>{month_select} / {day_select} / {year_select}&nbsp;&nbsp;&nbsp;{hour_select}&nbsp;:&nbsp;{minute_select}</dd>
-        </dl>
-      </fieldset>
-
-      <div>
-        <fieldset class="mg-edit-card">
-          <legend>{lang_attached_thumbnail}</legend>
-          <dl class="form_block">
-            <dt><label for="attachtn">{lang_attached_thumbnail}</label></dt>
-            <dd>
-              <div class="mg-file-control">
-                <label for="attachtn"><input type="checkbox" name="attachtn" id="attachtn" value="1" {at_tn_checked}{xhtml}> {lang_attached_thumbnail}</label>
-                <input type="file" name="attthumb" id="attthumb"{xhtml}>
-              </div>
-            </dd>
-
-            <dt><label for="replacefile">{lang_replacefile}</label></dt>
-            <dd>
-              <div class="mg-file-control">
-                <label for="replacefile"><input type="checkbox" name="replacefile" id="replacefile" value="1"{xhtml}> {lang_replacefile}</label>
-                <input type="file" name="repfilename" id="repfilename"{xhtml}>
-              </div>
-            </dd>
-
-            <dt><label for="remoteurl">{lang_remote_url}</label></dt>
-            <dd><input type="text" name="remoteurl" id="remoteurl" value="{remoteurl}" class="size6"{xhtml}></dd>
-          </dl>
-        </fieldset>
-
-        <fieldset class="mg-edit-card">
-          <legend>{lang_artist}</legend>
-          <dl class="form_block">
-            <dt><label for="artist">{lang_artist}</label></dt>
-            <dd><input type="text" name="artist" id="artist" value="{artist}" class="size6"{xhtml}></dd>
-
-            <dt><label for="musicalbum">{lang_music_album}</label></dt>
-            <dd><input type="text" name="musicalbum" id="musicalbum" value="{musicalbum}" class="size6"{xhtml}></dd>
-
-            <dt><label for="genre">{lang_genre}</label></dt>
-            <dd><input type="text" name="genre" id="genre" value="{genre}" class="size6"{xhtml}></dd>
-          </dl>
-        </fieldset>
-      </div>
-    </div>
-
-    <div class="mg_submit mg-edit-actions">
-      <input type="submit" name="mode" value="{lang_save}" class="mg-action-save"{xhtml}>
-      <input type="submit" name="mode" value="{lang_cancel}"{xhtml}>
-      <input type="reset" value="{lang_reset}"{xhtml}>
-      <input type="submit" name="mode" value="{lang_delete}" class="mg-action-delete" data-confirm="{lang_delete_confirm}" onclick="return confirm(this.getAttribute('data-confirm'));"{xhtml}>
-      <input type="hidden" name="rpath" value="{rpath}"{xhtml}>
-      <input type="hidden" value="{album_id}" name="album_id"{xhtml}>
-      <input type="hidden" value="{media_id}" name="mid"{xhtml}>
-      <input type="hidden" value="{queue}" name="queue"{xhtml}>
-      <input type="hidden" name="action" value="savemedia"{xhtml}>
-      <input type="hidden" name="{gltoken_name}" value="{gltoken}"{xhtml}>
-    </div>
-
-    <div class="mg-extra-options">
-      {playback_options}
-      {media_exif_info}
-    </div>
   </form>
 </div>
