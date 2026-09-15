@@ -84,6 +84,37 @@ array(
 
 Consumers should persist only the MediaGallery album ID when associating their own records with a gallery. Rendering should remain delegated to MediaGallery where practical so consuming plugins do not depend on MediaGallery's storage schema.
 
+## `media_list` service
+
+The `media_list` service returns one page of media from an accessible, visible
+album. It is intended for selectors and integrations that must discover media
+without querying MediaGallery tables directly.
+
+```php
+$output = array();
+$svc_msg = array();
+
+$status = PLG_invokeService(
+    'mediagallery',
+    'media_list',
+    array(
+        'album_id' => 52,
+        'page'      => 1,
+        'per_page' => 24,
+    ),
+    $output,
+    $svc_msg
+);
+```
+
+The result contains `items` and `pagination`. Each item exposes a stable media
+ID, title, description, media and MIME types, thumbnail URL and public
+MediaGallery URL. `per_page` is limited to 100. Requests for inaccessible or
+hidden albums fail without returning their contents.
+
+The reusable picker described in [`MEDIA-PICKER.md`](MEDIA-PICKER.md) consumes
+this service and returns the selected autotag to the calling editor.
+
 ## Content lifecycle events
 
 MediaGallery 1.8.0 reports content changes through Geeklog's standard lifecycle functions.

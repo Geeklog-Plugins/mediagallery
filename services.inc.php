@@ -14,7 +14,7 @@ if (stripos($_SERVER['PHP_SELF'], basename(__FILE__)) !== false) {
 
 /**
  * MediaGallery exposes read-only services through Geeklog's native service
- * mechanism. At present only album_list is implemented.
+ * mechanism. Album and media discovery are available to other plugins.
  *
  * @return bool
  */
@@ -158,6 +158,83 @@ function service_album_list_mediagallery($args, &$output, &$svc_msg)
     foreach ($children as $childId) {
         MG_serviceCollectAlbumTree180($childId, 0, $recursive, $visibleOnly, $output);
     }
+
+    return PLG_RET_OK;
+}
+
+/**
+ * Return one access-filtered page of media from an album.
+ *
+ * @param array $args album_id, page and per_page
+ * @param array $output
+ * @param array $svc_msg
+ * @return int
+ */
+function service_media_list_mediagallery($args, &$output, &$svc_msg)
+{
+    global $_TABLES, $_MG_CONF;
+
+    require_once __DIR__ . '/include/classAlbum.php';
+    require_once __DIR__ . '/include/classMedia.php';
+
+    $output = array('items' => array(), 'pagination' => array());
+    $svc_msg = array();
+
+    $albumId = isset($args['album_id']) ? intval($args['album_id']) : 0;
+    $page = isset($args['page']) ? max(1, intval($args['page'])) : 1;
+    $perPage = isset($args['per_page']) ? intval($args['per_page']) : 24;
+    $perPage = max(1, min(100, $perPage));
+
+    if ($albumId <= 0) {
+        $svc_msg['error_desc'] = 'Invalid album id.';
+        return PLG_RET_ERROR;
+    }
+
+    $album = new mgAlbum($albumId);
+    if (!$album->valid || $album->access <= 0 || ($album->hidden && $album->access < 3)) {
+        $svc_msg['error_desc'] = 'Album not found or not accessible.';
+        return PLG_RET_AUTH_FAILED;
+    }
+
+    $from = " FROM {$_TABLES['mg_media_albums']} AS ma"
+          . " INNER JOIN {$_TABLES['mg_media']} AS m ON m.media_id = ma.media_id"
+          . ' WHERE ma.album_id = ' . $albumId;
+    $countResult = DB_query('SELECT COUNT(*) AS total' . $from);
+    $countRow = DB_fetchArray($countResult);
+    $total = isset($countRow['total']) ? intval($countRow['total']) : 0;
+    $totalPages = max(1, intval(ceil($total / $perPage)));
+    if ($page > $totalPages) {
+        $page = $totalPages;
+    }
+
+    $offset = ($page - 1) * $perPage;
+    $result = DB_query('SELECT m.*' . $from
+        . ' ORDER BY ma.media_order ASC LIMIT ' . $offset . ',' . $perPage);
+
+    while ($row = DB_fetchArray($result)) {
+        $media = new Media($row, $albumId);
+        if (isset($media->access) && $media->access <= 0) {
+            continue;
+        }
+        $thumbnail = $media->displayRawThumb(1);
+        $output['items'][] = array(
+            'id'            => (string) $media->id,
+            'album_id'      => $albumId,
+            'title'         => $media->title === '' ? (string) $media->id : strip_tags($media->title),
+            'description'   => strip_tags($media->description),
+            'media_type'    => intval($media->type),
+            'mime_type'     => (string) $media->mime_type,
+            'thumbnail_url' => isset($thumbnail[0]) ? $thumbnail[0] : '',
+            'media_url'     => $_MG_CONF['site_url'] . '/media.php?f=0&s=' . rawurlencode($media->id),
+        );
+    }
+
+    $output['pagination'] = array(
+        'page'        => $page,
+        'per_page'    => $perPage,
+        'total_items' => $total,
+        'total_pages' => $totalPages,
+    );
 
     return PLG_RET_OK;
 }

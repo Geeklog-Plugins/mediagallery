@@ -1,0 +1,48 @@
+.mg-picker-button {
+    cursor: pointer;
+    margin: .5rem 0;
+    padding: .45rem .8rem;
+}
+.mg-picker-toolbar {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .75rem;
+    margin-bottom: 1rem;
+}
+
+.mg-picker-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+}
+
+.mg-picker-card {
+    background: #fff;
+    border: 1px solid #d8d8d8;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    min-height: 190px;
+    padding: .65rem;
+    text-align: center;
+}
+
+.mg-picker-card img {
+    height: 110px;
+    margin: 0 auto .5rem;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+.mg-picker-card button {
+    cursor: pointer;
+    margin-top: auto;
+}
+
+.mg-picker-pagination {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin: 1.25rem 0;
+}

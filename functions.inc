@@ -24,6 +24,7 @@ require_once __DIR__ . '/include/email_180.php';
 require_once __DIR__ . '/include/upload_security_180.php';
 require_once __DIR__ . '/include/tmp_cleanup_180.php';
 require_once __DIR__ . '/services.inc.php';
+require_once __DIR__ . '/include/media_picker_180.php';
 
 MG_addConfigLanguage180();
 MG_ensureConfig180();
