@@ -44,42 +44,31 @@
   margin-bottom: 16px;
 }
 
-.mg-media-editor .mg-primary-title label {
+.mg-media-editor .mg-primary-title label,
+.mg-media-editor .mg-primary-description label,
+.mg-media-editor .mg-primary-meta-item label {
   display: block;
   margin-bottom: 7px;
-  font-size: 1.05em;
   font-weight: 700;
 }
 
 .mg-media-editor .mg-primary-title input[type="text"] {
   width: 100%;
-  padding: 9px 10px;
-  font-size: 1.12em;
-  font-weight: 600;
-}
-
-.mg-media-editor .mg-primary-description label {
-  display: block;
-  margin-bottom: 7px;
+  padding: 10px 11px;
+  font-size: 1.16em;
   font-weight: 600;
 }
 
 .mg-media-editor .mg-primary-description textarea {
   width: 100%;
-  min-height: 110px;
+  min-height: 120px;
 }
 
 .mg-media-editor .mg-primary-meta {
   display: grid;
-  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1.4fr) minmax(240px, .8fr);
   gap: 18px;
   margin-top: 16px;
-}
-
-.mg-media-editor .mg-primary-meta-item label {
-  display: block;
-  margin-bottom: 6px;
-  font-weight: 600;
 }
 
 .mg-media-editor .mg-primary-meta-item input[type="text"],
@@ -88,16 +77,25 @@
   max-width: 100%;
 }
 
-.mg-media-editor .mg-admin-overview {
+.mg-media-editor .mg-workspace {
   display: grid;
-  grid-template-columns: minmax(0, 1.55fr) minmax(300px, .85fr);
+  grid-template-columns: minmax(0, 1.2fr) minmax(330px, .8fr);
   gap: 18px;
   align-items: start;
-  margin-bottom: 18px;
 }
 
 .mg-media-editor .mg-preview-pane {
   text-align: center;
+}
+
+.mg-media-editor .mg-preview-content {
+  display: flex;
+  min-height: 220px;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  border-radius: 6px;
+  background: rgba(127, 127, 127, .035);
 }
 
 .mg-media-editor .mg-preview-content img,
@@ -108,8 +106,8 @@
 
 .mg-media-editor .mg-media-rotate-controls {
   display: flex;
-  justify-content: space-between;
-  gap: 12px;
+  justify-content: center;
+  gap: 22px;
   margin-top: 12px;
 }
 
@@ -118,21 +116,46 @@
   float: none;
 }
 
-.mg-media-editor .mg-edit-grid {
+.mg-media-editor .mg-media-rotate-controls img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.mg-media-editor .mg-admin-details .form_block {
+  grid-template-columns: minmax(135px, 37%) minmax(0, 1fr);
+}
+
+.mg-media-editor .mg-thumbnail-block {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(127, 127, 127, .14);
+}
+
+.mg-media-editor .mg-thumbnail-block strong {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.mg-media-editor .mg-thumbnail-content {
+  text-align: center;
+}
+
+.mg-media-editor .mg-secondary-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
   align-items: start;
+  margin-top: 18px;
 }
 
-.mg-media-editor .mg-edit-grid > .mg-edit-card,
-.mg-media-editor .mg-edit-grid > div > .mg-edit-card:last-child {
+.mg-media-editor .mg-secondary-grid > .mg-edit-card {
   margin-bottom: 0;
 }
 
 .mg-media-editor .form_block {
   display: grid;
-  grid-template-columns: minmax(160px, 34%) minmax(0, 1fr);
+  grid-template-columns: minmax(155px, 34%) minmax(0, 1fr);
   column-gap: 18px;
   row-gap: 0;
   margin: 0;
@@ -174,13 +197,6 @@
   resize: vertical;
 }
 
-.mg-media-editor .mg-inline-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-}
-
 .mg-media-editor .mg-file-control {
   display: grid;
   gap: 8px;
@@ -193,25 +209,44 @@
   margin: 0;
 }
 
-.mg-media-editor .mg-admin-status .form_block {
-  grid-template-columns: minmax(125px, 38%) minmax(0, 1fr);
-}
-
-.mg-media-editor .mg-thumbnail-block {
-  margin-top: 14px;
-  padding-top: 14px;
-  border-top: 1px solid rgba(127, 127, 127, .14);
-  text-align: center;
-}
-
-.mg-media-editor .mg-thumbnail-block strong {
-  display: block;
-  margin-bottom: 10px;
-  text-align: left;
-}
-
 .mg-media-editor .mg-capture-time {
   line-height: 1.8;
+}
+
+.mg-media-editor .mg-admin-metrics {
+  margin-top: 18px;
+}
+
+.mg-media-editor .mg-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.mg-media-editor .mg-metric {
+  padding: 14px;
+  border: 1px solid rgba(127, 127, 127, .16);
+  border-radius: 6px;
+  background: rgba(127, 127, 127, .025);
+}
+
+.mg-media-editor .mg-metric-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: .92em;
+  font-weight: 700;
+  opacity: .8;
+}
+
+.mg-media-editor .mg-metric-value {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 1.08em;
+  font-weight: 600;
+}
+
+.mg-media-editor .mg-metric input[type="submit"] {
+  width: 100%;
 }
 
 .mg-media-editor .mg_submit.mg-edit-actions {
@@ -236,6 +271,7 @@
 }
 
 .mg-media-editor .mg-edit-actions .mg-action-save {
+  min-width: 130px;
   font-weight: 700;
 }
 
@@ -254,9 +290,10 @@
 }
 
 @media (max-width: 900px) {
-  .mg-media-editor .mg-admin-overview,
-  .mg-media-editor .mg-edit-grid,
-  .mg-media-editor .mg-primary-meta {
+  .mg-media-editor .mg-workspace,
+  .mg-media-editor .mg-secondary-grid,
+  .mg-media-editor .mg-primary-meta,
+  .mg-media-editor .mg-metrics-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -279,11 +316,6 @@
   .mg-media-editor .form_block dd {
     padding-top: 2px;
     padding-bottom: 12px;
-  }
-
-  .mg-media-editor .mg-media-rotate-controls {
-    justify-content: center;
-    flex-wrap: wrap;
   }
 
   .mg-media-editor .mg_submit.mg-edit-actions {
@@ -326,7 +358,7 @@
       </div>
     </section>
 
-    <div class="mg-admin-overview">
+    <div class="mg-workspace">
       <section class="mg-edit-card mg-preview-pane">
         <h3 class="mg-card-title">{lang_media_item}</h3>
         <div class="mg-preview-content">
@@ -334,13 +366,13 @@
           <img src="{media_thumbnail}" alt=""{xhtml}>{preview_end}
         </div>
         <div class="mg-media-rotate-controls">
-          <div class="mg-float-left">{s_rotate_left}</div>
-          <div class="mg-float-right">{s_rotate_right}</div>
+          <div>{s_rotate_left}</div>
+          <div>{s_rotate_right}</div>
         </div>
       </section>
 
-      <fieldset class="mg-edit-card mg-admin-status">
-        <legend>{lang_media_attributes}</legend>
+      <fieldset class="mg-edit-card mg-admin-details">
+        <legend>{lang_mediaattributes}</legend>
         <dl class="form_block">
           <dt><label>{uploaded_by}</label></dt>
           <dd>{username}</dd>
@@ -352,14 +384,16 @@
           <dd class="mg-capture-time">{media_time}<br{xhtml}>{month_select} / {day_select} / {year_select}<br{xhtml}>{hour_select}&nbsp;:&nbsp;{minute_select}</dd>
         </dl>
 
+{!if attached_thumbnail}
         <div class="mg-thumbnail-block">
           <strong>{lang_attached_thumbnail}</strong>
           <div class="mg-thumbnail-content">{attached_thumbnail}</div>
         </div>
+{!endif}
       </fieldset>
     </div>
 
-    <div class="mg-edit-grid">
+    <div class="mg-secondary-grid">
       <fieldset class="mg-edit-card">
         <legend>{lang_attached_thumbnail}</legend>
         <dl class="form_block">
@@ -418,32 +452,29 @@
     </div>
   </form>
 
-  <form method="post" action="{site_url}/admin.php" class="compact uk-form">
+  <form method="post" action="{site_url}/admin.php" class="compact uk-form mg-admin-metrics">
     <fieldset class="mg-edit-card">
       <legend>{lang_media_attributes}</legend>
-      <dl class="form_block">
-        <dt><label>{lang_comments}</label></dt>
-        <dd>{media_comments}</dd>
+      <div class="mg-metrics-grid">
+        <div class="mg-metric">
+          <span class="mg-metric-label">{lang_comments}</span>
+          <span class="mg-metric-value">{media_comments}</span>
+        </div>
 
-        <dt><label>{views}</label></dt>
-        <dd>
-          <div class="mg-inline-actions">
-            <span>{media_views}</span>
-            <input type="submit" name="mode" value="{lang_reset_views}"{xhtml}>
-          </div>
-          <input type="hidden" name="action" value="resetviews"{xhtml}>
-        </dd>
+        <div class="mg-metric">
+          <span class="mg-metric-label">{views}</span>
+          <span class="mg-metric-value">{media_views}</span>
+          <input type="submit" name="mode" value="{lang_reset_views}"{xhtml}>
+        </div>
 
-        <dt><label>{lang_rating}</label></dt>
-        <dd>
-          <div class="mg-inline-actions">
-            <span>{media_rating}&nbsp;/&nbsp;{media_rating_max}&nbsp;({media_votes} {lang_votes})</span>
-            <input type="submit" name="mode" value="{lang_reset_rating}"{xhtml}>
-          </div>
-          <input type="hidden" name="action" value="resetrating"{xhtml}>
-        </dd>
-      </dl>
+        <div class="mg-metric">
+          <span class="mg-metric-label">{lang_rating}</span>
+          <span class="mg-metric-value">{media_rating}&nbsp;/&nbsp;{media_rating_max}&nbsp;({media_votes} {lang_votes})</span>
+          <input type="submit" name="mode" value="{lang_reset_rating}"{xhtml}>
+        </div>
+      </div>
     </fieldset>
+    <input type="hidden" name="action" value="resetviews"{xhtml}>
     <input type="hidden" value="{album_id}" name="album_id"{xhtml}>
     <input type="hidden" value="{media_id}" name="mid"{xhtml}>
     <input type="hidden" value="{queue}" name="queue"{xhtml}>
