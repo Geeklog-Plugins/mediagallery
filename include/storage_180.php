@@ -152,22 +152,26 @@ function MG_mediaStorageHasUserContent180($root)
 }
 
 /**
- * Check whether historical user media still needs to be synchronized.
+ * Count historical user-media files that still need to be synchronized.
  * Matching files in the persistent target make this check idempotent even
  * though the historical source is deliberately retained.
+ *
+ * @param string|null $source Optional explicit source directory
+ * @return int Number of pending files. Returns 0 when storage cannot be
+ *             resolved or inventoried; those errors are logged separately.
  */
-function MG_mediaStorageNeedsMigration180($source = null)
+function MG_countPendingMediaStorage180($source = null)
 {
     $target = MG_getMediaStorageTarget180();
     if ($target === false) {
-        return false;
+        return 0;
     }
 
     if ($source === null || $source === '') {
         $source = MG_getLegacyMediaStorage180();
     }
     if ($source === '') {
-        return false;
+        return 0;
     }
 
     $source = rtrim($source, '/\\') . '/';
@@ -175,14 +179,15 @@ function MG_mediaStorageNeedsMigration180($source = null)
     if (rtrim(str_replace('\\', '/', $source), '/')
         === rtrim(str_replace('\\', '/', $targetPath), '/')
     ) {
-        return false;
+        return 0;
     }
 
     $inventory = MG_inventoryMediaStorage180($source);
     if ($inventory === false) {
-        return false;
+        return 0;
     }
 
+    $pending = 0;
     foreach ($inventory['files'] as $relative => $expectedSize) {
         $normalized = str_replace('\\', '/', $relative);
         if (!preg_match('~^(orig|disp|tn|covers)/~', $normalized)) {
@@ -195,11 +200,21 @@ function MG_mediaStorageNeedsMigration180($source = null)
             || is_link($destination)
             || filesize($destination) !== $expectedSize
         ) {
-            return true;
+            $pending++;
         }
     }
 
-    return false;
+    return $pending;
+}
+
+/**
+ * Check whether historical user media still needs to be synchronized.
+ *
+ * Kept as a boolean compatibility wrapper for existing callers.
+ */
+function MG_mediaStorageNeedsMigration180($source = null)
+{
+    return MG_countPendingMediaStorage180($source) > 0;
 }
 
 /**
