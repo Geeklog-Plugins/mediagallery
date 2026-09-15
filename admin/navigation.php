@@ -37,7 +37,7 @@ if (strpos(strtolower($_SERVER['PHP_SELF']), strtolower(basename(__FILE__))) !==
 
 function MG_showAdminMenu($sub_menu='')
 {
-    global $_CONF, $_TABLES, $_MG_CONF, $LANG_MG01, $LANG_ADMIN;
+    global $_CONF, $_TABLES, $_MG_CONF, $LANG_MG01;
 
     require_once $_CONF['path'] . 'system/lib-admin.php';
 
@@ -57,10 +57,7 @@ function MG_showAdminMenu($sub_menu='')
               'text' => $LANG_MG01['miscellaneous']),
 
         array('url'  => $help_url,
-              'text' => $LANG_MG01['help']),
-
-        array('url'  => $_CONF['site_admin_url'],
-              'text' => $LANG_ADMIN['admin_home']));
+              'text' => $LANG_MG01['help']));
 
     $menu = ADMIN_createMenu(
         $menu_arr,
@@ -75,7 +72,7 @@ function MG_showAdminMenu($sub_menu='')
 
 function MG_showAdminSubMenu($sub_menu)
 {
-    global $_CONF, $_TABLES, $_MG_CONF, $LANG_MG01, $LANG_ADMIN, $LANG27;
+    global $_CONF, $_TABLES, $_MG_CONF, $LANG_MG01, $LANG27;
 
     $menu = '';
     $admin_url = $_MG_CONF['admin_url'];
