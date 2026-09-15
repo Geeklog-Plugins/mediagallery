@@ -245,15 +245,20 @@
   font-weight: 600;
 }
 
-/* Maintenance actions are deliberately smaller than the main editor actions. */
-.mg-media-editor .mg-metric input[type="submit"] {
-  width: auto;
-  min-width: 0;
-  padding: 5px 10px;
-  font-size: .86em;
-  font-weight: 600;
-  line-height: 1.3;
-  border-radius: 4px;
+/* Explicitly override theme-wide button sizing inside MediaGallery. */
+.mg-media-editor .mg-maintenance-action {
+  display: inline-block !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 5px 10px !important;
+  font-size: .84em !important;
+  font-weight: 600 !important;
+  line-height: 1.25 !important;
+  border-radius: 4px !important;
+  white-space: nowrap !important;
   cursor: pointer;
 }
 
@@ -271,45 +276,47 @@
   background: inherit;
 }
 
-/* Default secondary action size. */
-.mg-media-editor .mg-edit-actions input[type="submit"],
-.mg-media-editor .mg-edit-actions input[type="reset"] {
-  min-width: 0;
-  padding: 7px 13px;
-  font-size: .92em;
-  line-height: 1.35;
-  border-radius: 5px;
+.mg-media-editor .mg-edit-actions .mg-action-save,
+.mg-media-editor .mg-edit-actions .mg-action-cancel,
+.mg-media-editor .mg-edit-actions .mg-action-reset,
+.mg-media-editor .mg-edit-actions .mg-action-delete {
+  display: inline-block !important;
+  width: auto !important;
+  max-width: none !important;
+  height: auto !important;
+  line-height: 1.25 !important;
+  border-radius: 5px !important;
+  white-space: nowrap !important;
   cursor: pointer;
 }
 
-/* Save is the primary action and gets the strongest visual weight. */
 .mg-media-editor .mg-edit-actions .mg-action-save {
-  min-width: 104px;
-  padding: 9px 20px;
-  font-size: 1em;
-  font-weight: 700;
+  min-width: 130px !important;
+  padding: 10px 22px !important;
+  font-size: 1em !important;
+  font-weight: 700 !important;
 }
 
-/* Cancel is important, but visually secondary to Save. */
 .mg-media-editor .mg-edit-actions .mg-action-cancel {
-  min-width: 88px;
+  min-width: 95px !important;
+  padding: 7px 14px !important;
+  font-size: .9em !important;
+  font-weight: 600 !important;
 }
 
-/* Reset is an auxiliary action, so keep it compact. */
 .mg-media-editor .mg-edit-actions .mg-action-reset {
-  min-width: 76px;
-  padding-left: 11px;
-  padding-right: 11px;
-  font-size: .88em;
+  min-width: 80px !important;
+  padding: 6px 12px !important;
+  font-size: .85em !important;
+  font-weight: 500 !important;
 }
 
-/* Delete remains isolated on the right without competing with Save. */
 .mg-media-editor .mg-edit-actions .mg-action-delete {
-  min-width: 88px;
-  margin-left: auto;
-  padding: 8px 16px;
-  font-size: .92em;
-  font-weight: 700;
+  min-width: 100px !important;
+  margin-left: auto !important;
+  padding: 8px 16px !important;
+  font-size: .9em !important;
+  font-weight: 700 !important;
 }
 
 .mg-media-editor .mg-extra-options {
@@ -355,17 +362,13 @@
     position: static;
   }
 
-  .mg-media-editor .mg-edit-actions input[type="submit"],
-  .mg-media-editor .mg-edit-actions input[type="reset"] {
-    flex: 0 1 auto;
-  }
-
   .mg-media-editor .mg-edit-actions .mg-action-save {
     flex: 1 1 100%;
+    width: 100% !important;
   }
 
   .mg-media-editor .mg-edit-actions .mg-action-delete {
-    margin-left: 0;
+    margin-left: 0 !important;
   }
 }
 </style>
@@ -501,13 +504,13 @@
         <div class="mg-metric">
           <span class="mg-metric-label">{views}</span>
           <span class="mg-metric-value">{media_views}</span>
-          <input type="submit" name="mode" value="{lang_reset_views}"{xhtml}>
+          <input type="submit" name="mode" value="{lang_reset_views}" class="mg-maintenance-action"{xhtml}>
         </div>
 
         <div class="mg-metric">
           <span class="mg-metric-label">{lang_rating}</span>
           <span class="mg-metric-value">{media_rating}&nbsp;/&nbsp;{media_rating_max}&nbsp;({media_votes} {lang_votes})</span>
-          <input type="submit" name="mode" value="{lang_reset_rating}"{xhtml}>
+          <input type="submit" name="mode" value="{lang_reset_rating}" class="mg-maintenance-action"{xhtml}>
         </div>
       </div>
     </fieldset>
