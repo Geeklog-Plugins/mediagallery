@@ -1014,6 +1014,51 @@ function MG_getAlbumChildCount($album_id)
     return $numChildren;
 }
 
+function MG_getAlbumPreviewImage180($album_id, $prefer_attached = true)
+{
+    global $_MG_CONF;
+
+    $album_id = (int) $album_id;
+    if ($album_id <= 0) {
+        return array('', false);
+    }
+
+    if ($prefer_attached) {
+        list($url, $size) = MG_getImageUrl('covers/cover_' . $album_id);
+        if ($size !== false && is_array($size) && !empty($size[0]) && !empty($size[1])) {
+            return array($url, $size);
+        }
+    }
+
+    $filename = MG_getAlbumCover($album_id);
+    if ($filename != '') {
+        foreach (array('disp', 'tn', 'orig') as $variant) {
+            list($url, $size) = MG_getImageUrl(
+                $variant . '/' . $filename[0] . '/' . $filename
+            );
+            if ($size !== false && is_array($size) && !empty($size[0]) && !empty($size[1])) {
+                return array($url, $size);
+            }
+        }
+    }
+
+    $emptyPath = isset($_MG_CONF['path_mediaassets'])
+        ? rtrim($_MG_CONF['path_mediaassets'], '/\\') . '/empty.png'
+        : '';
+    $emptyUrl = isset($_MG_CONF['mediaassets_url'])
+        ? rtrim($_MG_CONF['mediaassets_url'], '/') . '/empty.png'
+        : '';
+
+    if ($emptyPath !== '' && $emptyUrl !== '' && is_file($emptyPath)) {
+        $size = @getimagesize($emptyPath);
+        if ($size !== false && is_array($size) && !empty($size[0]) && !empty($size[1])) {
+            return array($emptyUrl, $size);
+        }
+    }
+
+    return array('', false);
+}
+
 function MG_getAlbumCover($album_id)
 {
     global $_TABLES;
@@ -1224,27 +1269,10 @@ function MG_albumThumbnail($album_id)
     }
 
     if ($album_data['tn_attached'] == 1) {
-        list($album_last_image, $mediasize) = MG_getImageUrl('covers/cover_' . $album_id);
-        if ($mediasize == false) {
-            /* A legacy album can keep tn_attached=1 even after the dedicated
-             * cover file has disappeared during a storage migration. Reuse
-             * the normal album-cover resolver before falling back to the
-             * missing-image asset. */
-            $fallback_cover = MG_getAlbumCover($album_id);
-            if ($fallback_cover != '') {
-                list($album_last_image, $mediasize) = MG_getImageUrl(
-                    'disp/' . $fallback_cover[0] . '/' . $fallback_cover
-                );
-                if ($mediasize == false) {
-                    list($album_last_image, $mediasize) = MG_getImageUrl(
-                        'tn/' . $fallback_cover[0] . '/' . $fallback_cover
-                    );
-                }
-            }
-            if ($mediasize == false) {
-                $album_last_image = $_MG_CONF['site_url'] . '/mediaobjects/missing.png';
-                $mediasize = @getimagesize($_MG_CONF['path_html'] . 'mediaobjects/missing.png');
-            }
+        list($resolved_album_image, $resolved_album_size) = MG_getAlbumPreviewImage180($album_id, true);
+        if ($resolved_album_size !== false) {
+            $album_last_image = $resolved_album_image;
+            $mediasize = $resolved_album_size;
         }
     } else {
         // MediaGallery 1.8: prefer the larger display derivative for album cards.
