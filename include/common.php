@@ -1220,17 +1220,7 @@ function MG_albumThumbnail($album_id)
                 $mediasize = @getimagesize($_MG_CONF['path_html'] . 'mediaobjects/empty.png');
             }
         } else {
-            $filename = MG_getAlbumCover($album_id);
-            if ($filename == '' || $filename == NULL || $filename == " ") {
-                $album_last_image = $_MG_CONF['site_url'] . '/mediaobjects/empty.png';
-                $mediasize = @getimagesize($_MG_CONF['path_html'] . 'mediaobjects/empty.png');
-            } else {
-                list($album_last_image, $mediasize) = MG_getImageUrl('tn/' . $filename[0] . '/' . $filename);
-                if ($mediasize == false) {
-                    $album_last_image = $_MG_CONF['site_url'] . '/mediaobjects/missing.png';
-                    $mediasize = @getimagesize($_MG_CONF['path_html'] . 'mediaobjects/missing.png');
-                }
-            }
+            list($album_last_image, $mediasize) = MG_getAlbumPreviewImage180($album_id, false);
         }
         $album_media_count = $album_data['media_count'];
         if ($album_data['last_update'] > 0) {
@@ -1253,27 +1243,13 @@ function MG_albumThumbnail($album_id)
             }
         }
     } else {  // nothing in the album yet...
-        $filename = MG_getAlbumCover($album_id);
-        if ($filename == '') {
-            $album_last_image = $_MG_CONF['site_url'] . '/mediaobjects/empty.png';
-            $mediasize = @getimagesize($_MG_CONF['path_html'] . 'mediaobjects/empty.png');
-        } else {
-            list($album_last_image, $mediasize) = MG_getImageUrl('tn/' . $filename[0] . '/' . $filename);
-            if ($mediasize == false) {
-                $album_last_image = $_MG_CONF['site_url'] . '/mediaobjects/missing.png';
-                $mediasize = @getimagesize($_MG_CONF['path_html'] . 'mediaobjects/missing.png');
-            }
-        }
+        list($album_last_image, $mediasize) = MG_getAlbumPreviewImage180($album_id, false);
         $album_last_update[0] = '';
         $lang_updated = '';
     }
 
     if ($album_data['tn_attached'] == 1) {
-        list($resolved_album_image, $resolved_album_size) = MG_getAlbumPreviewImage180($album_id, true);
-        if ($resolved_album_size !== false) {
-            $album_last_image = $resolved_album_image;
-            $mediasize = $resolved_album_size;
-        }
+        list($album_last_image, $mediasize) = MG_getAlbumPreviewImage180($album_id, true);
     } else {
         // MediaGallery 1.8: prefer the larger display derivative for album cards.
         // Fall back to the historical thumbnail when no display image exists.
