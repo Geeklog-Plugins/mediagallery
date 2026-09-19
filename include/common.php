@@ -1226,8 +1226,25 @@ function MG_albumThumbnail($album_id)
     if ($album_data['tn_attached'] == 1) {
         list($album_last_image, $mediasize) = MG_getImageUrl('covers/cover_' . $album_id);
         if ($mediasize == false) {
-            $album_last_image = $_MG_CONF['site_url'] . '/mediaobjects/missing.png';
-            $mediasize = @getimagesize($_MG_CONF['path_html'] . 'mediaobjects/missing.png');
+            /* A legacy album can keep tn_attached=1 even after the dedicated
+             * cover file has disappeared during a storage migration. Reuse
+             * the normal album-cover resolver before falling back to the
+             * missing-image asset. */
+            $fallback_cover = MG_getAlbumCover($album_id);
+            if ($fallback_cover != '') {
+                list($album_last_image, $mediasize) = MG_getImageUrl(
+                    'disp/' . $fallback_cover[0] . '/' . $fallback_cover
+                );
+                if ($mediasize == false) {
+                    list($album_last_image, $mediasize) = MG_getImageUrl(
+                        'tn/' . $fallback_cover[0] . '/' . $fallback_cover
+                    );
+                }
+            }
+            if ($mediasize == false) {
+                $album_last_image = $_MG_CONF['site_url'] . '/mediaobjects/missing.png';
+                $mediasize = @getimagesize($_MG_CONF['path_html'] . 'mediaobjects/missing.png');
+            }
         }
     } else {
         // MediaGallery 1.8: prefer the larger display derivative for album cards.
