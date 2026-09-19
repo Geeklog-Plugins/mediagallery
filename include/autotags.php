@@ -370,10 +370,7 @@ function MG_autotags($op, $content = '', $autotag = '')
                     }
                 }
                 if ($orientation == 0) {
-                    if ($tnImage == '' || empty($media_size[0]) || empty($media_size[1])) {
-                $newwidth = 0;
-                $newheight = 0;
-            } else if ($width > 0 && $height == 0) {
+                    if ($width > 0 && $height == 0) {
                         $videoheight = round($width * $ratio);
                         $videowidth  = $width;
                     } else if ($width == 0 && $height == 0) {
@@ -1107,7 +1104,10 @@ function MG_autotags($op, $content = '', $autotag = '')
                 $media_size = array(0, 0);
             }
 
-            if ($width > 0 && $height == 0) {
+            if ($tnImage == '' || empty($media_size[0]) || empty($media_size[1])) {
+                $newwidth = 0;
+                $newheight = 0;
+            } else if ($width > 0 && $height == 0) {
                 $ratio = $media_size[0] / $width;
                 $newwidth = $width;
                 $newheight = round($media_size[1] / $ratio);
