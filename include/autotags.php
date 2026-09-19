@@ -370,7 +370,10 @@ function MG_autotags($op, $content = '', $autotag = '')
                     }
                 }
                 if ($orientation == 0) {
-                    if ($width > 0 && $height == 0) {
+                    if ($tnImage == '' || empty($media_size[0]) || empty($media_size[1])) {
+                $newwidth = 0;
+                $newheight = 0;
+            } else if ($width > 0 && $height == 0) {
                         $videoheight = round($width * $ratio);
                         $videowidth  = $width;
                     } else if ($width == 0 && $height == 0) {
@@ -1093,53 +1096,17 @@ function MG_autotags($op, $content = '', $autotag = '')
             }
 //            $aid = $parm1;
 
-            $tnImage = '';
-            $tnFileName = '';
+            list($tnImage, $media_size) = MG_getAlbumPreviewImage180(
+                $parm1,
+                $album_data['tn_attached'] == 1
+            );
 
-            if ($album_data['tn_attached'] == 1) {
-                $tfn = 'covers/cover_' . $parm1;
-                $ext = MG_getMediaExt($_MG_CONF['path_mediaobjects'] . $tfn);
-                if ($ext != '') {
-                    $candidateFile = $_MG_CONF['path_mediaobjects'] . $tfn . $ext;
-                    $candidateSize = @getimagesize($candidateFile);
-                    if (MG_hasUsableImageSize180($candidateSize)) {
-                        $tnImage = $_MG_CONF['mediaobjects_url'] . '/' . $tfn . $ext;
-                        $tnFileName = $candidateFile;
-                    }
-                }
+            if ($media_size === false || $tnImage == '') {
+                /* No usable album image exists. Do not emit a broken
+                 * missing.png URL; keep the album link/caption usable. */
+                $media_size = array(0, 0);
             }
 
-            /* Historical albums can retain tn_attached=1 after their dedicated
-             * cover file has disappeared or moved during storage migration.
-             * Fall back to MediaGallery's normal album-cover resolver instead
-             * of rendering missing.png immediately. */
-            if ($tnFileName == '') {
-                $filename = MG_getAlbumCover($parm1);
-                if ($filename != '') {
-                    $tfn = 'tn/' . $filename[0] . '/' . $filename;
-                    $ext = MG_getMediaExt($_MG_CONF['path_mediaobjects'] . $tfn);
-                    if ($ext != '') {
-                        $candidateFile = $_MG_CONF['path_mediaobjects'] . $tfn . $ext;
-                        $candidateSize = @getimagesize($candidateFile);
-                        if (MG_hasUsableImageSize180($candidateSize)) {
-                            $tnImage = $_MG_CONF['mediaobjects_url'] . '/' . $tfn . $ext;
-                            $tnFileName = $candidateFile;
-                        }
-                    }
-                }
-            }
-
-            if ($tnFileName == '') {
-                $tnImage = $_MG_CONF['mediaassets_url'] . '/empty.png';
-                $tnFileName = $_MG_CONF['path_mediaassets'] . 'empty.png';
-            }
-
-            $media_size = @getimagesize($tnFileName);
-            if (!MG_hasUsableImageSize180($media_size)) {
-                $tnImage = $_MG_CONF['mediaassets_url'] . '/missing.png';
-                $tnFileName = $_MG_CONF['path_mediaassets'] . 'missing.png';
-                $media_size = MG_getSafeImageSize180($tnFileName, 'album autotag ' . $parm1);
-            }
             if ($width > 0 && $height == 0) {
                 $ratio = $media_size[0] / $width;
                 $newwidth = $width;
@@ -1162,7 +1129,15 @@ function MG_autotags($op, $content = '', $autotag = '')
                 $newwidth = $width;
                 $newheight = $height;
             }
-            $tagtext = '<img src="' . $tnImage . '" ' . $alttag . 'style="width:' . $newwidth . 'px;height:' . $newheight . 'px;border:none;vertical-align:bottom;"' . XHTML . '>';
+            if ($tnImage != '') {
+                $tagtext = '<img src="' . $tnImage . '" ' . $alttag . 'style="width:' . $newwidth . 'px;height:' . $newheight . 'px;border:none;vertical-align:bottom;"' . XHTML . '>';
+            } else {
+                $tagtext = htmlspecialchars(
+                    $caption != '' ? $caption : $album_data['album_title'],
+                    ENT_QUOTES,
+                    COM_getCharset()
+                );
+            }
 
             if ($linkID == 0) {
                 $url = $_MG_CONF['site_url'] . '/album.php?aid=' . $parm1;
