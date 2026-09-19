@@ -1093,23 +1093,47 @@ function MG_autotags($op, $content = '', $autotag = '')
             }
 //            $aid = $parm1;
 
+            $tnImage = '';
+            $tnFileName = '';
+
             if ($album_data['tn_attached'] == 1) {
                 $tfn = 'covers/cover_' . $parm1;
                 $ext = MG_getMediaExt($_MG_CONF['path_mediaobjects'] . $tfn);
-                $tnImage = $_MG_CONF['mediaobjects_url'] . '/' . $tfn . $ext;
-                $tnFileName = $_MG_CONF['path_mediaobjects'] . $tfn . $ext;
-            } else {
+                if ($ext != '') {
+                    $candidateFile = $_MG_CONF['path_mediaobjects'] . $tfn . $ext;
+                    $candidateSize = @getimagesize($candidateFile);
+                    if (MG_hasUsableImageSize180($candidateSize)) {
+                        $tnImage = $_MG_CONF['mediaobjects_url'] . '/' . $tfn . $ext;
+                        $tnFileName = $candidateFile;
+                    }
+                }
+            }
+
+            /* Historical albums can retain tn_attached=1 after their dedicated
+             * cover file has disappeared or moved during storage migration.
+             * Fall back to MediaGallery's normal album-cover resolver instead
+             * of rendering missing.png immediately. */
+            if ($tnFileName == '') {
                 $filename = MG_getAlbumCover($parm1);
                 if ($filename != '') {
                     $tfn = 'tn/' . $filename[0] . '/' . $filename;
                     $ext = MG_getMediaExt($_MG_CONF['path_mediaobjects'] . $tfn);
-                    $tnImage = $_MG_CONF['mediaobjects_url'] . '/' . $tfn . $ext;
-                    $tnFileName = $_MG_CONF['path_mediaobjects'] . $tfn . $ext;
-                } else {
-                    $tnImage = $_MG_CONF['mediaassets_url'] . '/empty.png';
-                    $tnFileName = $_MG_CONF['path_mediaassets'] . 'empty.png';
+                    if ($ext != '') {
+                        $candidateFile = $_MG_CONF['path_mediaobjects'] . $tfn . $ext;
+                        $candidateSize = @getimagesize($candidateFile);
+                        if (MG_hasUsableImageSize180($candidateSize)) {
+                            $tnImage = $_MG_CONF['mediaobjects_url'] . '/' . $tfn . $ext;
+                            $tnFileName = $candidateFile;
+                        }
+                    }
                 }
             }
+
+            if ($tnFileName == '') {
+                $tnImage = $_MG_CONF['mediaassets_url'] . '/empty.png';
+                $tnFileName = $_MG_CONF['path_mediaassets'] . 'empty.png';
+            }
+
             $media_size = @getimagesize($tnFileName);
             if (!MG_hasUsableImageSize180($media_size)) {
                 $tnImage = $_MG_CONF['mediaassets_url'] . '/missing.png';
