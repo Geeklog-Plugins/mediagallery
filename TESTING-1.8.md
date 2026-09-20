@@ -369,3 +369,17 @@ With separate site DB/table prefixes or databases and site-specific Geeklog path
 - [ ] Install the exact RC ZIP once on Geeklog 2.1.1.
 - [ ] Install the exact RC ZIP once on Geeklog 2.2.2.
 - [ ] Confirm both archive installs pass smoke tests before tagging/releasing the RC.
+
+
+## Capability declaration and dashboard summary
+
+- [ ] Confirm `plugin_getcapabilities_mediagallery()` returns schema 1 and the documented content/media/dashboard capabilities.
+- [ ] Confirm `album_read` returns an accessible album and refuses an inaccessible/hidden album for the caller.
+- [ ] Confirm `media_read` returns a visible media item and does not leak an item available only through inaccessible albums.
+- [ ] Confirm `media_list` keeps pagination bounded and permission-filtered.
+- [ ] Confirm `dashboard_summary` refuses unauthorized users.
+- [ ] Confirm `dashboard_summary` returns albums, media and pending metrics for an eligible administrator.
+- [ ] Confirm a non-writable persistent storage target produces a dashboard alert without breaking the dashboard.
+- [ ] Confirm Eclipse 1.2 consumes the summary without MediaGallery-specific SQL or adapters.
+- [ ] Confirm Agent/Hub can consume album/media identity, URLs and descriptions through the public contracts.
+- [ ] Repeat the checks on Geeklog 2.1.1 and Geeklog 2.2.2.
