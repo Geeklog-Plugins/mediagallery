@@ -32,6 +32,21 @@
 //
 
 require_once '../../../lib-common.php';
+
+// The admin entry point normally receives MediaGallery's bootstrap through
+// Geeklog's active-plugin loader. Keep a defensive fallback for upgrade,
+// disabled/re-enabled and multisite states where the plugin globals have not
+// been populated yet.
+if (
+    !isset($_MG_CONF) || !is_array($_MG_CONF)
+    || !isset($LANG_MG00) || !is_array($LANG_MG00)
+) {
+    $mgBootstrap = $_CONF['path'] . 'plugins/mediagallery/functions.inc';
+    if (is_file($mgBootstrap)) {
+        require_once $mgBootstrap;
+    }
+}
+
 require_once '../../auth.inc.php';
 
 $sub  = isset($_GET['s'])    ? COM_applyFilter($_GET['s'])         : '';
