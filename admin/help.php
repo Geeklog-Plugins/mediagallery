@@ -22,6 +22,8 @@ if (!SEC_hasRights('mediagallery.admin')) {
     exit;
 }
 
+require_once $_MG_CONF['path_admin'] . 'navigation.php';
+
 $guide = $_CONF['path'] . 'plugins/mediagallery/docs/ADMIN_GUIDE.html';
 if (!is_file($guide) || !is_readable($guide)) {
     COM_errorLog('MediaGallery: administrator guide is missing or unreadable: ' . $guide, 1);
@@ -37,10 +39,7 @@ if (!is_file($guide) || !is_readable($guide)) {
 $T = new Template($_MG_CONF['template_path']);
 $T->set_file('admin_help', 'admin_help.thtml');
 $T->set_var(array(
-    'admin_home_url'     => $_MG_CONF['admin_url'] . 'index.php',
-    'configuration_url'  => $_CONF['site_admin_url'] . '/configuration.php',
-    'lang_admin_home'    => isset($LANG_ADMIN['admin_home']) ? $LANG_ADMIN['admin_home'] : $LANG_MG00['admin'],
-    'lang_configuration' => $LANG_MG01['configuration'],
+    'admin_menu'         => MG_showAdminMenu(),
     'guide_content'      => $guideContent
 ));
 
@@ -48,7 +47,5 @@ $display = COM_startBlock($LANG_MG01['help'], '', COM_getBlockTemplate('_admin_b
 $display .= $T->finish($T->parse('output', 'admin_help'));
 $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
 
-$headerCode = '<link rel="stylesheet" type="text/css" href="'
-    . $_MG_CONF['site_url'] . '/admin.css">';
-$display = COM_createHTMLDocument($display, array('headercode' => $headerCode));
+$display = MG_adminCreateHTMLDocument($display);
 COM_output($display);
