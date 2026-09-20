@@ -2,7 +2,7 @@
 // +--------------------------------------------------------------------------+
 // | Media Gallery Plugin - Geeklog                                           |
 // +--------------------------------------------------------------------------+
-// | Protected administrator guide.                                          |
+// | Protected administrator guide.                                           |
 // +--------------------------------------------------------------------------+
 
 require_once '../../../lib-common.php';
@@ -22,25 +22,33 @@ if (!SEC_hasRights('mediagallery.admin')) {
     exit;
 }
 
-require_once $_MG_CONF['path_admin'] . 'navigation.php';
-
 $guide = $_CONF['path'] . 'plugins/mediagallery/docs/ADMIN_GUIDE.html';
 if (!is_file($guide) || !is_readable($guide)) {
     COM_errorLog('MediaGallery: administrator guide is missing or unreadable: ' . $guide, 1);
-    $content = COM_startBlock('MediaGallery Help');
-    $content .= 'The MediaGallery administrator guide is not available.';
-    $content .= COM_endBlock();
+    $guideContent = '<p>The MediaGallery administrator guide is not available.</p>';
 } else {
-    $content = file_get_contents($guide);
-    if ($content === false) {
+    $guideContent = file_get_contents($guide);
+    if ($guideContent === false) {
         COM_errorLog('MediaGallery: failed to read administrator guide: ' . $guide, 1);
-        $content = COM_startBlock('MediaGallery Help');
-        $content .= 'The MediaGallery administrator guide could not be loaded.';
-        $content .= COM_endBlock();
+        $guideContent = '<p>The MediaGallery administrator guide could not be loaded.</p>';
     }
 }
 
-$display = MG_showAdminMenu();
-$display .= $content;
+$T = new Template($_MG_CONF['template_path']);
+$T->set_file('admin_help', 'admin_help.thtml');
+$T->set_var(array(
+    'admin_home_url'     => $_MG_CONF['admin_url'] . 'index.php',
+    'configuration_url'  => $_CONF['site_admin_url'] . '/configuration.php',
+    'lang_admin_home'    => isset($LANG_ADMIN['admin_home']) ? $LANG_ADMIN['admin_home'] : $LANG_MG00['admin'],
+    'lang_configuration' => $LANG_MG01['configuration'],
+    'guide_content'      => $guideContent
+));
 
-COM_output(COM_createHTMLDocument($display));
+$display = COM_startBlock($LANG_MG01['help'], '', COM_getBlockTemplate('_admin_block', 'header'));
+$display .= $T->finish($T->parse('output', 'admin_help'));
+$display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
+
+$headerCode = '<link rel="stylesheet" type="text/css" href="'
+    . $_MG_CONF['site_url'] . '/admin.css">';
+$display = COM_createHTMLDocument($display, array('headercode' => $headerCode));
+COM_output($display);
