@@ -197,7 +197,7 @@ $display = COM_startBlock($LANG_MG00['admin'], '', COM_getBlockTemplate('_admin_
 $display .= MG_showAdminMenu('member_albums');
 $display .= $T->finish($T->parse('output', 'admin'));
 $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
-$display = COM_createHTMLDocument($display);
+$display = MG_adminCreateHTMLDocument($display);
 
 COM_output($display);
 ?>
