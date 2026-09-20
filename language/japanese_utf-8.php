@@ -1637,3 +1637,7 @@ $LANG_configselects['mediagallery'] = array(
 if (isset($_MG_CONF, $_MG_CONF['custom_image_width'], $_MG_CONF['custom_image_height'])) {
     $LANG_configselects['mediagallery'][21][$LANG_MG01['size_custom'] . ' - ' . $_MG_CONF['custom_image_width'] . 'x' . $_MG_CONF['custom_image_height']] = 9;
 }
+
+$LANG_MG01['admin_help'] = 'MediaGallery administration gives you quick access to albums, member galleries, maintenance tasks, reports and plugin configuration.';
+
+?>
