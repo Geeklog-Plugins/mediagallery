@@ -105,6 +105,13 @@ This changelog tracks the maintained MediaGallery development line. MediaGallery
 
 ### Interoperability
 
+- Add a shared provider capability declaration for Agent, Eclipse, Hub and future consumers.
+- Add the bounded `dashboard_summary` service with album, media and moderation metrics plus storage/moderation alerts.
+- Add permission-filtered `album_read` and `media_read` services with normalized identity, subtype, URL, description, ownership and media metadata.
+- Declare content, lifecycle, URL-resolution and MediaGallery album/media capabilities using the memorandum's provider-neutral names.
+- Correct the media Item Info description/excerpt mapping used by normalized content consumers.
+- Align `plugin.json` with the 1.8.0 compatibility policy (Geeklog 2.1.1+, PHP 5.6+).
+
 - Add a read-only `album_list` service through Geeklog `PLG_invokeService()`.
 - Reuse MediaGallery permission and album-tree rules rather than exposing raw `mg_*` tables to consumers.
 - Preserve valid `member_album_root = 0` behavior.
