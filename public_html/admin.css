@@ -3,9 +3,11 @@
 .mg-admin-toolbar__menu{flex:1 1 520px;min-width:0}
 .mg-admin-toolbar__actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .mg-admin-config-form{display:inline-block;margin:0}
-.mg-admin-summary{margin:0 0 20px;color:#5f6b76;line-height:1.55}
-.mg-admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
-.mg-admin-card{display:flex;flex-direction:column;gap:7px;min-height:120px;padding:18px 20px;border:1px solid #d8dee6;border-radius:8px;background:#fff;text-decoration:none;box-sizing:border-box}
+.mg-admin-intro{margin:0 0 18px;padding:16px 18px;border:1px solid #d8dee6;border-radius:8px;background:#f7f9fb}
+.mg-admin-intro h2{margin:0 0 6px;font-size:1.15rem}
+.mg-admin-intro p{margin:0;line-height:1.5}
+.mg-admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.mg-admin-card{display:flex;flex-direction:column;gap:6px;min-height:110px;padding:16px 18px;border:1px solid #d8dee6;border-radius:8px;background:#fff;text-decoration:none;box-sizing:border-box}
 .mg-admin-card:hover,.mg-admin-card:focus{text-decoration:none;border-color:#9aa8b8;box-shadow:0 2px 10px rgba(0,0,0,.06)}
 .mg-admin-card__title{font-weight:700;font-size:1.05rem}
 .mg-admin-card__text{color:#5f6b76;line-height:1.45}
