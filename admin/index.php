@@ -125,6 +125,14 @@ if ($sub_menu !== '') {
     $adminMenu = MG_showAdminMenu($sub_menu);
 }
 
+$statsContent = '';
+if (empty($sub_menu)) {
+    $stats = plugin_showstats_mediagallery(0);
+    if (is_string($stats) && $stats !== '') {
+        $statsContent = '<div class="mg-admin-stats">' . $stats . '</div>';
+    }
+}
+
 $adminTemplate = new Template($_MG_CONF['template_path']);
 $adminTemplate->set_file('admin_index', 'admin_index.thtml');
 $adminTemplate->set_var(array(
@@ -152,16 +160,13 @@ $adminTemplate->set_var(array(
     'lang_categories_help'    => $LANG_MG01['content_categories_help'],
     'status_message'          => ($msg > 0 && isset($LANG_MG09[$msg]))
         ? COM_showMessageText($LANG_MG09[$msg])
-        : ''
+        : '',
+    'stats_content'           => $statsContent
 ));
 
 $display = COM_startBlock($LANG_MG00['admin'], '', COM_getBlockTemplate('_admin_block', 'header'));
 $display .= $adminTemplate->finish($adminTemplate->parse('output', 'admin_index'));
 $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
-
-if (empty($sub_menu)) {
-    $display .= plugin_showstats_mediagallery(0);
-}
 
 $headerCode = '<link rel="stylesheet" type="text/css" href="'
     . $_MG_CONF['site_url'] . '/admin.css">';
