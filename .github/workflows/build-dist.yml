@@ -83,7 +83,7 @@ jobs:
             | grep -q '{stats_content}'
           unzip -p "dist/${ARCHIVE}" mediagallery/templates/admin_index.thtml \
             | grep -q 'name="conf_group" value="mediagallery"'
-          unzip -p "dist/${ARCHIVE}" mediagallery/templates/admin_index.thtml \
+          unzip -p "dist/${ARCHIVE}" mediagallery/templates/admin_navigation.thtml \
             | grep -q '{configuration_url}'
           unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/include/storage_180.php'
           unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/tools/migrate-media-storage.php'
