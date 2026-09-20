@@ -1676,7 +1676,7 @@ function plugin_getiteminfo_mediagallery($id, $what, $uid = 0, $options = array(
                         break;
                     case 'description':
                     case 'excerpt':
-                        $prop[$p] = PLG_replaceTags($A['media_desc']);
+                        $props[$p] = PLG_replaceTags($A['media_desc']);
                         break;
                     case 'raw-description' :
                         $props[$p] = $A['media_desc'];
