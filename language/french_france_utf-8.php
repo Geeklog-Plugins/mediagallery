@@ -1407,6 +1407,7 @@ $LANG_MG01['admin_help'] = 'L’administration de MediaGallery donne un accès r
 
 
 $LANG_MG01['manage_albums'] = 'Gérer les albums';
+$LANG_MG01['manage_albums_help'] = 'Gérez les albums, les médias et la structure de la galerie.';
 $LANG_MG01['overview'] = 'Vue d’ensemble';
 $LANG_MG01['media_items'] = 'Médias';
 $LANG_MG01['pending_media'] = 'En attente';
