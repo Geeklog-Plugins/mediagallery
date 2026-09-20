@@ -137,9 +137,9 @@ $adminTemplate->set_var(array(
     'lang_albums_help'        => $LANG_MG01['manage_albums_help'],
     'lang_member_albums'      => $LANG_MG01['member_albums'],
     'lang_member_albums_help' => $LANG_MG01['member_albums_help'],
-    'lang_batch_sessions'     => $LANG_MG01['batch_sessions'],
+    'lang_batch_sessions'     => $LANG_MG01['maintenance_tools'],
     'lang_batch_sessions_help'=> $LANG_MG01['maintenance_tools_help'],
-    'lang_miscellaneous'      => $LANG_MG01['miscellaneous'],
+    'lang_miscellaneous'      => $LANG_MG01['reports_tools'],
     'lang_misc_help'          => $LANG_MG01['reports_tools_help'],
     'status_message'          => ($msg > 0 && isset($LANG_MG09[$msg]))
         ? COM_showMessageText($LANG_MG09[$msg])
