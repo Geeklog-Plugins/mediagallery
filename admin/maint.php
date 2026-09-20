@@ -405,7 +405,7 @@ if ($mode == 'thumbs') {
         $display .= MG_continueSession($sid, $item_limit, $refresh_rate);
     }
     $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
-    $display = COM_createHTMLDocument($display);
+    $display = MG_adminCreateHTMLDocument($display);
     COM_output($display);
     exit;
 
