@@ -124,8 +124,11 @@ $display .= MG_showAdminMenu($sub_menu);
 if ($msg > 0) {
     $display .= COM_showMessageText($LANG_MG09[$msg]);
 }
-if (empty($sub_menu)) {
-    $display .= '<div class="mg-admin-section mg-admin-stats">' . plugin_showstats_mediagallery(0) . '</div>';
+if (empty($sub_menu) && function_exists('plugin_showstats_mediagallery')) {
+    $mgStats = plugin_showstats_mediagallery(0);
+    if (is_string($mgStats) && $mgStats !== '') {
+        $display .= '<div class="mg-admin-section mg-admin-stats">' . $mgStats . '</div>';
+    }
 }
 $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
 $display = COM_createHTMLDocument($display);
