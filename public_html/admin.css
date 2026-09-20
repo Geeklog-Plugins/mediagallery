@@ -30,3 +30,21 @@
 .mg-admin-guide dt{font-weight:700;margin-top:10px}
 .mg-admin-guide dd{margin:3px 0 10px 20px}
 @media (max-width:640px){.mg-admin-guide nav ul{columns:1}.mg-admin-guide table{display:block;overflow-x:auto}}
+
+.mg-admin-nav{margin:0 0 20px}
+.mg-admin-nav__primary{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 12px}
+.mg-admin-subnav{padding:14px 16px;border:1px solid #d8dee6;border-radius:8px;background:#f7f9fb}
+.mg-admin-subnav__title{display:block;margin:0 0 8px;font-size:1rem}
+.mg-admin-subnav__links{display:flex;flex-wrap:wrap;gap:8px 14px}
+.mg-admin-subnav__links a{display:inline-block}
+.mg-admin-stats{margin-top:24px;padding-top:20px;border-top:1px solid #d8dee6}
+.mg-admin-stats h2,.mg-admin-stats h3{margin-top:0}
+.mg-admin-stats table{width:100%}
+.mg-admin-home .admin-list,.mg-admin-home .admin-list-table{margin-top:10px}
+@media (max-width:640px){
+.mg-admin-nav__primary{align-items:stretch}
+.mg-admin-nav__primary .uk-button,.mg-admin-nav__primary form{width:100%}
+.mg-admin-nav__primary form .uk-button{width:100%}
+.mg-admin-subnav__links{display:block}
+.mg-admin-subnav__links a{display:block;padding:5px 0}
+}
