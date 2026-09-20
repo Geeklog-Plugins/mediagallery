@@ -35,18 +35,6 @@ if (strpos(strtolower($_SERVER['PHP_SELF']), strtolower(basename(__FILE__))) !==
     die('This file can not be used on its own!');
 }
 
-function MG_adminConfigurationForm()
-{
-    global $_CONF, $LANG_MG01;
-
-    $configUrl = rtrim((string) $_CONF['site_admin_url'], '/') . '/configuration.php';
-
-    return '<form method="post" action="' . htmlspecialchars($configUrl, ENT_QUOTES, COM_getCharset()) . '" style="display:inline-block;margin:0 0 12px 0;">'
-        . '<input type="hidden" name="conf_group" value="mediagallery">'
-        . '<button type="submit" class="uk-button">' . htmlspecialchars($LANG_MG01['configuration'], ENT_QUOTES, COM_getCharset()) . '</button>'
-        . '</form>';
-}
-
 function MG_showAdminMenu($sub_menu='')
 {
     global $_CONF, $_TABLES, $_MG_CONF, $LANG_MG01;
@@ -77,7 +65,6 @@ function MG_showAdminMenu($sub_menu='')
         $_MG_CONF['site_url'] . '/images/mediagallery.png'
     );
 
-    $menu .= MG_adminConfigurationForm();
     $menu .= MG_showAdminSubMenu($sub_menu);
 
     return $menu;
