@@ -124,10 +124,10 @@ $display .= MG_showAdminMenu($sub_menu);
 if ($msg > 0) {
     $display .= COM_showMessageText($LANG_MG09[$msg]);
 }
-$display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
 if (empty($sub_menu)) {
-    $display .= plugin_showstats_mediagallery(0);
+    $display .= '<div class="mg-admin-section mg-admin-stats">' . plugin_showstats_mediagallery(0) . '</div>';
 }
+$display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
 $display = COM_createHTMLDocument($display);
 
 COM_output($display);
