@@ -225,3 +225,93 @@ The service and lifecycle extensions are additive in MediaGallery 1.8.0.
 - Geeklog 2.1.1 is the minimum supported baseline.
 - Album IDs use the `album:<id>` namespace specifically so lifecycle interoperability does not depend on newer Geeklog-only `sub_type` support.
 - Existing media IDs, pages, autotags, albums and database tables remain compatible with the historical MediaGallery contract.
+
+
+## Capability discovery
+
+MediaGallery 1.8.0 advertises one provider-neutral capability declaration:
+
+```php
+$capabilities = plugin_getcapabilities_mediagallery();
+```
+
+The declaration uses schema 1 and identifies MediaGallery as a `content` and
+`service` provider. Current capabilities include:
+
+```text
+content.read
+content.collection
+content.search
+content.url.resolve
+content.lifecycle
+dashboard.summary
+media.album.list
+media.album.read
+media.item.read
+media.item.collection
+```
+
+Consumers should feature-detect this callback and degrade gracefully when
+running against older MediaGallery versions.
+
+### `album_read`
+
+Returns one album after MediaGallery permission and hidden-state checks.
+
+```php
+$status = PLG_invokeService(
+    'mediagallery',
+    'album_read',
+    array('album_id' => 52),
+    $output,
+    $svc_msg
+);
+```
+
+The normalized payload includes stable identity (`album:<id>`), type,
+subtype, title, description, canonical URL, modification date, owner and parent.
+
+### `media_read`
+
+Returns one media item visible through at least one accessible album. An
+optional `album_id` can bind the read to a specific album context.
+
+```php
+$status = PLG_invokeService(
+    'mediagallery',
+    'media_read',
+    array('media_id' => $mediaId),
+    $output,
+    $svc_msg
+);
+```
+
+The payload includes stable media identity, subtype, album, title,
+description, canonical URL, modification date, owner, MediaGallery media type,
+MIME type and thumbnail URL.
+
+### `dashboard_summary`
+
+Administration dashboards such as Eclipse can request a bounded summary without
+querying MediaGallery tables:
+
+```php
+$status = PLG_invokeService(
+    'mediagallery',
+    'dashboard_summary',
+    array(),
+    $output,
+    $svc_msg
+);
+```
+
+The service requires MediaGallery administration or configuration rights. It
+returns schema 1 with album/media/pending metrics, actionable alerts and an
+administration link. The service performs no external network work.
+
+## Consumer responsibilities
+
+Agent, Eclipse, Hub and other consumers must not infer permissions from the
+capability declaration. Each service remains authoritative for access checks.
+Consumers should not query MediaGallery's `mg_*` tables or persistent file
+paths directly.
