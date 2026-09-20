@@ -238,3 +238,208 @@ function service_media_list_mediagallery($args, &$output, &$svc_msg)
 
     return PLG_RET_OK;
 }
+
+
+/**
+ * Advertise MediaGallery interoperability capabilities.
+ *
+ * This is a small, provider-owned declaration following the shared Geeklog
+ * memorandum capability convention. Consumers must still use the normal
+ * MediaGallery permission checks on every read.
+ *
+ * @return array
+ */
+function plugin_getcapabilities_mediagallery()
+{
+    return array(
+        'schema' => 1,
+        'roles' => array('content', 'service'),
+        'capabilities' => array(
+            'content.read',
+            'content.collection',
+            'content.search',
+            'content.url.resolve',
+            'content.lifecycle',
+            'dashboard.summary',
+            'media.album.list',
+            'media.album.read',
+            'media.item.read',
+            'media.item.collection'
+        )
+    );
+}
+
+/**
+ * Return one access-filtered album.
+ *
+ * @param array $args album_id
+ * @param array $output
+ * @param array $svc_msg
+ * @return int
+ */
+function service_album_read_mediagallery($args, &$output, &$svc_msg)
+{
+    global $_MG_CONF;
+
+    require_once __DIR__ . '/include/classAlbum.php';
+
+    $output = array();
+    $svc_msg = array();
+
+    $albumId = isset($args['album_id']) ? intval($args['album_id']) : 0;
+    if ($albumId <= 0) {
+        $svc_msg['error_desc'] = 'Invalid album id.';
+        return PLG_RET_ERROR;
+    }
+
+    $album = new mgAlbum($albumId);
+    if (!$album->valid || $album->access <= 0 || ($album->hidden && $album->access < 3)) {
+        $svc_msg['error_desc'] = 'Album not found or not accessible.';
+        return PLG_RET_AUTH_FAILED;
+    }
+
+    $output = array(
+        'id'            => 'album:' . $albumId,
+        'type'          => 'mediagallery',
+        'subtype'       => 'album',
+        'title'         => strip_tags($album->title),
+        'description'   => strip_tags($album->description),
+        'url'           => $_MG_CONF['site_url'] . '/album.php?aid=' . $albumId,
+        'canonical_url' => $_MG_CONF['site_url'] . '/album.php?aid=' . $albumId,
+        'date-modified' => intval($album->last_update),
+        'uid'           => intval($album->owner_id),
+        'parent_id'     => intval($album->parent)
+    );
+
+    return PLG_RET_OK;
+}
+
+/**
+ * Return one access-filtered media item.
+ *
+ * @param array $args media_id and optional album_id
+ * @param array $output
+ * @param array $svc_msg
+ * @return int
+ */
+function service_media_read_mediagallery($args, &$output, &$svc_msg)
+{
+    global $_TABLES, $_MG_CONF;
+
+    require_once __DIR__ . '/include/classAlbum.php';
+    require_once __DIR__ . '/include/classMedia.php';
+
+    $output = array();
+    $svc_msg = array();
+
+    $mediaId = isset($args['media_id']) ? (string) $args['media_id'] : '';
+    $requestedAlbumId = isset($args['album_id']) ? intval($args['album_id']) : 0;
+    if ($mediaId === '') {
+        $svc_msg['error_desc'] = 'Invalid media id.';
+        return PLG_RET_ERROR;
+    }
+
+    $escapedId = DB_escapeString($mediaId);
+    $sql = "SELECT m.*, ma.album_id FROM {$_TABLES['mg_media']} AS m "
+         . "INNER JOIN {$_TABLES['mg_media_albums']} AS ma ON ma.media_id=m.media_id "
+         . "WHERE m.media_id='" . $escapedId . "'";
+    if ($requestedAlbumId > 0) {
+        $sql .= ' AND ma.album_id=' . $requestedAlbumId;
+    }
+    $result = DB_query($sql);
+
+    while ($row = DB_fetchArray($result)) {
+        $albumId = intval($row['album_id']);
+        $album = new mgAlbum($albumId);
+        if (!$album->valid || $album->access <= 0 || ($album->hidden && $album->access < 3)) {
+            continue;
+        }
+
+        $media = new Media($row, $albumId);
+        if (isset($media->access) && $media->access <= 0) {
+            continue;
+        }
+
+        $thumbnail = $media->displayRawThumb(1);
+        $url = $_MG_CONF['site_url'] . '/media.php?f=0&s=' . rawurlencode($media->id);
+        $output = array(
+            'id'            => (string) $media->id,
+            'type'          => 'mediagallery',
+            'subtype'       => 'media',
+            'album_id'      => $albumId,
+            'title'         => $media->title === '' ? (string) $media->id : strip_tags($media->title),
+            'description'   => strip_tags($media->description),
+            'url'           => $url,
+            'canonical_url' => $url,
+            'date-modified' => isset($row['media_upload_time']) ? intval($row['media_upload_time']) : 0,
+            'uid'           => isset($row['media_user_id']) ? intval($row['media_user_id']) : 0,
+            'media_type'    => intval($media->type),
+            'mime_type'     => (string) $media->mime_type,
+            'thumbnail_url' => isset($thumbnail[0]) ? $thumbnail[0] : '',
+            'media_url'     => $url
+        );
+        return PLG_RET_OK;
+    }
+
+    $svc_msg['error_desc'] = 'Media not found or not accessible.';
+    return PLG_RET_AUTH_FAILED;
+}
+
+/**
+ * Return a bounded administration summary for generic dashboards.
+ *
+ * @param array $args
+ * @param array $output
+ * @param array $svc_msg
+ * @return int
+ */
+function service_dashboard_summary_mediagallery($args, &$output, &$svc_msg)
+{
+    global $_TABLES, $_MG_CONF;
+
+    $output = array();
+    $svc_msg = array();
+
+    if (!SEC_hasRights('mediagallery.admin') && !SEC_hasRights('mediagallery.config')) {
+        $svc_msg['error_desc'] = 'Not authorized to read MediaGallery administration summary.';
+        return PLG_RET_AUTH_FAILED;
+    }
+
+    $albums = DB_count($_TABLES['mg_albums']);
+    $media = DB_count($_TABLES['mg_media']);
+    $pending = DB_count($_TABLES['mg_mediaqueue']);
+
+    $alerts = array();
+    if (!empty($_MG_CONF['path_mediaobjects']) && !is_writable($_MG_CONF['path_mediaobjects'])) {
+        $alerts[] = array(
+            'id' => 'storage',
+            'status' => 'critical',
+            'message' => 'Persistent media storage is not writable.'
+        );
+    }
+    if ($pending > 0) {
+        $alerts[] = array(
+            'id' => 'pending',
+            'status' => 'warning',
+            'message' => 'Media submissions are waiting for moderation.',
+            'count' => intval($pending)
+        );
+    }
+
+    $output = array(
+        'schema' => 1,
+        'status' => empty($alerts) ? 'ok' : 'warning',
+        'metrics' => array(
+            array('id' => 'albums', 'label' => 'Albums', 'value' => intval($albums)),
+            array('id' => 'items', 'label' => 'Media', 'value' => intval($media)),
+            array('id' => 'pending', 'label' => 'Pending', 'value' => intval($pending))
+        ),
+        'alerts' => $alerts,
+        'links' => array(
+            array('label' => 'Manage MediaGallery', 'url' => $_MG_CONF['admin_url'] . 'index.php')
+        ),
+        'updated' => time()
+    );
+
+    return PLG_RET_OK;
+}
