@@ -42,6 +42,22 @@ function MG_adminEscape($value)
     return htmlspecialchars((string) $value, ENT_QUOTES, COM_getCharset());
 }
 
+function MG_adminCreateHTMLDocument($display, $options = array())
+{
+    global $_MG_CONF;
+
+    $adminCss = '<link rel="stylesheet" type="text/css" href="'
+        . $_MG_CONF['site_url'] . '/admin.css">';
+
+    if (isset($options['headercode']) && $options['headercode'] !== '') {
+        $options['headercode'] .= "\n" . $adminCss;
+    } else {
+        $options['headercode'] = $adminCss;
+    }
+
+    return COM_createHTMLDocument($display, $options);
+}
+
 function MG_showAdminMenu($sub_menu = '')
 {
     global $_CONF, $_MG_CONF, $LANG_MG01;
