@@ -141,6 +141,11 @@ The maintained MediaGallery 1.8.0 templates now include:
 
 ## Geeklog interoperability
 
+### Shared capability discovery
+
+MediaGallery 1.8.0 declares provider-neutral capabilities for Agent, Eclipse, Hub and future Geeklog consumers. It exposes bounded read-only album/media services and an administration `dashboard_summary` service, while keeping MediaGallery permissions authoritative and avoiding direct consumer access to `mg_*` tables.
+
+
 ### Album discovery
 
 Other Geeklog plugins can request permitted album trees through the native service API instead of querying `mg_*` tables directly:
