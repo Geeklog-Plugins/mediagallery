@@ -1642,6 +1642,7 @@ $LANG_MG01['admin_help'] = 'MediaGallery administration gives you quick access t
 
 
 $LANG_MG01['manage_albums'] = 'Manage Albums';
+$LANG_MG01['manage_albums_help'] = 'アルバム、メディア項目、ギャラリー構成を管理します。';
 $LANG_MG01['overview'] = 'Overview';
 $LANG_MG01['media_items'] = 'Media items';
 $LANG_MG01['pending_media'] = 'Pending media';
