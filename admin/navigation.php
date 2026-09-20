@@ -54,6 +54,35 @@ function MG_adminConfigurationForm($buttonClass = 'uk-button')
         . '</form>';
 }
 
+function MG_adminSafeCount($tableKey)
+{
+    global $_TABLES;
+
+    if (!isset($_TABLES[$tableKey]) || $_TABLES[$tableKey] === '') {
+        return 0;
+    }
+
+    $result = DB_query('SELECT COUNT(*) AS mg_count FROM ' . $_TABLES[$tableKey], 1);
+    if ($result === false || DB_error()) {
+        return 0;
+    }
+
+    $row = DB_fetchArray($result);
+    return isset($row['mg_count']) ? (int) $row['mg_count'] : 0;
+}
+
+function MG_adminStorageStatus()
+{
+    global $_MG_CONF;
+
+    if (empty($_MG_CONF['path_mediaobjects'])) {
+        return false;
+    }
+
+    $path = (string) $_MG_CONF['path_mediaobjects'];
+    return is_dir($path) && is_writable($path);
+}
+
 function MG_adminStyles()
 {
     return '<style>'
@@ -100,11 +129,10 @@ function MG_showAdminMenu($sub_menu='')
         return $menu . MG_showAdminSubMenu($sub_menu);
     }
 
-    $albumCount = (int) DB_count($_TABLES['mg_albums']);
-    $mediaCount = (int) DB_count($_TABLES['mg_media']);
-    $pendingCount = (int) DB_count($_TABLES['mg_mediaqueue']);
-    $storageOk = !empty($_MG_CONF['path_mediaobjects']) && is_dir($_MG_CONF['path_mediaobjects'])
-        && is_writable($_MG_CONF['path_mediaobjects']);
+    $albumCount = MG_adminSafeCount('mg_albums');
+    $mediaCount = MG_adminSafeCount('mg_media');
+    $pendingCount = MG_adminSafeCount('mg_mediaqueue');
+    $storageOk = MG_adminStorageStatus();
 
     $menu .= '<div class="mg-admin-section">'
         . '<h2>' . MG_adminEscape($LANG_MG01['overview']) . '</h2>'
