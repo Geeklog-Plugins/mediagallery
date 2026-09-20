@@ -59,15 +59,25 @@ function MG_adminStyles()
     return '<style>'
         . '.mg-admin-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 18px;}'
         . '.mg-admin-config-form{display:inline-block;margin:0;}'
-        . '.mg-admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin:16px 0 20px;}'
+        . '.mg-admin-section{border:1px solid #d8dee6;border-radius:6px;background:#fff;padding:18px;margin:0 0 18px;}'
+        . '.mg-admin-section h2{margin:0 0 12px;font-size:1.2em;}'
+        . '.mg-admin-section-intro{color:#666;margin:0 0 14px;line-height:1.45;}'
+        . '.mg-admin-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:0 0 18px;}'
+        . '.mg-admin-metric{border:1px solid #d8dee6;border-radius:6px;background:#f7f9fb;padding:14px 16px;}'
+        . '.mg-admin-metric strong{display:block;font-size:1.6em;line-height:1.1;margin-bottom:4px;}'
+        . '.mg-admin-metric span{color:#666;font-size:.95em;}'
+        . '.mg-admin-status-ok{color:#287a3b;}'
+        . '.mg-admin-status-warning{color:#a05a00;}'
+        . '.mg-admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;}'
         . '.mg-admin-card{border:1px solid #d8dee6;border-radius:6px;background:#fff;padding:16px;box-sizing:border-box;}'
-        . '.mg-admin-card h3{margin:0 0 8px;font-size:1.05em;}'
+        . '.mg-admin-card h3{margin:0 0 7px;font-size:1.05em;}'
         . '.mg-admin-card p{margin:0 0 12px;color:#666;line-height:1.45;}'
-        . '.mg-admin-card ul{margin:0;padding-left:18px;}'
-        . '.mg-admin-card li{margin:5px 0;}'
-        . '.mg-admin-overview{background:#f7f9fb;border:1px solid #d8dee6;border-radius:6px;padding:16px 18px;margin:0 0 18px;}'
-        . '.mg-admin-overview h2{margin-top:0;}'
-        . '.mg-admin-actions a.uk-button:hover,.mg-admin-actions a.uk-button:focus{color:#fff!important;text-decoration:none!important;}'
+        . '.mg-admin-card .uk-button{margin-top:auto;}'
+        . '.mg-admin-submenu{border:1px solid #d8dee6;border-radius:6px;background:#fff;padding:16px 18px;margin:0 0 18px;}'
+        . '.mg-admin-submenu h3{margin-top:0;}'
+        . '.mg-admin-submenu ul{margin-bottom:0;}'
+        . '.mg-admin-stats{margin-top:18px;}'
+        . '.mg-admin-actions a.uk-button:hover,.mg-admin-actions a.uk-button:focus,.mg-admin-card a.uk-button:hover,.mg-admin-card a.uk-button:focus{color:#fff!important;text-decoration:none!important;}'
         . '</style>';
 }
 
@@ -75,50 +85,86 @@ function MG_showAdminMenu($sub_menu='')
 {
     global $_CONF, $_TABLES, $_MG_CONF, $LANG_MG01;
 
-    require_once $_CONF['path'] . 'system/lib-admin.php';
-
     $help_url = $_MG_CONF['admin_url'] . 'help.php';
-
-    $menu_arr = array(
-        array('url'  => $_MG_CONF['admin_url'] . 'category.php',
-              'text' => $LANG_MG01['category_manage_help']),
-
-        array('url'  => $_MG_CONF['admin_url'] . 'index.php?s=m',
-              'text' => $LANG_MG01['member_albums']),
-
-        array('url'  => $_MG_CONF['admin_url'] . 'index.php?s=b',
-              'text' => $LANG_MG01['batch_sessions']),
-
-        array('url'  => $_MG_CONF['admin_url'] . 'index.php?s=c',
-              'text' => $LANG_MG01['miscellaneous']),
-
-        array('url'  => $help_url,
-              'text' => $LANG_MG01['help']));
+    $albumsUrl = $_MG_CONF['site_url'] . '/admin.php';
 
     $menu = MG_adminStyles();
     $menu .= '<div class="mg-admin-actions">'
-        . '<a class="uk-button uk-button-primary" href="' . MG_adminEscape($_MG_CONF['site_url'] . '/admin.php') . '">' . MG_adminEscape($LANG_MG01['albums']) . '</a>'
+        . '<a class="uk-button uk-button-primary" href="' . MG_adminEscape($albumsUrl) . '">'
+        . MG_adminEscape($LANG_MG01['manage_albums']) . '</a>'
         . MG_adminConfigurationForm()
         . '<a class="uk-button" href="' . MG_adminEscape($help_url) . '">' . MG_adminEscape($LANG_MG01['help']) . '</a>'
         . '</div>';
 
-    if ($sub_menu === '') {
-        $menu .= '<div class="mg-admin-overview"><h2>' . MG_adminEscape($LANG_MG01['admin']) . '</h2>'
-            . '<p>' . MG_adminEscape($LANG_MG01['admin_help']) . '</p></div>';
-
-        $menu .= '<div class="mg-admin-grid">';
-        foreach ($menu_arr as $item) {
-            if ($item['url'] === $help_url) {
-                continue;
-            }
-            $menu .= '<div class="mg-admin-card"><h3><a href="' . MG_adminEscape($item['url']) . '">'
-                . MG_adminEscape($item['text']) . '</a></h3>'
-                . '<p><a class="uk-button" href="' . MG_adminEscape($item['url']) . '">' . MG_adminEscape($item['text']) . '</a></p></div>';
-        }
-        $menu .= '</div>';
-    } else {
-        $menu .= MG_showAdminSubMenu($sub_menu);
+    if ($sub_menu !== '') {
+        return $menu . MG_showAdminSubMenu($sub_menu);
     }
+
+    $albumCount = (int) DB_count($_TABLES['mg_albums']);
+    $mediaCount = (int) DB_count($_TABLES['mg_media']);
+    $pendingCount = (int) DB_count($_TABLES['mg_mediaqueue']);
+    $storageOk = !empty($_MG_CONF['path_mediaobjects']) && is_dir($_MG_CONF['path_mediaobjects'])
+        && is_writable($_MG_CONF['path_mediaobjects']);
+
+    $menu .= '<div class="mg-admin-section">'
+        . '<h2>' . MG_adminEscape($LANG_MG01['overview']) . '</h2>'
+        . '<p class="mg-admin-section-intro">' . MG_adminEscape($LANG_MG01['admin_help']) . '</p>'
+        . '<div class="mg-admin-metrics">'
+        . '<div class="mg-admin-metric"><strong>' . $albumCount . '</strong><span>' . MG_adminEscape($LANG_MG01['albums']) . '</span></div>'
+        . '<div class="mg-admin-metric"><strong>' . $mediaCount . '</strong><span>' . MG_adminEscape($LANG_MG01['media_items']) . '</span></div>'
+        . '<div class="mg-admin-metric"><strong>' . $pendingCount . '</strong><span>' . MG_adminEscape($LANG_MG01['pending_media']) . '</span></div>'
+        . '<div class="mg-admin-metric"><strong class="' . ($storageOk ? 'mg-admin-status-ok' : 'mg-admin-status-warning') . '">'
+        . MG_adminEscape($storageOk ? $LANG_MG01['status_ok'] : $LANG_MG01['status_check']) . '</strong>'
+        . '<span>' . MG_adminEscape($LANG_MG01['media_storage']) . '</span></div>'
+        . '</div></div>';
+
+    $cards = array(
+        array(
+            'title' => $LANG_MG01['content_categories'],
+            'description' => $LANG_MG01['content_categories_help'],
+            'url' => $_MG_CONF['admin_url'] . 'category.php',
+            'action' => $LANG_MG01['manage']
+        ),
+        array(
+            'title' => $LANG_MG01['member_albums'],
+            'description' => $LANG_MG01['member_albums_help'],
+            'url' => $_MG_CONF['admin_url'] . 'index.php?s=m',
+            'action' => $LANG_MG01['manage']
+        )
+    );
+
+    $menu .= '<div class="mg-admin-section"><h2>' . MG_adminEscape($LANG_MG01['content']) . '</h2>'
+        . '<div class="mg-admin-grid">';
+    foreach ($cards as $card) {
+        $menu .= '<div class="mg-admin-card"><h3>' . MG_adminEscape($card['title']) . '</h3>'
+            . '<p>' . MG_adminEscape($card['description']) . '</p>'
+            . '<a class="uk-button" href="' . MG_adminEscape($card['url']) . '">' . MG_adminEscape($card['action']) . '</a></div>';
+    }
+    $menu .= '</div></div>';
+
+    $tools = array(
+        array(
+            'title' => $LANG_MG01['maintenance_tools'],
+            'description' => $LANG_MG01['maintenance_tools_help'],
+            'url' => $_MG_CONF['admin_url'] . 'index.php?s=b',
+            'action' => $LANG_MG01['open_tools']
+        ),
+        array(
+            'title' => $LANG_MG01['reports_tools'],
+            'description' => $LANG_MG01['reports_tools_help'],
+            'url' => $_MG_CONF['admin_url'] . 'index.php?s=c',
+            'action' => $LANG_MG01['open_tools']
+        )
+    );
+
+    $menu .= '<div class="mg-admin-section"><h2>' . MG_adminEscape($LANG_MG01['maintenance_reports']) . '</h2>'
+        . '<div class="mg-admin-grid">';
+    foreach ($tools as $card) {
+        $menu .= '<div class="mg-admin-card"><h3>' . MG_adminEscape($card['title']) . '</h3>'
+            . '<p>' . MG_adminEscape($card['description']) . '</p>'
+            . '<a class="uk-button" href="' . MG_adminEscape($card['url']) . '">' . MG_adminEscape($card['action']) . '</a></div>';
+    }
+    $menu .= '</div></div>';
 
     return $menu;
 }
@@ -178,7 +224,7 @@ function MG_showAdminSubMenu($sub_menu)
                    . '</ul>' . LB;
             break;
     }
-    return $menu;
+    return $menu === '' ? '' : '<div class="mg-admin-submenu">' . $menu . '</div>';
 }
 
 ?>
