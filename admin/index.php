@@ -119,16 +119,25 @@ if ($mode == 'editsubmission') {
     COM_redirect($home_url);
 }
 
+$adminTemplate = new Template($_MG_CONF['template_path']);
+$adminTemplate->set_file('admin_index', 'admin_index.thtml');
+$adminTemplate->set_var(array(
+    'admin_menu'         => MG_showAdminMenu($sub_menu),
+    'configuration_url'  => $_CONF['site_admin_url'] . '/configuration.php',
+    'lang_configuration' => $LANG_MG01['configuration'],
+    'status_message'     => ($msg > 0 && isset($LANG_MG09[$msg]))
+        ? COM_showMessageText($LANG_MG09[$msg])
+        : ''
+));
+
 $display = COM_startBlock($LANG_MG00['admin'], '', COM_getBlockTemplate('_admin_block', 'header'));
-$display .= MG_showAdminMenu($sub_menu);
-if ($msg > 0) {
-    $display .= COM_showMessageText($LANG_MG09[$msg]);
-}
+$display .= $adminTemplate->finish($adminTemplate->parse('output', 'admin_index'));
 $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
+
 if (empty($sub_menu)) {
     $display .= plugin_showstats_mediagallery(0);
 }
-$display = COM_createHTMLDocument($display);
 
+$display = COM_createHTMLDocument($display);
 COM_output($display);
 ?>
