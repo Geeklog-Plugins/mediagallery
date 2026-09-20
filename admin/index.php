@@ -120,10 +120,7 @@ if ($mode == 'editsubmission') {
     COM_redirect($home_url);
 }
 
-$adminMenu = '';
-if ($sub_menu !== '') {
-    $adminMenu = MG_showAdminMenu($sub_menu);
-}
+$adminMenu = MG_showAdminMenu($sub_menu);
 
 $statsContent = '';
 if (empty($sub_menu)) {
