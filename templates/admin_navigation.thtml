@@ -8,14 +8,5 @@
         <a class="uk-button" href="{help_url}">{lang_help}</a>
     </div>
 
-    <!-- BEGIN subnav -->
-    <div class="mg-admin-subnav">
-        <strong class="mg-admin-subnav__title">{subnav_title}</strong>
-        <div class="mg-admin-subnav__links">
-            <!-- BEGIN subnav_item -->
-            <a href="{subnav_url}">{subnav_text}</a>
-            <!-- END subnav_item -->
-        </div>
-    </div>
-    <!-- END subnav -->
+    {sub_menu}
 </div>
