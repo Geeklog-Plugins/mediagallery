@@ -75,7 +75,12 @@ jobs:
           unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/admin/navigation.php'
           unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/templates/admin_index.thtml'
           unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/templates/admin_help.thtml'
+          unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/templates/admin_navigation.thtml'
           unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/public_html/admin.css'
+          unzip -p "dist/${ARCHIVE}" mediagallery/admin/navigation.php \
+            | grep -q 'function MG_adminCreateHTMLDocument'
+          unzip -p "dist/${ARCHIVE}" mediagallery/templates/admin_index.thtml \
+            | grep -q '{stats_content}'
           unzip -p "dist/${ARCHIVE}" mediagallery/templates/admin_index.thtml \
             | grep -q 'name="conf_group" value="mediagallery"'
           unzip -p "dist/${ARCHIVE}" mediagallery/templates/admin_index.thtml \
