@@ -205,7 +205,7 @@ $display = COM_startBlock($LANG_MG00['admin'], '', COM_getBlockTemplate('_admin_
 $display .= MG_showAdminMenu('batch_sessions');
 $display .= $T->finish($T->get_var('output'));
 $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
-$display = COM_createHTMLDocument($display);
+$display = MG_adminCreateHTMLDocument($display);
 
 COM_output($display);
 ?>
