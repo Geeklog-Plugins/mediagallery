@@ -1,5 +1,6 @@
 <div class="mg-admin-home">
     <div class="mg-admin-toolbar">
+        <div class="mg-admin-toolbar__menu">{admin_menu}</div>
         <div class="mg-admin-toolbar__actions">
             <form class="mg-admin-config-form" method="post" action="{configuration_url}">
                 <input type="hidden" name="conf_group" value="mediagallery">
@@ -11,7 +12,10 @@
 
     {status_message}
 
-    <p class="mg-admin-summary">{admin_help}</p>
+    <div class="mg-admin-intro">
+        <h2>{lang_overview}</h2>
+        <p>{admin_help}</p>
+    </div>
 
     <div class="mg-admin-grid">
         <a class="mg-admin-card" href="{albums_url}">
@@ -25,18 +29,13 @@
         </a>
 
         <a class="mg-admin-card" href="{maintenance_url}">
-            <span class="mg-admin-card__title">{lang_maintenance}</span>
-            <span class="mg-admin-card__text">{lang_maintenance_help}</span>
+            <span class="mg-admin-card__title">{lang_batch_sessions}</span>
+            <span class="mg-admin-card__text">{lang_batch_sessions_help}</span>
         </a>
 
-        <a class="mg-admin-card" href="{tools_url}">
-            <span class="mg-admin-card__title">{lang_tools}</span>
-            <span class="mg-admin-card__text">{lang_tools_help}</span>
-        </a>
-
-        <a class="mg-admin-card" href="{categories_url}">
-            <span class="mg-admin-card__title">{lang_categories}</span>
-            <span class="mg-admin-card__text">{lang_categories_help}</span>
+        <a class="mg-admin-card" href="{misc_url}">
+            <span class="mg-admin-card__title">{lang_miscellaneous}</span>
+            <span class="mg-admin-card__text">{lang_misc_help}</span>
         </a>
     </div>
 </div>
