@@ -173,6 +173,21 @@ The historical `public_html/mediagallery/mediaobjects/` location is a migration 
 
 ## 9. Interoperability
 
+### Shared capability contract
+
+- [x] `plugin_getcapabilities_mediagallery()` advertises the provider roles and shared capabilities defined by the Geeklog memorandum.
+- [x] Declare `content.read`, `content.collection`, `content.search`, `content.url.resolve` and `content.lifecycle`.
+- [x] Declare `media.album.list`, `media.album.read`, `media.item.read` and `media.item.collection`.
+- [x] Expose `dashboard.summary` through the bounded `dashboard_summary` service for Eclipse and other administration consumers.
+- [x] Expose permission-filtered `album_read` and `media_read` services so Agent, Hub and future consumers do not need MediaGallery SQL knowledge.
+- [x] Keep capability discovery consumer-neutral: MediaGallery has no dependency on Agent, Eclipse or Hub.
+- [x] Align `plugin.json` with the maintained 1.8.0 baseline: Geeklog 2.1.1+ and PHP 5.6+.
+- [x] Correct Media Item Info description/excerpt mapping for normalized consumers.
+- [ ] Live-test capability discovery and all new read services on Geeklog 2.1.1 and 2.2.2.
+- [ ] Validate Eclipse 1.2 rendering of albums/media/pending/storage summary from the exact release archive.
+- [ ] Validate Agent/Hub reads with anonymous, member and administrator permission contexts.
+
+
 ### Album discovery
 
 - [x] `album_list` implemented through `PLG_invokeService()`.
