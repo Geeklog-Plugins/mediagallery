@@ -81,7 +81,7 @@ jobs:
             | grep -q 'function MG_adminCreateHTMLDocument'
           unzip -p "dist/${ARCHIVE}" mediagallery/templates/admin_index.thtml \
             | grep -q '{stats_content}'
-          unzip -p "dist/${ARCHIVE}" mediagallery/templates/admin_index.thtml \
+          unzip -p "dist/${ARCHIVE}" mediagallery/templates/admin_navigation.thtml \
             | grep -q 'name="conf_group" value="mediagallery"'
           unzip -p "dist/${ARCHIVE}" mediagallery/templates/admin_navigation.thtml \
             | grep -q '{configuration_url}'
