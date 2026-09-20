@@ -1,10 +1,41 @@
-<div class="mg-admin-index">
-    {admin_menu}
-
-    <form class="mg-admin-config-form" method="post" action="{configuration_url}">
-        <input type="hidden" name="conf_group" value="mediagallery">
-        <button type="submit" class="uk-button">{lang_configuration}</button>
-    </form>
+<div class="mg-admin-home">
+    <div class="mg-admin-toolbar">
+        <div class="mg-admin-toolbar__menu">{admin_menu}</div>
+        <div class="mg-admin-toolbar__actions">
+            <form class="mg-admin-config-form" method="post" action="{configuration_url}">
+                <input type="hidden" name="conf_group" value="mediagallery">
+                <button type="submit" class="uk-button uk-button-primary">{lang_configuration}</button>
+            </form>
+            <a class="uk-button" href="{help_url}">{lang_help}</a>
+        </div>
+    </div>
 
     {status_message}
+
+    <div class="mg-admin-intro">
+        <h2>{lang_overview}</h2>
+        <p>{admin_help}</p>
+    </div>
+
+    <div class="mg-admin-grid">
+        <a class="mg-admin-card" href="{albums_url}">
+            <span class="mg-admin-card__title">{lang_albums}</span>
+            <span class="mg-admin-card__text">{lang_albums_help}</span>
+        </a>
+
+        <a class="mg-admin-card" href="{member_albums_url}">
+            <span class="mg-admin-card__title">{lang_member_albums}</span>
+            <span class="mg-admin-card__text">{lang_member_albums_help}</span>
+        </a>
+
+        <a class="mg-admin-card" href="{maintenance_url}">
+            <span class="mg-admin-card__title">{lang_batch_sessions}</span>
+            <span class="mg-admin-card__text">{lang_batch_sessions_help}</span>
+        </a>
+
+        <a class="mg-admin-card" href="{misc_url}">
+            <span class="mg-admin-card__title">{lang_miscellaneous}</span>
+            <span class="mg-admin-card__text">{lang_misc_help}</span>
+        </a>
+    </div>
 </div>
