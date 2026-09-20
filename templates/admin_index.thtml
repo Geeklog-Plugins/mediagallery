@@ -12,10 +12,7 @@
 
     {status_message}
 
-    <div class="mg-admin-intro">
-        <h2>{lang_overview}</h2>
-        <p>{admin_help}</p>
-    </div>
+    <p class="mg-admin-summary">{admin_help}</p>
 
     <div class="mg-admin-grid">
         <a class="mg-admin-card" href="{albums_url}">
@@ -36,6 +33,11 @@
         <a class="mg-admin-card" href="{misc_url}">
             <span class="mg-admin-card__title">{lang_miscellaneous}</span>
             <span class="mg-admin-card__text">{lang_misc_help}</span>
+        </a>
+
+        <a class="mg-admin-card" href="{categories_url}">
+            <span class="mg-admin-card__title">{lang_categories}</span>
+            <span class="mg-admin-card__text">{lang_categories_help}</span>
         </a>
     </div>
 </div>
