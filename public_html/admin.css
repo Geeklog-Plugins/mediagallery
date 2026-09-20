@@ -12,3 +12,21 @@
 .mg-admin-card__title{font-weight:700;font-size:1.05rem}
 .mg-admin-card__text{color:#5f6b76;line-height:1.45}
 @media (max-width:640px){.mg-admin-toolbar{display:block}.mg-admin-toolbar__actions{margin-top:12px}.mg-admin-grid{grid-template-columns:1fr}}
+
+.mg-admin-guide{max-width:1100px}
+.mg-admin-guide article{line-height:1.6}
+.mg-admin-guide h1{margin:0 0 12px;font-size:1.6rem}
+.mg-admin-guide h2{margin:28px 0 10px;font-size:1.25rem}
+.mg-admin-guide h3{margin:20px 0 8px;font-size:1.08rem}
+.mg-admin-guide p{margin:0 0 12px}
+.mg-admin-guide nav{margin:18px 0 24px;padding:16px 18px;border:1px solid #d8dee6;border-radius:8px;background:#f7f9fb}
+.mg-admin-guide nav h2{margin-top:0}
+.mg-admin-guide nav ul{columns:2;column-gap:28px;margin:0;padding-left:20px}
+.mg-admin-guide nav li{break-inside:avoid;margin:4px 0}
+.mg-admin-guide table{width:100%;border-collapse:collapse;margin:14px 0 22px}
+.mg-admin-guide th,.mg-admin-guide td{padding:9px 10px;border:1px solid #d8dee6;text-align:left;vertical-align:top}
+.mg-admin-guide th{background:#f7f9fb}
+.mg-admin-guide dl{margin:0 0 18px}
+.mg-admin-guide dt{font-weight:700;margin-top:10px}
+.mg-admin-guide dd{margin:3px 0 10px 20px}
+@media (max-width:640px){.mg-admin-guide nav ul{columns:1}.mg-admin-guide table{display:block;overflow-x:auto}}
