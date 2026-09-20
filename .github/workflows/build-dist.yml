@@ -73,10 +73,11 @@ jobs:
           unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/autoinstall.php'
           unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/BUILD_INFO.txt'
           unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/admin/navigation.php'
-          unzip -p "dist/${ARCHIVE}" mediagallery/admin/navigation.php \
-            | grep -q 'function MG_adminConfigurationForm'
-          unzip -p "dist/${ARCHIVE}" mediagallery/admin/navigation.php \
+          unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/templates/admin_index.thtml'
+          unzip -p "dist/${ARCHIVE}" mediagallery/templates/admin_index.thtml \
             | grep -q 'name="conf_group" value="mediagallery"'
+          unzip -p "dist/${ARCHIVE}" mediagallery/templates/admin_index.thtml \
+            | grep -q '{configuration_url}'
           unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/include/storage_180.php'
           unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/tools/migrate-media-storage.php'
           unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/public_html/mediaobjects/generic.png'
