@@ -1636,4 +1636,24 @@ if (isset($_MG_CONF, $_MG_CONF['custom_image_width'], $_MG_CONF['custom_image_he
 
 $LANG_MG01['admin_help'] = 'MediaGallery administration gives you quick access to albums, member galleries, maintenance tasks, reports and plugin configuration.';
 
+
+$LANG_MG01['manage_albums'] = 'Manage Albums';
+$LANG_MG01['overview'] = 'Overview';
+$LANG_MG01['media_items'] = 'Media items';
+$LANG_MG01['pending_media'] = 'Pending media';
+$LANG_MG01['status_ok'] = 'OK';
+$LANG_MG01['status_check'] = 'Check';
+$LANG_MG01['media_storage'] = 'Media storage';
+$LANG_MG01['content'] = 'Content';
+$LANG_MG01['content_categories'] = 'Categories';
+$LANG_MG01['content_categories_help'] = 'Organize and maintain MediaGallery categories.';
+$LANG_MG01['member_albums_help'] = 'Manage member galleries, quotas and related album tools.';
+$LANG_MG01['manage'] = 'Manage';
+$LANG_MG01['maintenance_reports'] = 'Maintenance & reports';
+$LANG_MG01['maintenance_tools'] = 'Batch & maintenance';
+$LANG_MG01['maintenance_tools_help'] = 'Run thumbnail, resize, quota, sorting and batch maintenance tools.';
+$LANG_MG01['reports_tools'] = 'Reports & tools';
+$LANG_MG01['reports_tools_help'] = 'Open usage reports, EXIF tools, RSS rebuilds and environment checks.';
+$LANG_MG01['open_tools'] = 'Open tools';
+
 ?>
