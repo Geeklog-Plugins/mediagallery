@@ -35,97 +35,104 @@ if (strpos(strtolower($_SERVER['PHP_SELF']), strtolower(basename(__FILE__))) !==
     die('This file can not be used on its own!');
 }
 
-function MG_showAdminMenu($sub_menu='')
+require_once $_CONF['path'] . 'system/lib-admin.php';
+
+function MG_adminEscape($value)
 {
-    global $_CONF, $_TABLES, $_MG_CONF, $LANG_MG01;
+    return htmlspecialchars((string) $value, ENT_QUOTES, COM_getCharset());
+}
 
-    require_once $_CONF['path'] . 'system/lib-admin.php';
+function MG_showAdminMenu($sub_menu = '')
+{
+    global $_CONF, $_MG_CONF, $LANG_MG01;
 
-    $help_url = $_MG_CONF['admin_url'] . 'help.php';
+    $T = new Template($_MG_CONF['template_path']);
+    $T->set_file('admin_navigation', 'admin_navigation.thtml');
 
-    $menu_arr = array(
-        array('url'  => $_MG_CONF['admin_url'] . 'category.php',
-              'text' => $LANG_MG01['category_manage_help']),
+    $T->set_var(array(
+        'admin_home_url'    => $_MG_CONF['admin_url'] . 'index.php',
+        'configuration_url' => $_CONF['site_admin_url'] . '/configuration.php',
+        'help_url'          => $_MG_CONF['admin_url'] . 'help.php',
+        'lang_overview'     => $LANG_MG01['overview'],
+        'lang_configuration'=> $LANG_MG01['configuration'],
+        'lang_help'         => $LANG_MG01['help'],
+        'sub_menu'          => MG_showAdminSubMenu($sub_menu),
+    ));
 
-        array('url'  => $_MG_CONF['admin_url'] . 'index.php?s=m',
-              'text' => $LANG_MG01['member_albums']),
-
-        array('url'  => $_MG_CONF['admin_url'] . 'index.php?s=b',
-              'text' => $LANG_MG01['batch_sessions']),
-
-        array('url'  => $_MG_CONF['admin_url'] . 'index.php?s=c',
-              'text' => $LANG_MG01['miscellaneous']),
-
-        array('url'  => $help_url,
-              'text' => $LANG_MG01['help']));
-
-    $menu = ADMIN_createMenu(
-        $menu_arr,
-        '',
-        $_MG_CONF['site_url'] . '/images/mediagallery.png'
-    );
-
-    $menu .= MG_showAdminSubMenu($sub_menu);
-
-    return $menu;
+    return $T->finish($T->parse('output', 'admin_navigation'));
 }
 
 function MG_showAdminSubMenu($sub_menu)
 {
-    global $_CONF, $_TABLES, $_MG_CONF, $LANG_MG01, $LANG27;
+    global $_TABLES, $_MG_CONF, $LANG_MG01;
 
-    $menu = '';
-    $admin_url = $_MG_CONF['admin_url'];
+    $adminUrl = $_MG_CONF['admin_url'];
+    $title = '';
+    $items = array();
+
     switch ($sub_menu) {
         case 'member_albums':
-            $menu .= '<h3>' . $LANG_MG01['member_albums'] . '</h3>' . LB;
-            $menu .= '<ul>' . LB
-                   . '<li><a href="' . $admin_url . 'createmembers.php">' . $LANG_MG01['batch_create_members'] . '</a></li>' . LB
-                   . '<li><a href="' . $admin_url . 'purgealbums.php">'   . $LANG_MG01['purge_member_albums']  . '</a></li>' . LB
-                   . '<li><a href="' . $admin_url . 'resetmembers.php">'  . $LANG_MG01['reset_members']        . '</a></li>' . LB
-                   . '<li><a href="' . $admin_url . 'quotareport.php">'   . $LANG_MG01['quota_reports']        . '</a></li>' . LB
-                   . '</ul>' . LB;
+            $title = $LANG_MG01['member_albums'];
+            $items = array(
+                array($adminUrl . 'createmembers.php', $LANG_MG01['batch_create_members']),
+                array($adminUrl . 'purgealbums.php', $LANG_MG01['purge_member_albums']),
+                array($adminUrl . 'resetmembers.php', $LANG_MG01['reset_members']),
+                array($adminUrl . 'quotareport.php', $LANG_MG01['quota_reports']),
+            );
             break;
 
         case 'rss_feeds':
-            $menu .= '<h3>' . $LANG_MG01['rss_feeds'] . '</h3>' . LB;
-            $menu .= '<ul>' . LB
-                   . '<li><a href="' . $admin_url . 'rssrebuild.php?mode=full">'  . $LANG_MG01['rss_rebuild_all']   . '</a></li>' . LB
-                   . '<li><a href="' . $admin_url . 'rssrebuild.php?mode=album">' . $LANG_MG01['rss_rebuild_album'] . '</a></li>' . LB
-                   . '</ul>' . LB;
+            $title = $LANG_MG01['rss_feeds'];
+            $items = array(
+                array($adminUrl . 'rssrebuild.php?mode=full', $LANG_MG01['rss_rebuild_all']),
+                array($adminUrl . 'rssrebuild.php?mode=album', $LANG_MG01['rss_rebuild_album']),
+            );
             break;
 
         case 'batch_sessions':
-            $session_count = DB_count($_TABLES['mg_sessions'],'session_status','1');
-            $menu .= '<h3>' . $LANG_MG01['batch_sessions'] . '</h3>' . LB;
-            $menu .= '<ul>' . LB
-                   . '<li><a href="' . $admin_url . 'sessions.php">'                       . $LANG_MG01['paused_sessions']
-                                                                                           . ' (' . $session_count .  ')'      . '</a></li>' . LB
-                   . '<li><a href="' . $admin_url . 'maint.php?mode=thumbs&amp;step=one">' . $LANG_MG01['rebuild_thumb']       . '</a></li>' . LB
-                   . '<li><a href="' . $admin_url . 'maint.php?mode=resize&amp;step=one">' . $LANG_MG01['resize_display']      . '</a></li>' . LB
-                   . '<li><a href="' . $admin_url . 'maint.php?mode=remove&amp;step=one">' . $LANG_MG01['discard_originals']   . '</a></li>' . LB
-                   . '<li><a href="' . $admin_url . 'quota.php">'                          . $LANG_MG01['rebuild_quota']       . '</a></li>' . LB
-                   . '<li><a href="' . $admin_url . 'staticsortalbums.php">'               . $LANG_MG01['static_sort_albums']  . '</a></li>' . LB
-                   . '<li><a href="' . $admin_url . 'staticsortmedia.php">'                . $LANG_MG01['static_sort_media']   . '</a></li>' . LB
-                   . '<li><a href="' . $admin_url . 'massdelete.php">'                     . $LANG_MG01['batch_delete_albums'] . '</a></li>' . LB
-
-                   . '<li><a href="' . $_MG_CONF['site_url'] . '/admin.php?album_id=0&amp;mode=globalperm&amp;a=1">' . $LANG_MG01['globalperm'] . '</a></li>' . LB
-                   . '<li><a href="' . $_MG_CONF['site_url'] . '/admin.php?album_id=0&amp;mode=globalattr&amp;a=1">' . $LANG_MG01['globalattr'] . '</a></li>' . LB
-                   . '</ul>' . LB;
+            $sessionCount = DB_count($_TABLES['mg_sessions'], 'session_status', '1');
+            $title = $LANG_MG01['maintenance_tools'];
+            $items = array(
+                array($adminUrl . 'sessions.php', $LANG_MG01['paused_sessions'] . ' (' . $sessionCount . ')'),
+                array($adminUrl . 'maint.php?mode=thumbs&step=one', $LANG_MG01['rebuild_thumb']),
+                array($adminUrl . 'maint.php?mode=resize&step=one', $LANG_MG01['resize_display']),
+                array($adminUrl . 'maint.php?mode=remove&step=one', $LANG_MG01['discard_originals']),
+                array($adminUrl . 'quota.php', $LANG_MG01['rebuild_quota']),
+                array($adminUrl . 'staticsortalbums.php', $LANG_MG01['static_sort_albums']),
+                array($adminUrl . 'staticsortmedia.php', $LANG_MG01['static_sort_media']),
+                array($adminUrl . 'massdelete.php', $LANG_MG01['batch_delete_albums']),
+                array($_MG_CONF['site_url'] . '/admin.php?album_id=0&mode=globalperm&a=1', $LANG_MG01['globalperm']),
+                array($_MG_CONF['site_url'] . '/admin.php?album_id=0&mode=globalattr&a=1', $LANG_MG01['globalattr']),
+            );
             break;
 
         case 'miscellaneous':
-            $menu .= '<h3>' . $LANG_MG01['miscellaneous'] . '</h3>' . LB;
-            $menu .= '<ul>' . LB
-                   . '<li><a href="' . $admin_url . 'usage_rpt.php">'             . $LANG_MG01['usage_reports']     . '</a></li>' . LB
-                   . '<li><a href="' . $admin_url . 'exif_admin.php">'            . $LANG_MG01['exif_admin_header'] . '</a></li>' . LB
-                   . '<li><a href="' . $admin_url . 'rssrebuild.php?mode=full">'  . $LANG_MG01['rss_rebuild_all']   . '</a></li>' . LB
-                   . '<li><a href="' . $admin_url . 'rssrebuild.php?mode=album">' . $LANG_MG01['rss_rebuild_album'] . '</a></li>' . LB
-                   . '<li><a href="' . $admin_url . 'envcheck.php">'              . $LANG_MG01['env_check']         . '</a></li>' . LB
-                   . '</ul>' . LB;
+            $title = $LANG_MG01['reports_tools'];
+            $items = array(
+                array($adminUrl . 'usage_rpt.php', $LANG_MG01['usage_reports']),
+                array($adminUrl . 'exif_admin.php', $LANG_MG01['exif_admin_header']),
+                array($adminUrl . 'rssrebuild.php?mode=full', $LANG_MG01['rss_rebuild_all']),
+                array($adminUrl . 'rssrebuild.php?mode=album', $LANG_MG01['rss_rebuild_album']),
+                array($adminUrl . 'envcheck.php', $LANG_MG01['env_check']),
+            );
             break;
     }
-    return $menu;
+
+    if ($title === '' || empty($items)) {
+        return '';
+    }
+
+    $html = '<div class="mg-admin-subnav">'
+          . '<strong class="mg-admin-subnav__title">' . MG_adminEscape($title) . '</strong>'
+          . '<div class="mg-admin-subnav__links">';
+
+    foreach ($items as $item) {
+        $html .= '<a href="' . MG_adminEscape($item[0]) . '">' . MG_adminEscape($item[1]) . '</a>';
+    }
+
+    $html .= '</div></div>';
+
+    return $html;
 }
 
 ?>
