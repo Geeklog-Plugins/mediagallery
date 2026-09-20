@@ -37,5 +37,10 @@
             <span class="mg-admin-card__title">{lang_miscellaneous}</span>
             <span class="mg-admin-card__text">{lang_misc_help}</span>
         </a>
+
+        <a class="mg-admin-card" href="{categories_url}">
+            <span class="mg-admin-card__title">{lang_categories}</span>
+            <span class="mg-admin-card__text">{lang_categories_help}</span>
+        </a>
     </div>
 </div>
