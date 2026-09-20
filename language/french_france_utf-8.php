@@ -1405,4 +1405,23 @@ $LANG_MG03['aria_media_list'] = 'Liste des médias';
 
 $LANG_MG01['admin_help'] = 'L’administration de MediaGallery donne un accès rapide aux albums, galeries des membres, opérations de maintenance, rapports et à la configuration du plugin.';
 
+
+$LANG_MG01['manage_albums'] = 'Gérer les albums';
+$LANG_MG01['overview'] = 'Vue d’ensemble';
+$LANG_MG01['media_items'] = 'Médias';
+$LANG_MG01['pending_media'] = 'En attente';
+$LANG_MG01['status_ok'] = 'OK';
+$LANG_MG01['status_check'] = 'À vérifier';
+$LANG_MG01['content'] = 'Contenu';
+$LANG_MG01['content_categories'] = 'Catégories';
+$LANG_MG01['content_categories_help'] = 'Organisez et gérez les catégories de MediaGallery.';
+$LANG_MG01['member_albums_help'] = 'Gérez les galeries des membres, les quotas et les outils associés.';
+$LANG_MG01['manage'] = 'Gérer';
+$LANG_MG01['maintenance_reports'] = 'Maintenance et rapports';
+$LANG_MG01['maintenance_tools'] = 'Traitements et maintenance';
+$LANG_MG01['maintenance_tools_help'] = 'Lancez les opérations sur les miniatures, redimensionnements, quotas, tris et traitements par lot.';
+$LANG_MG01['reports_tools'] = 'Rapports et outils';
+$LANG_MG01['reports_tools_help'] = 'Accédez aux rapports d’utilisation, outils EXIF, reconstructions RSS et contrôles d’environnement.';
+$LANG_MG01['open_tools'] = 'Ouvrir les outils';
+
 ?>
