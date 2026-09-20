@@ -80,6 +80,13 @@ jobs:
             | grep -q 'name="conf_group" value="mediagallery"'
           unzip -p "dist/${ARCHIVE}" mediagallery/templates/admin_index.thtml \
             | grep -q '{configuration_url}'
+
+          for lang in english.php english_utf-8.php french_france_utf-8.php japanese_utf-8.php; do
+            for key in admin_help manage_albums manage_albums_help member_albums_help maintenance_tools maintenance_tools_help reports_tools reports_tools_help content_categories content_categories_help; do
+              unzip -p "dist/${ARCHIVE}" "mediagallery/language/${lang}" \
+                | grep -Fq "\$LANG_MG01['${key}']"
+            done
+          done
           unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/include/storage_180.php'
           unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/tools/migrate-media-storage.php'
           unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/public_html/mediaobjects/generic.png'
