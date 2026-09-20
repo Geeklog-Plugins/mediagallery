@@ -119,10 +119,15 @@ if ($mode == 'editsubmission') {
     COM_redirect($home_url);
 }
 
+$adminMenu = '';
+if ($sub_menu !== '') {
+    $adminMenu = MG_showAdminMenu($sub_menu);
+}
+
 $adminTemplate = new Template($_MG_CONF['template_path']);
 $adminTemplate->set_file('admin_index', 'admin_index.thtml');
 $adminTemplate->set_var(array(
-    'admin_menu'              => empty($sub_menu) ? '' : MG_showAdminMenu($sub_menu),
+    'admin_menu'              => $adminMenu,
     'configuration_url'       => $_CONF['site_admin_url'] . '/configuration.php',
     'help_url'                => $_MG_CONF['admin_url'] . 'help.php',
     'albums_url'              => $_MG_CONF['site_url'] . '/admin.php',
