@@ -122,13 +122,14 @@ if ($mode == 'editsubmission') {
 $adminTemplate = new Template($_MG_CONF['template_path']);
 $adminTemplate->set_file('admin_index', 'admin_index.thtml');
 $adminTemplate->set_var(array(
-    'admin_menu'              => MG_showAdminMenu($sub_menu),
+    'admin_menu'              => empty($sub_menu) ? '' : MG_showAdminMenu($sub_menu),
     'configuration_url'       => $_CONF['site_admin_url'] . '/configuration.php',
     'help_url'                => $_MG_CONF['admin_url'] . 'help.php',
     'albums_url'              => $_MG_CONF['site_url'] . '/admin.php',
     'member_albums_url'       => $_MG_CONF['admin_url'] . 'index.php?s=m',
     'maintenance_url'         => $_MG_CONF['admin_url'] . 'index.php?s=b',
     'misc_url'                => $_MG_CONF['admin_url'] . 'index.php?s=c',
+    'categories_url'          => $_MG_CONF['admin_url'] . 'category.php',
     'lang_configuration'      => $LANG_MG01['configuration'],
     'lang_help'               => $LANG_MG01['help'],
     'lang_overview'           => $LANG_MG01['overview'],
@@ -141,6 +142,8 @@ $adminTemplate->set_var(array(
     'lang_batch_sessions_help'=> $LANG_MG01['maintenance_tools_help'],
     'lang_miscellaneous'      => $LANG_MG01['reports_tools'],
     'lang_misc_help'          => $LANG_MG01['reports_tools_help'],
+    'lang_categories'         => $LANG_MG01['content_categories'],
+    'lang_categories_help'    => $LANG_MG01['content_categories_help'],
     'status_message'          => ($msg > 0 && isset($LANG_MG09[$msg]))
         ? COM_showMessageText($LANG_MG09[$msg])
         : ''
