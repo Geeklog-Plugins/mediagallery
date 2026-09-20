@@ -43,4 +43,6 @@
             <span class="mg-admin-card__text">{lang_categories_help}</span>
         </a>
     </div>
+
+    {stats_content}
 </div>
