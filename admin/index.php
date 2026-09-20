@@ -58,6 +58,7 @@ if (!$hasAccess) {
 }
 
 require_once $_MG_CONF['path_admin'] . 'navigation.php';
+require_once $_CONF['path'] . 'system/lib-admin.php';
 
 // main menu for media gallery administration
 
