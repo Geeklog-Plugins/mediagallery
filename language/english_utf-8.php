@@ -1644,3 +1644,7 @@ $LANG_MG03['media_id_label'] = 'Media ID';
 $LANG_MG03['aria_search_results_navigation'] = 'Search results navigation';
 $LANG_MG03['aria_album_navigation'] = 'Album navigation';
 $LANG_MG03['aria_media_list'] = 'Media list';
+
+$LANG_MG01['admin_help'] = 'MediaGallery administration gives you quick access to albums, member galleries, maintenance tasks, reports and plugin configuration.';
+
+?>
