@@ -1,0 +1,9 @@
+{
+  "schema": 1,
+  "id": "mediagallery",
+  "name": "mediagallery",
+  "icon": "public_html/images/mediagallery.png",
+  "requires": {
+    "geeklog": "2.0.0"
+  }
+}
