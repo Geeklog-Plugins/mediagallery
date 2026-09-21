@@ -439,7 +439,10 @@ function MG_displayJPG($I, $opt=array())
 
     $media_size_disp = false;
     if ($full == 1) {
-        $u_image = Media::getFileUrl('orig', $I['media_filename'], $I['media_mime_ext']);
+        $originalFile = Media::getReadableFileInfo('orig', $I['media_filename'], $I['media_mime_ext']);
+        $u_image = ($originalFile !== false)
+            ? $originalFile['url']
+            : Media::getFileUrl('orig', $I['media_filename'], $I['media_mime_ext']);
     } else {
         if ($I['remote_media'] == 1) {
             if ($I['media_resolution_x'] != 0 && $I['media_resolution_y'] != 0) {
@@ -450,30 +453,36 @@ function MG_displayJPG($I, $opt=array())
             }
             $u_image = $I['remote_url'];
         } else {
-            $u_image = Media::getFileUrl('disp', $I['media_filename'], $I['media_mime_ext']);
-            $media_size_disp = @getimagesize(Media::getFilePath('disp', $I['media_filename'], $I['media_mime_ext']));
-            if ($media_size_disp == false) {
-                $u_image = Media::getFileUrl('disp', $I['media_filename'], 'jpg');
-                $media_size_disp = @getimagesize(Media::getFilePath('disp', $I['media_filename'], 'jpg'));
-                if ($media_size_disp == false) {
-                    /* Built-in fallback image is a plugin asset, not site media. */
-                    $fname = 'missing.png';
-                    $u_image = $_MG_CONF['site_url'] . '/mediaobjects/' . $fname;
-                    $p_image = $_MG_CONF['path_html'] . 'mediaobjects/' . $fname;
-                    $media_size_disp = @getimagesize($p_image);
-                }
+            $displayFile = Media::getReadableFileInfo('disp', $I['media_filename'], $I['media_mime_ext']);
+            if ($displayFile === false && strtolower($I['media_mime_ext']) !== 'jpg') {
+                $displayFile = Media::getReadableFileInfo('disp', $I['media_filename'], 'jpg');
+            }
+
+            if ($displayFile !== false) {
+                $u_image = $displayFile['url'];
+                $media_size_disp = MG_getImageInfo180($displayFile['path']);
+            }
+
+            if ($displayFile === false || $media_size_disp === false) {
+                /* Built-in fallback image is a plugin asset, not site media. */
+                $fname = 'missing.png';
+                $u_image = $_MG_CONF['site_url'] . '/mediaobjects/' . $fname;
+                $p_image = $_MG_CONF['path_html'] . 'mediaobjects/' . $fname;
+                $media_size_disp = MG_getImageInfo180($p_image);
             }
         }
     }
 
     if ($media_size_disp == false) {
-        $media_size_disp[0] = 0;
-        $media_size_disp[1] = 0;
+        $media_size_disp = array(0, 0);
     }
 
     $media_link_start = '';
     $media_link_end   = '';
-    $media_size_orig = @getimagesize(Media::getFilePath('orig', $I['media_filename'], $I['media_mime_ext']));
+    $originalFile = Media::getReadableFileInfo('orig', $I['media_filename'], $I['media_mime_ext']);
+    $media_size_orig = ($originalFile !== false)
+        ? MG_getImageInfo180($originalFile['path'])
+        : false;
     
     if ($media_size_orig == false ||
             $opt['full_display'] == 2 ||
