@@ -3477,3 +3477,11 @@ a.SWFUProgressCancel:hover {
     grid-column:1;
   }
 }
+
+.mg-manager-na{
+  display:inline-block;
+  font-size:.86rem;
+  line-height:1.3;
+  opacity:.62;
+  font-weight:500;
+}
