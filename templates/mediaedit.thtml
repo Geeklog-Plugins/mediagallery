@@ -1,5 +1,5 @@
 <div class="mg-media-editor mg-media-type-{media_type}">
-  <form name="media" enctype="multipart/form-data" method="post" action="{s_form_action}" class="MG_editform compact uk-form">
+  <form id="mg-media-edit-form" name="media" enctype="multipart/form-data" method="post" action="{s_form_action}" class="MG_editform compact uk-form">
     <section class="mg-edit-card mg-primary-card">
       <div class="mg-primary-title">
         <label for="media_title">{lang_title}</label>
@@ -96,19 +96,15 @@
       {media_exif_info}
     </div>
 
-    <div class="mg_submit mg-edit-actions">
-      <input type="submit" name="mode" value="{lang_save}" class="mg-action-save uk-button uk-button-primary"{xhtml}>
-      <button type="button" class="mg-action-cancel uk-button" onclick="window.location.href='{site_url}/admin.php?mode=media&amp;album_id={album_id}';">{lang_cancel}</button>
-      <input type="reset" value="{lang_reset}" class="mg-action-reset uk-button uk-button-small"{xhtml}>
-      <input type="submit" name="mode" value="{lang_delete}" class="mg-action-delete uk-button" data-confirm="{lang_delete_confirm}" onclick="return confirm(this.getAttribute('data-confirm'));"{xhtml}>
-      <input type="hidden" name="rpath" value="{rpath}"{xhtml}>
-      <input type="hidden" value="{album_id}" name="album_id"{xhtml}>
-      <input type="hidden" value="{media_id}" name="mid"{xhtml}>
-      <input type="hidden" value="{queue}" name="queue"{xhtml}>
-      <input type="hidden" name="action" value="savemedia"{xhtml}>
-      <input type="hidden" name="{gltoken_name}" value="{gltoken}"{xhtml}>
-    </div>
+    <input type="hidden" name="rpath" value="{rpath}"{xhtml}>
+    <input type="hidden" value="{album_id}" name="album_id"{xhtml}>
+    <input type="hidden" value="{media_id}" name="mid"{xhtml}>
+    <input type="hidden" value="{queue}" name="queue"{xhtml}>
+    <input type="hidden" name="action" value="savemedia"{xhtml}>
+    <input type="hidden" name="{gltoken_name}" value="{gltoken}"{xhtml}>
   </form>
+
+  {rotation_forms}
 
   <form method="post" action="{site_url}/admin.php" class="compact uk-form mg-admin-metrics">
     <fieldset class="mg-edit-card">
@@ -125,4 +121,11 @@
     <input type="hidden" value="{queue}" name="queue"{xhtml}>
     <input type="hidden" name="{gltoken_name}" value="{gltoken}"{xhtml}>
   </form>
+
+  <div class="mg_submit mg-edit-actions">
+    <input type="submit" form="mg-media-edit-form" name="mode" value="{lang_save}" class="mg-action-save uk-button uk-button-primary"{xhtml}>
+    <button type="button" class="mg-action-cancel uk-button" onclick="window.location.href='{cancel_url}';">{lang_cancel}</button>
+    <input type="reset" form="mg-media-edit-form" value="{lang_reset}" class="mg-action-reset uk-button uk-button-small"{xhtml}>
+    <input type="submit" form="mg-media-edit-form" name="mode" value="{lang_delete}" class="mg-action-delete uk-button" data-confirm="{lang_delete_confirm}" onclick="return confirm(this.getAttribute('data-confirm'));"{xhtml}>
+  </div>
 </div>
