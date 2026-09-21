@@ -355,6 +355,55 @@ function MG_migrateMediaStorage180($source = null)
 }
 
 /**
+ * Resolve an existing user-media file for read access.
+ *
+ * MediaGallery 1.8 writes to persistent images/mediagallery storage. During
+ * migration, an existing 1.7.x installation may still have readable files in
+ * public_html/mediagallery/mediaobjects. Read resolution is centralized here
+ * so callers never need storage-specific fallback logic.
+ *
+ * @param string $relative Path relative to the media storage root
+ * @return array|false Keys: path, url, storage
+ */
+function MG_resolveMediaStorageFile180($relative)
+{
+    global $_CONF;
+
+    $relative = ltrim(str_replace('\\', '/', (string) $relative), '/');
+    $segments = explode('/', $relative);
+    if ($relative === '' || in_array('..', $segments, true)) {
+        return false;
+    }
+
+    $target = MG_getMediaStorageTarget180();
+    if ($target !== false) {
+        $path = rtrim($target['path'], '/\\') . '/' . $relative;
+        if (is_file($path) && !is_link($path) && is_readable($path)) {
+            return array(
+                'path' => $path,
+                'url' => rtrim($target['url'], '/') . '/' . $relative,
+                'storage' => 'persistent',
+            );
+        }
+    }
+
+    $legacyRoot = MG_getLegacyMediaStorage180();
+    if ($legacyRoot !== '') {
+        $legacyPath = rtrim($legacyRoot, '/\\') . '/' . $relative;
+        if (is_file($legacyPath) && !is_link($legacyPath) && is_readable($legacyPath)) {
+            $siteUrl = isset($_CONF['site_url']) ? rtrim($_CONF['site_url'], '/') : '';
+            return array(
+                'path' => $legacyPath,
+                'url' => $siteUrl . '/mediagallery/mediaobjects/' . $relative,
+                'storage' => 'legacy',
+            );
+        }
+    }
+
+    return false;
+}
+
+/**
  * Return the packaged images required when a requested media file is missing.
  */
 function MG_getRequiredMediaAssets180()
