@@ -4,7 +4,7 @@
 <div class="mg-upload-modern">
   <p class="mg-upload-intro">{lang_upload_help}</p>
 
-  <form id="mg-upload-form" method="post" enctype="multipart/form-data" name="mediaupload" action="{s_form_action}" class="compact uk-form">
+  <form id="mg-upload-form" data-selected-label="{lang_upload_files_selected}" method="post" enctype="multipart/form-data" name="mediaupload" action="{s_form_action}" class="compact uk-form">
     {max_file_size}
     <input type="hidden" name="action" value="{action}"{xhtml}>
     <input type="hidden" name="{gltoken_name}" value="{gltoken}"{xhtml}>
@@ -15,7 +15,7 @@
     </div>
 
     <div class="mg-upload-dropzone" id="mg-upload-dropzone" tabindex="0" role="button" aria-controls="mg-upload-files">
-      <input type="file" id="mg-upload-files" name="newmedia[]" multiple{ xhtml}>
+      <input type="file" id="mg-upload-files" name="newmedia[]" multiple{xhtml}>
       <strong class="mg-upload-dropzone__title">{lang_upload_drop_title}</strong>
       <span class="mg-upload-dropzone__help">{lang_upload_drop_help}</span>
       <span class="uk-button mg-upload-dropzone__button">{lang_upload_choose_files}</span>
