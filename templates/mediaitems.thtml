@@ -21,8 +21,8 @@ function doUnCheckAll_mediaitems() {
 
 <div class="mg-manager-toolbar">
   <div class="mg-manager-select-actions">
-    <button type="button" class="uk-button" onclick="doCheckAll_mediaitems()">{lang_checkall}</button>
-    <button type="button" class="uk-button" onclick="doUnCheckAll_mediaitems()">{lang_uncheckall}</button>
+    <button type="button" class="uk-button uk-button-small mg-button-quiet" onclick="doCheckAll_mediaitems()">{lang_checkall}</button>
+    <button type="button" class="uk-button uk-button-small mg-button-quiet" onclick="doUnCheckAll_mediaitems()">{lang_uncheckall}</button>
   </div>
 
   <label class="mg-manager-default-cover" for="mg-reset-cover">
@@ -47,7 +47,7 @@ function doUnCheckAll_mediaitems() {
     <div class="mg-manager-card__body">
       <div class="mg-manager-preview">
         {media_zoom}<img src="{u_thumbnail}" height="{height}" width="{width}" alt="{media_title}" loading="lazy" decoding="async"{xhtml}></a>
-        <a class="uk-button mg-manager-edit" href="{media_edit}">{lang_edit}</a>
+        <a class="uk-button uk-button-small mg-manager-edit mg-button-quiet" href="{media_edit}">{lang_edit}</a>
       </div>
 
       <div class="mg-manager-controls">
