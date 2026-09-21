@@ -114,8 +114,12 @@ function MG_watermarkManage($actionURL = '')
                 $pThumbnail = $_MG_CONF['path_html'] . 'watermarks/' . $row['filename'];
 
                 $img_size = @getimagesize($pThumbnail);
-                $width  = $img_size[0] + 16;
-                $height = $img_size[1] + 16;
+                $width = 166;
+                $height = 166;
+                if (is_array($img_size) && isset($img_size[0], $img_size[1])) {
+                    $width = $img_size[0] + 16;
+                    $height = $img_size[1] + 16;
+                }
 
                 $oResult = DB_query("SELECT username FROM {$_TABLES['users']} WHERE uid=" . $row['owner_id']);
                 $oRows  = DB_numRows($oResult);
