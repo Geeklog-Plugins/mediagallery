@@ -79,7 +79,7 @@ jobs:
           unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/public_html/admin.css'
           unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/public_html/js/upload.js'
           unzip -p "dist/${ARCHIVE}" mediagallery/templates/userupload.thtml \
-            | grep -q 'name="newmedia\[\]" multiple'
+            | grep -q 'name="newmedia\[\]" multiple{upload_accept}'
           unzip -p "dist/${ARCHIVE}" mediagallery/templates/mediaitems.thtml \
             | grep -q 'class="mg-manager-grid"'
           unzip -p "dist/${ARCHIVE}" mediagallery/templates/mediamanage.thtml \
