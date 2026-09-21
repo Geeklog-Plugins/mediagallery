@@ -706,6 +706,13 @@ function MG_mediaEdit($album_id, $media_id, $actionURL='', $mqueue=0, $view=0, $
     }
     $cat_select .= '</select>';
 
+    $editPreviewWidth = 190;
+    $editPreviewHeight = 200;
+    if (is_array($size) && isset($size[0], $size[1]) && $size[0] > 0 && $size[1] > 0) {
+        $editPreviewWidth = $size[0] + 40;
+        $editPreviewHeight = $size[1] + 50;
+    }
+
     $T->set_var(array(
         'original_filename'  => $row['media_original_filename'],
         'attach_tn'          => $row['media_tn_attached'],
@@ -721,8 +728,8 @@ function MG_mediaEdit($album_id, $media_id, $actionURL='', $mqueue=0, $view=0, $
         'media_comments'     => $row['media_comments'],
         'media_exif_info'    => $exif_info,
         'media_rating_max'   => 5,
-        'height'             => $size[1] + 50,
-        'width'              => $size[0] + 40,
+        'height'             => $editPreviewHeight,
+        'width'              => $editPreviewWidth,
         'queue'              => $mqueue,
         'month_select'       => $month_select,
         'day_select'         => $day_select,
