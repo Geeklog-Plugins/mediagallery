@@ -61,29 +61,23 @@ function MG_uploadForm($album_id)
  */
 function MG_userUpload($album_id)
 {
-    global $_USER, $_TABLES, $_MG_CONF, $LANG_MG01, $LANG_MG03;
+    global $_USER, $_TABLES, $_MG_CONF, $LANG_MG01, $LANG_MG03, $_SCRIPTS;
 
     $root_album = new mgAlbum(0);
     $album_selectbox = MG_buildAlbumBox($root_album, $album_id, 3, -1, 'upload');
 
     $result = DB_query("SELECT * FROM {$_TABLES['mg_category']} ORDER BY cat_id ASC");
-    $catRow = array();
+    $categoryOptions = '<option value="0">' . htmlspecialchars($LANG_MG01['no_category'], ENT_QUOTES, COM_getCharset()) . '</option>';
+    $cRows = 0;
     while ($row = DB_fetchArray($result)) {
-        $catRow[] = $row;
+        $categoryOptions .= '<option value="' . intval($row['cat_id']) . '">'
+            . htmlspecialchars($row['cat_name'], ENT_QUOTES, COM_getCharset())
+            . '</option>';
+        $cRows++;
     }
 
-    $cRows = count($catRow);
-    $cat_selects = array('', '', '', '');
-    if ($cRows > 0) {
-        for ($slot = 0; $slot < 4; $slot++) {
-            $select = '<select name="cat_id[' . $slot . ']">';
-            $select .= '<option value="0">' . $LANG_MG01['no_category'] . '</option>';
-            foreach ($catRow as $row) {
-                $select .= '<option value="' . intval($row['cat_id']) . '">' . $row['cat_name'] . '</option>';
-            }
-            $select .= '</select>';
-            $cat_selects[$slot] = $select;
-        }
+    if (isset($_SCRIPTS) && is_object($_SCRIPTS)) {
+        $_SCRIPTS->setJavaScriptFile('mediagallery-upload', '/mediagallery/js/upload.js');
     }
 
     $user_quota = DB_getItem($_TABLES['mg_userprefs'], 'quota', 'uid=' . intval($_USER['uid']));
@@ -125,10 +119,15 @@ function MG_userUpload($album_id)
         'lang_destination_album' => $LANG_MG01['destination_album'],
         'lang_do_not_convert_orig' => $LANG_MG01['do_not_convert_orig'],
         'lang_file_number' => $LANG_MG01['file_number'],
-        'cat_select_0' => $cat_selects[0],
-        'cat_select_1' => $cat_selects[1],
-        'cat_select_2' => $cat_selects[2],
-        'cat_select_3' => $cat_selects[3],
+        'lang_upload_drop_title' => $LANG_MG03['upload_drop_title'],
+        'lang_upload_drop_help' => $LANG_MG03['upload_drop_help'],
+        'lang_upload_choose_files' => $LANG_MG03['upload_choose_files'],
+        'lang_upload_queue' => $LANG_MG03['upload_queue'],
+        'lang_upload_remove' => $LANG_MG03['upload_remove'],
+        'lang_upload_file_details' => $LANG_MG03['upload_file_details'],
+        'lang_upload_files_selected' => $LANG_MG03['upload_files_selected'],
+        'lang_upload_noscript' => $LANG_MG03['upload_noscript'],
+        'category_options' => $categoryOptions,
         'album_id' => $album_id,
         'action' => 'upload',
         'max_file_size' => '<input type="hidden" name="MAX_FILE_SIZE" value="' . $upload_max_size_b . '"' . XHTML . '>',
