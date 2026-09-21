@@ -1036,7 +1036,17 @@ function MG_rotateMedia($album_id, $media_id, $direction, $actionURL = '')
     $sql = "SELECT media_filename, media_mime_ext, media_type FROM {$_TABLES['mg_media']} "
          . "WHERE media_id = " . $media_id;
     $result = DB_query($sql);
-    list($filename, $mime_ext, $media_type) = DB_fetchArray($result);
+    $mediaRow = DB_fetchArray($result);
+    if (!is_array($mediaRow)) {
+        COM_errorLog('MediaGallery: rotate rejected because media ' . $media_id . ' does not exist', 1);
+        if ($actionURL == -1 || $actionURL == '') {
+            return false;
+        }
+        COM_redirect($_MG_CONF['site_url'] . '/album.php?aid=' . $album_id);
+    }
+    $filename = $mediaRow['media_filename'];
+    $mime_ext = $mediaRow['media_mime_ext'];
+    $media_type = $mediaRow['media_type'];
     if ((int) $media_type !== 0) {
         COM_errorLog('MediaGallery: rotate rejected for non-image media ' . $media_id, 1);
         if ($actionURL == -1 || $actionURL == '') {
