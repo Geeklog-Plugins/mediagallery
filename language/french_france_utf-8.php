@@ -1442,4 +1442,9 @@ $LANG_MG01['manager_select_media'] = "Sélectionner le média";
 $LANG_MG01['manager_album_cover'] = "Couverture de l’album";
 $LANG_MG01['manager_slideshow'] = "Diaporama";
 
+
+// MediaGallery 1.8 non-image manager states
+$LANG_MG01['manager_cover_unavailable'] = "Indisponible sans vignette";
+$LANG_MG01['manager_slideshow_unavailable'] = "Images uniquement";
+
 ?>
