@@ -36,14 +36,32 @@
 }
 
 .mg-album-editor .mg-edit-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
-  align-items: start;
+  display: block;
+  columns: 2;
+  column-gap: 18px;
+}
+
+.mg-album-editor .mg-edit-grid > * {
+  display: inline-block;
+  width: 100%;
+  margin: 0 0 18px;
+  vertical-align: top;
+  break-inside: avoid;
 }
 
 .mg-album-editor .mg-edit-grid > .mg-edit-card {
-  margin: 0;
+  margin: 0 0 18px;
+}
+
+.mg-album-editor .mg-edit-grid .mg-edit-card:last-child {
+  margin-bottom: 0;
+}
+
+.mg-album-editor .mg-access-rights {
+  column-span: all;
+  display: block;
+  width: 100%;
+  margin-top: 18px;
 }
 
 .mg-album-editor .form_block {
@@ -177,7 +195,7 @@
 
 @media (max-width: 900px) {
   .mg-album-editor .mg-edit-grid {
-    grid-template-columns: 1fr;
+    columns: 1;
   }
 
   .mg-album-editor .mg-format-grid {
@@ -479,7 +497,7 @@ function change(what) {
         </dl>
       </fieldset>
 
-      <fieldset class="mg-edit-card">
+      <fieldset class="mg-edit-card mg-access-rights">
         <legend>{lang_accessrights}</legend>
         <dl class="form_block">
           <dt><label>{lang_owner}</label></dt>
@@ -503,7 +521,7 @@ function change(what) {
 {!endif}
 
 {!if perms_editor_member}
-    <fieldset class="mg-edit-card">
+    <fieldset class="mg-edit-card mg-access-rights">
       <legend>{lang_accessrights}</legend>
       <dl class="form_block">
         <dt><label>{lang_owner}</label></dt>
