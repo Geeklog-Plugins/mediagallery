@@ -769,6 +769,10 @@ function MG_displayMedia($id, $full=0, $sortOrder=0, $comments=0, $spage=0)
     }
     $vf = $full;
 
+    $switch_size = '';
+    $lang_switch_size = '';
+    $switch_viewsize_link = '';
+
     if ($media['media_type'] == '0') { // image
         $switch_size = $_MG_CONF['site_url'] . "/media.php?f=" . ($full ? '0' : '1')
                      . '&amp;sort=' . $sortOrder
@@ -995,7 +999,7 @@ function MG_displayMedia($id, $full=0, $sortOrder=0, $comments=0, $spage=0)
         } elseif (isset($_GET['mode'])) {
             $commode = COM_applyFilter($_GET['mode']);
         }
-        $commentcode = 0; // ¡‚Ì‚Æ‚±‚ë–³ğŒ‚ÉƒRƒƒ“ƒg“Še‚ğ‹–‰ÂB
+        $commentcode = 0; // ä»Šã®ã¨ã“ã‚ç„¡æ¡ä»¶ã«ã‚³ãƒ¡ãƒ³ãƒˆæŠ•ç¨¿ã‚’è¨±å¯ã€‚
         $retval .= CMT_userComments($sid, $media_title_plain, 'mediagallery',
                        $comorder, $commode, 0, $page, false, $delete_option, $commentcode);
     }
