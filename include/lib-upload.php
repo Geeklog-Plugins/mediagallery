@@ -85,7 +85,7 @@ function MG_processOriginal($srcImage, $mimeExt, $mimeType, $aid, $dnc)
     if ($_MG_CONF['verbose'] ) {
         COM_errorLog("MG Upload: Entering MG_processOriginal()");
     }
-    $imgsize = @getimagesize($srcImage);
+    $imgsize = MG_getImageInfo180($srcImage);
     $imgwidth = (is_array($imgsize) && isset($imgsize[0])) ? (int) $imgsize[0] : 0;
     $imgheight = (is_array($imgsize) && isset($imgsize[1])) ? (int) $imgsize[1] : 0;
 
@@ -184,7 +184,7 @@ function MG_createDisplayImage($srcImage, $imageDisplay, $mimeExt, $mimeType, $a
 {
     global $_CONF, $_TABLES, $_MG_CONF, $_SPECIAL_IMAGES_MIMETYPE;
 
-    $imgsize = @getimagesize($srcImage);
+    $imgsize = MG_getImageInfo180($srcImage);
 
     if ($imgsize == false && !in_array($mimeType, $_SPECIAL_IMAGES_MIMETYPE)) {
         return array(false, 'Unable to determine src image dimensions');
