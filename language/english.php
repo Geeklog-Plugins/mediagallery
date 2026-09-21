@@ -1668,4 +1668,10 @@ $LANG_MG03['upload_file_details'] = "File details";
 $LANG_MG03['upload_files_selected'] = "files selected";
 $LANG_MG03['upload_noscript'] = "Multiple file selection is available. Drag-and-drop and the editable upload queue require JavaScript.";
 
+
+// MediaGallery 1.8 media manager labels
+$LANG_MG01['manager_select_media'] = "Select media";
+$LANG_MG01['manager_album_cover'] = "Album cover";
+$LANG_MG01['manager_slideshow'] = "Slideshow";
+
 ?>
