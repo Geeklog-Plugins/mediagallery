@@ -3342,3 +3342,115 @@ a.SWFUProgressCancel:hover {
 .mg-manager-savebar{position:sticky;bottom:0;z-index:10;display:flex;justify-content:flex-end;gap:.55rem;flex-wrap:wrap;margin-top:1rem;padding:.75rem;border:1px solid rgba(127,127,127,.2);border-radius:.65rem;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 -.35rem 1.2rem rgba(0,0,0,.06)}
 @media(max-width:48rem){.mg-manager-card__body{grid-template-columns:1fr}.mg-manager-preview img{max-width:14rem}.mg-manager-fields,.mg-manager-batch{grid-template-columns:1fr}.mg-manager-fields>label:nth-child(2){grid-column:auto}.mg-manager-savebar{position:static;justify-content:stretch}.mg-manager-savebar .uk-button,.mg-manager-savebar input{flex:1 1 100%}}
 @media(max-width:32rem){.mg-manager-header__actions{width:100%}.mg-manager-header__actions .uk-button{flex:1 1 100%}.mg-manager-toolbar{align-items:stretch}.mg-manager-select-actions{width:100%}.mg-manager-select-actions .uk-button{flex:1 1 calc(50% - .45rem)}}
+
+
+/* MediaGallery 1.8 media manager editorial layout */
+.mg-manager-grid{
+  grid-template-columns:1fr;
+  gap:.9rem;
+}
+.mg-manager-card{
+  display:grid;
+  grid-template-columns:minmax(15rem,20rem) minmax(0,1fr);
+  grid-template-areas:
+    "top top"
+    "visual fields";
+}
+.mg-manager-card__top{
+  grid-area:top;
+}
+.mg-manager-card__body{
+  grid-area:visual;
+  grid-template-columns:1fr;
+  align-content:start;
+  border-right:1px solid rgba(127,127,127,.14);
+}
+.mg-manager-preview img{
+  max-width:13rem;
+}
+.mg-manager-edit{
+  width:auto;
+  min-width:0;
+  padding:.25rem .65rem;
+}
+.mg-manager-controls{
+  grid-template-columns:1fr;
+  margin-top:.35rem;
+}
+.mg-manager-controls>label{
+  grid-template-columns:5.5rem minmax(0,1fr);
+}
+.mg-manager-fields{
+  grid-area:fields;
+  grid-template-columns:minmax(0,1fr) minmax(12rem,18rem);
+  align-content:start;
+  padding:1rem;
+}
+.mg-manager-fields>label:nth-child(1){
+  grid-column:1;
+}
+.mg-manager-fields>label:nth-child(2){
+  grid-column:1/-1;
+}
+.mg-manager-fields>label:nth-child(3){
+  grid-column:1;
+}
+.mg-manager-fields>label:nth-child(4){
+  grid-column:2;
+}
+.mg-manager-fields textarea{
+  min-height:8rem;
+  resize:vertical;
+}
+.mg-manager-fields input[type="text"]{
+  min-height:2.5rem;
+}
+.mg-manager-select-actions .uk-button,
+.mg-manager-header__actions .mg-button-quiet,
+.mg-button-quiet{
+  font-size:.9rem;
+  font-weight:500;
+  min-height:2.1rem;
+  padding:.3rem .7rem;
+}
+.mg-button-danger{
+  background:#b42318;
+  color:#fff;
+  border-color:#b42318;
+}
+.mg-button-danger:hover,
+.mg-button-danger:focus{
+  background:#912018;
+  color:#fff;
+}
+.mg-manager-savebar input[name="mode"][value]{
+  min-width:6.5rem;
+}
+@media(max-width:58rem){
+  .mg-manager-card{
+    grid-template-columns:1fr;
+    grid-template-areas:
+      "top"
+      "visual"
+      "fields";
+  }
+  .mg-manager-card__body{
+    border-right:0;
+    border-bottom:1px solid rgba(127,127,127,.14);
+    grid-template-columns:minmax(10rem,14rem) minmax(0,1fr);
+  }
+}
+@media(max-width:40rem){
+  .mg-manager-card__body{
+    grid-template-columns:1fr;
+  }
+  .mg-manager-fields{
+    grid-template-columns:1fr;
+  }
+  .mg-manager-fields>label:nth-child(1),
+  .mg-manager-fields>label:nth-child(2),
+  .mg-manager-fields>label:nth-child(3),
+  .mg-manager-fields>label:nth-child(4){
+    grid-column:1;
+  }
+}
