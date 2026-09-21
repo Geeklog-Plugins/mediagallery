@@ -181,11 +181,13 @@ function MG_imageAdmin($album_id, $page, $actionURL = '')
                     $album_cover_check = $checked;
                 }
 
-                $include_ss = '&nbsp;';
+                $include_ss = '<input type="hidden" name="ss[' . $counter . ']" value="0"' . XHTML . '>';
                 if ($row['media_type'] == 0) {
                     $checked = ($row['include_ss'] == 1) ? ' checked="checked"' : '';
-                    $include_ss = '<input type="checkbox" name="ss[' . $counter . ']" value="1" aria-label="'
-                                . MG_escapeHTML($LANG_MG01['include_ss']) . '"' . $checked . XHTML . '>';
+                    $include_ss .= '<input type="checkbox" name="ss[' . $counter . ']" value="1" aria-label="'
+                                 . MG_escapeHTML($LANG_MG01['include_ss']) . '"' . $checked . XHTML . '>';
+                } else {
+                    $include_ss .= '&nbsp;';
                 }
 
                 switch ($row['media_type']) {
@@ -275,6 +277,9 @@ function MG_imageAdmin($album_id, $page, $actionURL = '')
     $T->set_var(array(
         'album_id'               => $album_id,
         'url_album'              => $_MG_CONF['site_url'] . '/album.php?aid=' . $album_id,
+        'upload_url'             => $_MG_CONF['site_url'] . '/admin.php?mode=browser&amp;album_id=' . $album_id,
+        'lang_return_album'      => $LANG_MG03['return_to_album'],
+        'lang_upload_media'      => $LANG_MG01['upload_media'],
         's_mode'                 => 'cover',
         's_form_action'          => $actionURL,
         'mode'                   => 'media',
