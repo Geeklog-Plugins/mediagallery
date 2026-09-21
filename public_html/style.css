@@ -3454,3 +3454,26 @@ a.SWFUProgressCancel:hover {
     grid-column:1;
   }
 }
+
+
+/* MediaGallery 1.8 manager full-width title field */
+.mg-manager-fields>label:nth-child(1){
+  grid-column:1/-1;
+}
+.mg-manager-fields>label:nth-child(2){
+  grid-column:1/-1;
+}
+.mg-manager-fields>label:nth-child(3){
+  grid-column:1;
+}
+.mg-manager-fields>label:nth-child(4){
+  grid-column:2;
+}
+@media(max-width:40rem){
+  .mg-manager-fields>label:nth-child(1),
+  .mg-manager-fields>label:nth-child(2),
+  .mg-manager-fields>label:nth-child(3),
+  .mg-manager-fields>label:nth-child(4){
+    grid-column:1;
+  }
+}
