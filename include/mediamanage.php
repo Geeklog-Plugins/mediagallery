@@ -594,24 +594,30 @@ function MG_mediaEdit($album_id, $media_id, $actionURL='', $mqueue=0, $view=0, $
 
     $rotate_right = '';
     $rotate_left  = '';
+    $rotation_forms = '';
     if ($row['media_type'] == 0 && ($_CONF['image_lib'] != 'gdlib' || function_exists("imagerotate"))) {
         $rotation_token = SEC_createToken();
         $rotation_common = '<input type="hidden" name="mode" value="rotate"' . XHTML . '>'
                          . '<input type="hidden" name="media_id" value="' . intval($row['media_id']) . '"' . XHTML . '>'
                          . '<input type="hidden" name="album_id" value="' . intval($album_id) . '"' . XHTML . '>'
                          . '<input type="hidden" name="' . CSRF_TOKEN . '" value="' . $rotation_token . '"' . XHTML . '>';
-        $rotate_right = '<form method="post" action="' . $_MG_CONF['site_url'] . '/admin.php" style="display:inline">'
-                      . $rotation_common
-                      . '<input type="hidden" name="action" value="right"' . XHTML . '>'
-                      . '<button type="submit" style="border:0;background:transparent;padding:0;cursor:pointer">'
+
+        $rotate_right = '<button type="submit" form="mg-rotate-right-form" class="mg-rotate-button">'
                       . '<img src="' . $_MG_CONF['site_url'] . '/images/rotate_right_icon.gif" alt="'
-                      . $LANG_MG01['rotate_right'] . '" style="border:none;"' . XHTML . '></button></form>';
-        $rotate_left  = '<form method="post" action="' . $_MG_CONF['site_url'] . '/admin.php" style="display:inline">'
-                      . $rotation_common
-                      . '<input type="hidden" name="action" value="left"' . XHTML . '>'
-                      . '<button type="submit" style="border:0;background:transparent;padding:0;cursor:pointer">'
-                      . '<img src="' . $_MG_CONF['site_url'] . '/images/rotate_left_icon.gif" alt="'
-                      . $LANG_MG01['rotate_left'] . '" style="border:none;"' . XHTML . '></button></form>';
+                      . MG_escapeHTML($LANG_MG01['rotate_right']) . '"' . XHTML . '></button>';
+
+        $rotate_left = '<button type="submit" form="mg-rotate-left-form" class="mg-rotate-button">'
+                     . '<img src="' . $_MG_CONF['site_url'] . '/images/rotate_left_icon.gif" alt="'
+                     . MG_escapeHTML($LANG_MG01['rotate_left']) . '"' . XHTML . '></button>';
+
+        $rotation_forms = '<form id="mg-rotate-right-form" method="post" action="' . $_MG_CONF['site_url'] . '/admin.php" class="mg-hidden-form">'
+                        . $rotation_common
+                        . '<input type="hidden" name="action" value="right"' . XHTML . '>'
+                        . '</form>'
+                        . '<form id="mg-rotate-left-form" method="post" action="' . $_MG_CONF['site_url'] . '/admin.php" class="mg-hidden-form">'
+                        . $rotation_common
+                        . '<input type="hidden" name="action" value="left"' . XHTML . '>'
+                        . '</form>';
     }
 
     $resolution = '';
@@ -750,6 +756,12 @@ function MG_mediaEdit($album_id, $media_id, $actionURL='', $mqueue=0, $view=0, $
         'preview'            => $preview,
         'preview_end'        => $preview_end,
         'rpath'              => htmlentities($back, ENT_QUOTES, COM_getCharset()),
+        'cancel_url'         => htmlentities(
+            $back !== '' ? $back : $_MG_CONF['site_url'] . '/admin.php?mode=media&album_id=' . intval($album_id),
+            ENT_QUOTES,
+            COM_getCharset()
+        ),
+        'rotation_forms'     => $rotation_forms,
         'remoteurl'          => $remoteurl,
         'lang_remote_url'    => $lang_remote_url,
         'resolution'         => $resolution,
