@@ -328,6 +328,10 @@ function MG_batchDeleteMedia($album_id, $media_id_array, $actionURL = '')
     $sql = "SELECT * FROM {$_TABLES['mg_albums']} WHERE album_id=" . intval($album_id);
     $result = DB_query($sql);
     $A = DB_fetchArray($result);
+    if (!is_array($A)) {
+        COM_errorLog('MediaGallery: batch operation rejected because album ' . intval($album_id) . ' does not exist', 1);
+        return COM_showMessageText($LANG_MG00['access_denied_msg']);
+    }
 
     $access = SEC_hasAccess($A['owner_id'], $A['group_id'], $A['perm_owner'],
                             $A['perm_group'], $A['perm_members'], $A['perm_anon']);
@@ -382,6 +386,10 @@ function MG_batchMoveMedia($album_id, $destination, $media_id_array, $actionURL 
     $sql = "SELECT * FROM {$_TABLES['mg_albums']} WHERE album_id=" . intval($album_id);
     $result = DB_query($sql);
     $A = DB_fetchArray($result);
+    if (!is_array($A)) {
+        COM_errorLog('MediaGallery: batch operation rejected because album ' . intval($album_id) . ' does not exist', 1);
+        return COM_showMessageText($LANG_MG00['access_denied_msg']);
+    }
 
     $access = SEC_hasAccess($A['owner_id'], $A['group_id'], $A['perm_owner'],
                             $A['perm_group'], $A['perm_members'], $A['perm_anon']);
@@ -406,6 +414,10 @@ function MG_batchMoveMedia($album_id, $destination, $media_id_array, $actionURL 
     $sql = "SELECT * FROM {$_TABLES['mg_albums']} WHERE album_id=" . intval($destination);
     $result = DB_query($sql);
     $D = DB_fetchArray($result);
+    if (!is_array($D)) {
+        COM_errorLog('MediaGallery: media move rejected because destination album ' . intval($destination) . ' does not exist', 1);
+        return COM_showMessageText($LANG_MG00['access_denied_msg']);
+    }
 
     $access = SEC_hasAccess($D['owner_id'], $D['group_id'], $D['perm_owner'],
                             $D['perm_group'], $D['perm_members'], $D['perm_anon']);
