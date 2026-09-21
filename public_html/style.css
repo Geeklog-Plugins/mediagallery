@@ -3536,3 +3536,42 @@ a.SWFUProgressCancel:hover {
 .mg-media-editor .mg-extra-options{margin-top:1rem}
 @media(max-width:56rem){.mg-media-editor .mg-editor-columns{columns:1}.mg-media-editor .mg-primary-meta,.mg-media-editor .mg-metrics-grid{grid-template-columns:1fr}}
 @media(max-width:40rem){.mg-media-editor .mg-edit-card,.mg-media-editor .mg-primary-card{padding:.8rem}.mg-media-editor .form_block{display:block}.mg-media-editor .form_block dt{padding-bottom:.15rem;border-bottom:0}.mg-media-editor .form_block dd{padding-top:.15rem}.mg-media-editor .mg-edit-actions{position:static}.mg-media-editor .mg-action-save{flex:1 1 100%}.mg-media-editor .mg-action-delete{margin-left:0}}
+
+
+/* MediaGallery 1.8 album editor */
+.MG_editform.mg-album-editor{max-width:88rem;margin:0 auto}
+.mg-album-editor*,.mg-album-editor *::before,.mg-album-editor *::after{box-sizing:border-box}
+.mg-album-editor .mg-edit-card{min-width:0;margin:0 0 1rem;padding:1rem;border:1px solid rgba(127,127,127,.24);border-radius:.7rem;background:rgba(127,127,127,.035)}
+.mg-album-editor fieldset.mg-edit-card{min-width:0}
+.mg-album-editor .mg-edit-card legend{width:auto;margin:0 0 .45rem;padding:0 .35rem;font-size:1.05rem;font-weight:700}
+.mg-album-editor .mg-edit-intro{padding-top:1.1rem}
+.mg-album-editor .mg-album-main-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1rem;align-items:start}
+.mg-album-editor .mg-album-main-left,.mg-album-editor .mg-album-main-right{min-width:0}
+.mg-album-editor .mg-album-main-right{display:flex;flex-direction:column;gap:1rem}
+.mg-album-editor .mg-album-main-right>.mg-edit-card{margin:0}
+.mg-album-editor .mg-full-width-card{width:100%;clear:both;margin-top:1rem}
+.mg-album-editor .form_block{display:grid;grid-template-columns:minmax(10.5rem,34%) minmax(0,1fr);column-gap:1rem;margin:0}
+.mg-album-editor .form_block dt,.mg-album-editor .form_block dd{margin:0;padding:.55rem 0;border-bottom:1px solid rgba(127,127,127,.12)}
+.mg-album-editor .form_block dt{font-weight:600}
+.mg-album-editor .form_block dt label{display:inline-block;padding-top:.2rem}
+.mg-album-editor .form_block dd{min-width:0;overflow-wrap:anywhere}
+.mg-album-editor .form_block dd.description{grid-column:2;margin-top:-.25rem;padding-top:0;opacity:.72;font-size:.92rem}
+.mg-album-editor input[type="text"],.mg-album-editor input[type="file"],.mg-album-editor textarea,.mg-album-editor select{max-width:100%;min-width:0}
+.mg-album-editor input[type="text"],.mg-album-editor textarea{width:100%}
+.mg-album-editor textarea{min-height:5.8rem;resize:vertical}
+.mg-album-editor .mg-cover-preview img,.mg-album-editor .form_block dd img{max-width:100%;height:auto}
+.mg-album-editor .mg-format-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem}
+.mg-album-editor .mg-format-group{padding:.85rem;border:1px solid rgba(127,127,127,.18);border-radius:.55rem;background:rgba(127,127,127,.025)}
+.mg-album-editor .mg-format-group h4{margin:0 0 .65rem;font-size:1rem;font-weight:700}
+.mg-album-editor .mg-format-options{display:grid;gap:.45rem}
+.mg-album-editor .mg-format-options label{display:flex;gap:.45rem;align-items:center;margin:0;cursor:pointer}
+.mg-album-editor .mg-format-options input[type="checkbox"]{flex:0 0 auto;margin:0}
+.mg-album-editor .mg-user-uploads-grid{grid-template-columns:minmax(9rem,16rem) minmax(0,1fr) minmax(9rem,16rem) minmax(0,1fr);column-gap:1rem}
+.mg-album-editor .mg-user-uploads-grid dt,.mg-album-editor .mg-user-uploads-grid dd{border-bottom:1px solid rgba(127,127,127,.12)}
+.mg-album-editor .mg-access-rights .form_block{grid-template-columns:minmax(11rem,22%) minmax(0,1fr)}
+.mg-album-editor .mg-edit-actions{position:sticky;bottom:0;z-index:20;display:flex;gap:.55rem;flex-wrap:wrap;margin:1rem 0 0;padding:.75rem;border:1px solid rgba(127,127,127,.18);border-radius:.65rem;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 -.25rem 1rem rgba(0,0,0,.05)}
+.mg-album-editor .mg-edit-actions .submit{min-width:7rem;padding:.45rem .9rem;border-radius:.4rem;cursor:pointer}
+.mg-album-editor .mg-edit-actions .mg-action-save{font-weight:700}
+.mg-album-editor .mg-edit-actions .mg-action-delete{margin-left:auto}
+@media(max-width:60rem){.mg-album-editor .mg-album-main-layout{grid-template-columns:1fr}.mg-album-editor .mg-user-uploads-grid{grid-template-columns:minmax(9rem,34%) minmax(0,1fr)}.mg-album-editor .mg-format-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:40rem){.mg-album-editor .mg-edit-card{padding:.8rem}.mg-album-editor .form_block,.mg-album-editor .mg-user-uploads-grid,.mg-album-editor .mg-access-rights .form_block{display:block}.mg-album-editor .form_block dt{padding-bottom:.15rem;border-bottom:0}.mg-album-editor .form_block dd{padding-top:.15rem}.mg-album-editor .form_block dd.description{margin-top:-.35rem}.mg-album-editor .mg-format-grid{grid-template-columns:1fr}.mg-album-editor .mg-edit-actions{position:static}.mg-album-editor .mg-edit-actions .submit{flex:1 1 auto}.mg-album-editor .mg-edit-actions .mg-action-delete{margin-left:0}}
