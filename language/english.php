@@ -1657,4 +1657,15 @@ $LANG_MG01['reports_tools'] = 'Reports & tools';
 $LANG_MG01['reports_tools_help'] = 'Open usage reports, EXIF tools, RSS rebuilds and environment checks.';
 $LANG_MG01['open_tools'] = 'Open tools';
 
+
+// MediaGallery 1.8 modern browser uploader
+$LANG_MG03['upload_drop_title'] = "Drop files here to upload";
+$LANG_MG03['upload_drop_help'] = "Add several files at once by dragging them here or by choosing them from your computer.";
+$LANG_MG03['upload_choose_files'] = "Choose files";
+$LANG_MG03['upload_queue'] = "Upload queue";
+$LANG_MG03['upload_remove'] = "Remove";
+$LANG_MG03['upload_file_details'] = "File details";
+$LANG_MG03['upload_files_selected'] = "files selected";
+$LANG_MG03['upload_noscript'] = "Multiple file selection is available. Drag-and-drop and the editable upload queue require JavaScript.";
+
 ?>
