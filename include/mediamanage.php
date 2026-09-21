@@ -469,6 +469,10 @@ function MG_mediaEdit($album_id, $media_id, $actionURL='', $mqueue=0, $view=0, $
             " WHERE media_id='" . DB_escapeString($media_id) . "'";
     $result = DB_query($sql);
     $row = DB_fetchArray($result);
+    if (!is_array($row) || empty($row['media_id'])) {
+        COM_errorLog('MediaGallery: media edit requested for missing media ' . DB_escapeString($media_id), 1);
+        return COM_showMessageText($LANG_MG00['access_denied_msg']);
+    }
 
     if (!$mqueue && DB_count($_TABLES['mg_media_albums'], array('album_id', 'media_id'), array(intval($album_id), $media_id)) < 1) {
         COM_errorLog('MediaGallery: media edit rejected because media ' . DB_escapeString($media_id) . ' is not in album ' . intval($album_id), 1);
