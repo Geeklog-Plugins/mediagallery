@@ -140,6 +140,8 @@ function MG_imageAdmin($album_id, $page, $actionURL = '')
         'lang_media_manage_help'  => $LANG_MG01['media_manage_help'],
         'lang_reset_cover'        => $LANG_MG01['reset_cover'],
         'lang_include_ss'         => $LANG_MG01['manager_slideshow'],
+        'lang_cover_unavailable'  => $LANG_MG01['manager_cover_unavailable'],
+        'lang_slideshow_unavailable' => $LANG_MG01['manager_slideshow_unavailable'],
         'lang_watermarked'        => $LANG_MG01['watermarked'],
         'lang_delete_confirm'     => MG_escapeHTML($LANG_MG01['delete_item_confirm']),
         'batchoptionselect'       => $batchOptionSelect,
@@ -172,11 +174,11 @@ function MG_imageAdmin($album_id, $page, $actionURL = '')
                 $row = DB_fetchArray($result);
 
                 $album_cover_check = '';
-                $radio_box = '&nbsp;';
+                $radio_box = '<span class="mg-manager-na">' . MG_escapeHTML($LANG_MG01['manager_cover_unavailable']) . '</span>';
                 if (($row['media_type'] == 0 || $row['media_tn_attached'] == 1) && $album->tn_attached == 0) {
                     $checked = ($album_cover == $row['media_id']) ? ' checked="checked"' : '';
                     $radio_box = '<input type="radio" name="cover" value="'
-                               . $row['media_id'] . '" aria-label="' . MG_escapeHTML($LANG_MG01['cover']) . '"'
+                               . $row['media_id'] . '" aria-label="' . MG_escapeHTML($LANG_MG01['manager_album_cover']) . '"'
                                . $checked . XHTML . '>';
                     $album_cover_check = $checked;
                 }
@@ -185,9 +187,9 @@ function MG_imageAdmin($album_id, $page, $actionURL = '')
                 if ($row['media_type'] == 0) {
                     $checked = ($row['include_ss'] == 1) ? ' checked="checked"' : '';
                     $include_ss .= '<input type="checkbox" name="ss[' . $counter . ']" value="1" aria-label="'
-                                 . MG_escapeHTML($LANG_MG01['include_ss']) . '"' . $checked . XHTML . '>';
+                                 . MG_escapeHTML($LANG_MG01['manager_slideshow']) . '"' . $checked . XHTML . '>';
                 } else {
-                    $include_ss .= '&nbsp;';
+                    $include_ss .= '<span class="mg-manager-na">' . MG_escapeHTML($LANG_MG01['manager_slideshow_unavailable']) . '</span>';
                 }
 
                 switch ($row['media_type']) {
@@ -556,8 +558,13 @@ function MG_mediaEdit($album_id, $media_id, $actionURL='', $mqueue=0, $view=0, $
         }
         $attached_thumbnail = '<img src="' . $thumbnail . '" alt="" ' . $atnsize . XHTML . '>';
         $tmpthumb = Media::getDefaultThumbnail($row, $tn_size);
+        $tmpthumbPath = $_MG_CONF['path_mediaobjects'] . $tmpthumb;
+        if (!is_file($tmpthumbPath) || !is_readable($tmpthumbPath)) {
+            $tmpthumb = 'missing.png';
+            $tmpthumbPath = $_MG_CONF['path_mediaobjects'] . $tmpthumb;
+        }
         $thumbnail = $_MG_CONF['mediaobjects_url'] . '/' . $tmpthumb;
-        $size = getimagesize($_MG_CONF['path_mediaobjects'] . $tmpthumb);
+        $size = @getimagesize($tmpthumbPath);
     }
 
     $preview = '';
