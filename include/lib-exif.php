@@ -54,7 +54,13 @@ function MG_haveEXIF($mid)
     $exifItems  = 0;
 
     $result = DB_query("SELECT media_filename,media_mime_ext,media_exif FROM {$_TABLES['mg_media']} WHERE media_id='" . DB_escapeString($mid) . "'");
-    list($media_filename, $media_mime_ext, $media_exif) = DB_fetchArray($result);
+    $mediaRow = DB_fetchArray($result);
+    if (!is_array($mediaRow)) {
+        return 0;
+    }
+    $media_filename = $mediaRow['media_filename'];
+    $media_mime_ext = $mediaRow['media_mime_ext'];
+    $media_exif = $mediaRow['media_exif'];
     if ( $media_exif == 0 )
         return 0;
 
