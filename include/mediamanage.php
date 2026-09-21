@@ -723,6 +723,8 @@ function MG_mediaEdit($album_id, $media_id, $actionURL='', $mqueue=0, $view=0, $
         'at_tn_checked'      => $row['media_tn_attached'] == 1 ? ' checked="checked"' : '',
         'attached_thumbnail' => $attached_thumbnail,
         'album_id'           => $album_id,
+        'album_title'        => MG_escapeHTML($album->title),
+        'album_access_url'   => $_MG_CONF['site_url'] . '/admin.php?mode=edit&amp;album_id=' . intval($album_id),
         'media_thumbnail'    => $thumbnail,
         'media_id'           => $row['media_id'],
         'media_title'        => $row['media_title'],
@@ -848,6 +850,9 @@ function MG_mediaEdit($album_id, $media_id, $actionURL='', $mqueue=0, $view=0, $
         'lang_artist'                   => $LANG_MG01['artist'],
         'lang_genre'                    => $LANG_MG01['genre'],
         'lang_music_album'              => $LANG_MG01['music_album'],
+        'lang_access_ownership'         => $LANG_MG01['media_access_ownership'],
+        'lang_access_inherited'         => $LANG_MG01['media_access_inherited'],
+        'lang_edit_album_rights'        => $LANG_MG01['media_edit_album_rights'],
     ));
 
     $retval .= $T->finish($T->parse('output', 'admin'));
