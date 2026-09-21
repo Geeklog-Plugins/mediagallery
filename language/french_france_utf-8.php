@@ -1447,4 +1447,10 @@ $LANG_MG01['manager_slideshow'] = "Diaporama";
 $LANG_MG01['manager_cover_unavailable'] = "Indisponible sans vignette";
 $LANG_MG01['manager_slideshow_unavailable'] = "Images uniquement";
 
+
+// MediaGallery 1.8 media access editor
+$LANG_MG01['media_access_ownership'] = "Accès et propriété";
+$LANG_MG01['media_access_inherited'] = "Les droits d’accès de ce média sont hérités de l’album « %s ».";
+$LANG_MG01['media_edit_album_rights'] = "Modifier les droits de l’album";
+
 ?>
