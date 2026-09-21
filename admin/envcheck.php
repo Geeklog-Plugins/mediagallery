@@ -49,6 +49,7 @@ if (!SEC_hasRights('mediagallery.config')) {
 }
 
 require_once $_MG_CONF['path_admin'] . 'navigation.php';
+require_once $_CONF['path'] . 'plugins/mediagallery/include/classMedia.php';
 
 function gdVersion($user_ver = 0)
 {
@@ -79,6 +80,109 @@ function gdVersion($user_ver = 0)
    preg_match('/\d/', $info, $match);
    $gd_ver = $match[0];
    return $match[0];
+}
+
+function MG_getMediaStorageAudit180()
+{
+    global $_CONF, $_MG_CONF, $_TABLES;
+
+    $audit = array(
+        'db_local_media' => 0,
+        'db_local_images' => 0,
+        'orig_ok' => 0,
+        'disp_ok' => 0,
+        'thumb_ok' => 0,
+        'missing_orig' => array(),
+        'missing_disp' => array(),
+        'missing_thumb' => array(),
+        'persistent_files' => 0,
+        'legacy_files' => 0,
+        'legacy_user_files' => 0,
+    );
+
+    $target = MG_getMediaStorageTarget180();
+    if ($target !== false) {
+        $inventory = MG_inventoryMediaStorage180($target['path']);
+        if (is_array($inventory)) {
+            $audit['persistent_files'] = (int) $inventory['count'];
+        }
+    }
+
+    $legacy = MG_getLegacyMediaStorage180();
+    if ($legacy !== '') {
+        $inventory = MG_inventoryMediaStorage180($legacy);
+        if (is_array($inventory)) {
+            $audit['legacy_files'] = (int) $inventory['count'];
+            foreach ($inventory['files'] as $relative => $size) {
+                if (MG_isUserMediaFile180($relative)) {
+                    $audit['legacy_user_files']++;
+                }
+            }
+        }
+    }
+
+    if (!isset($_TABLES['mg_media'])) {
+        return $audit;
+    }
+
+    $result = DB_query(
+        "SELECT media_id, media_filename, media_mime_ext, media_type, media_tn_attached, remote_media "
+        . "FROM {$_TABLES['mg_media']} ORDER BY media_id"
+    );
+
+    while ($row = DB_fetchArray($result)) {
+        if ((int) $row['remote_media'] === 1) {
+            continue;
+        }
+
+        $audit['db_local_media']++;
+        $filename = (string) $row['media_filename'];
+        $mimeExt = ltrim((string) $row['media_mime_ext'], '.');
+
+        if ((int) $row['media_type'] === 0) {
+            $audit['db_local_images']++;
+
+            $orig = Media::getReadableFileInfo('orig', $filename, $mimeExt);
+            if ($orig !== false) {
+                $audit['orig_ok']++;
+            } else {
+                $audit['missing_orig'][] = $row['media_id'];
+            }
+
+            $disp = Media::getReadableFileInfo('disp', $filename, $mimeExt);
+            if ($disp === false && strtolower($mimeExt) !== 'jpg') {
+                $disp = Media::getReadableFileInfo('disp', $filename, 'jpg');
+            }
+            if ($disp !== false) {
+                $audit['disp_ok']++;
+            } else {
+                $audit['missing_disp'][] = $row['media_id'];
+            }
+
+            $thumbFound = false;
+            $thumbSuffixes = array('_100', '_150', '_200', '_custom', '_100x100', '_150x150', '_200x200', '_cropcustom');
+            $thumbExts = array($mimeExt, 'jpg', 'jpeg', 'png', 'gif');
+            foreach ($thumbSuffixes as $suffix) {
+                foreach ($thumbExts as $thumbExt) {
+                    if ($thumbExt === '') {
+                        continue;
+                    }
+                    $relative = 'tn/' . $filename[0] . '/' . $filename . $suffix . '.' . $thumbExt;
+                    if (MG_resolveMediaStorageFile180($relative) !== false) {
+                        $thumbFound = true;
+                        break 2;
+                    }
+                }
+            }
+            if ($thumbFound) {
+                $audit['thumb_ok']++;
+            } else {
+                $audit['missing_thumb'][] = $row['media_id'];
+            }
+        }
+    }
+
+    return $audit;
 }
 
 function MG_checkEnvironment($storageMessage = '', $storageSuccess = true)
@@ -281,6 +385,73 @@ function MG_checkEnvironment($storageMessage = '', $storageSuccess = true)
     $T->parse('CRow2', 'CheckRow2', true);
     foreach ($invalidAssets as $asset) {
         $T->set_var(array('config_item' => htmlspecialchars($asset, ENT_QUOTES, 'UTF-8'),'status' => '<span style="color:red">' . $LANG_MG01['invalid_media_asset'] . '</span>'));
+        $T->parse('CRow2', 'CheckRow2', true);
+    }
+
+    $corePathImages = isset($_CONF['path_images']) ? (string) $_CONF['path_images'] : '';
+    $coreImagesUrl = isset($_CONF['images_url']) ? (string) $_CONF['images_url'] : '';
+
+    $T->set_var(array(
+        'config_item' => $LANG_MG01['core_path_images'],
+        'status' => '<code>' . htmlspecialchars($corePathImages, ENT_QUOTES, 'UTF-8') . '</code>',
+    ));
+    $T->parse('CRow2', 'CheckRow2', true);
+
+    $T->set_var(array(
+        'config_item' => $LANG_MG01['core_images_url'],
+        'status' => '<code>' . htmlspecialchars($coreImagesUrl, ENT_QUOTES, 'UTF-8') . '</code>',
+    ));
+    $T->parse('CRow2', 'CheckRow2', true);
+
+    $storageAudit = MG_getMediaStorageAudit180();
+
+    $T->set_var(array(
+        'config_item' => $LANG_MG01['persistent_storage_files'],
+        'status' => (string) (int) $storageAudit['persistent_files'],
+    ));
+    $T->parse('CRow2', 'CheckRow2', true);
+
+    $legacyStatus = (string) (int) $storageAudit['legacy_user_files'];
+    if ((int) $storageAudit['legacy_user_files'] > 0) {
+        $legacyStatus .= ' <span style="color:#b45309">' . $LANG_MG01['legacy_storage_files_warning'] . '</span>';
+    } else {
+        $legacyStatus .= ' <span style="color:green">' . $LANG_MG01['ok'] . '</span>';
+    }
+    $T->set_var(array(
+        'config_item' => $LANG_MG01['legacy_storage_user_files'],
+        'status' => $legacyStatus,
+    ));
+    $T->parse('CRow2', 'CheckRow2', true);
+
+    $T->set_var(array(
+        'config_item' => $LANG_MG01['local_media_db_rows'],
+        'status' => (string) (int) $storageAudit['db_local_media'],
+    ));
+    $T->parse('CRow2', 'CheckRow2', true);
+
+    $imageChecks = array(
+        array('label' => $LANG_MG01['image_original_files'], 'ok' => $storageAudit['orig_ok'], 'missing' => $storageAudit['missing_orig']),
+        array('label' => $LANG_MG01['image_display_files'], 'ok' => $storageAudit['disp_ok'], 'missing' => $storageAudit['missing_disp']),
+        array('label' => $LANG_MG01['image_thumbnail_files'], 'ok' => $storageAudit['thumb_ok'], 'missing' => $storageAudit['missing_thumb']),
+    );
+
+    foreach ($imageChecks as $check) {
+        $status = (int) $check['ok'] . ' / ' . (int) $storageAudit['db_local_images'];
+        if (!empty($check['missing'])) {
+            $sample = array_slice($check['missing'], 0, 5);
+            $status .= ' <span style="color:red">' . $LANG_MG01['missing_media_files'] . ': '
+                . htmlspecialchars(implode(', ', $sample), ENT_QUOTES, 'UTF-8');
+            if (count($check['missing']) > 5) {
+                $status .= '…';
+            }
+            $status .= '</span>';
+        } else {
+            $status .= ' <span style="color:green">' . $LANG_MG01['ok'] . '</span>';
+        }
+        $T->set_var(array(
+            'config_item' => $check['label'],
+            'status' => $status,
+        ));
         $T->parse('CRow2', 'CheckRow2', true);
     }
 
