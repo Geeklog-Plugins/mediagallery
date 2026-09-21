@@ -407,6 +407,39 @@ class Media {
 		*/
     }
 
+    static public function getReadableFileInfo($type, $filename, $ext = '', $atttn = 0)
+    {
+        global $_MG_CONF;
+
+        if ($filename === '') {
+            return false;
+        }
+
+        $tn = ($atttn == 1) ? 'tn_' : '';
+        $relativeBase = $type . '/' . $filename[0] . '/' . $tn . $filename;
+
+        if ($atttn == 1) {
+            $extensions = array('jpg');
+        } elseif ($ext !== '') {
+            $extensions = array(ltrim($ext, '.'));
+        } else {
+            $extensions = array();
+            foreach ($_MG_CONF['validExtensions'] as $candidate) {
+                $extensions[] = ltrim($candidate, '.');
+            }
+        }
+
+        foreach ($extensions as $candidate) {
+            $resolved = MG_resolveMediaStorageFile180($relativeBase . '.' . $candidate);
+            if ($resolved !== false) {
+                $resolved['extension'] = $candidate;
+                return $resolved;
+            }
+        }
+
+        return false;
+    }
+
     static public function getFilePath($type, $filename, $ext = '', $atttn = 0)
     {
         global $_MG_CONF;
