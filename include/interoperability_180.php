@@ -220,7 +220,19 @@ function MG_getAlbumItemInfo180($album_id, $what, $uid = 0)
         return isset($values[$properties[0]]) ? $values[$properties[0]] : '';
     }
 
-    return $values;
+    /*
+     * Geeklog's historical PLG_getItemInfo() contract returns values for a
+     * single item as a numerically indexed array in the same order as the
+     * requested property list. Consumers such as XMLSitemap still rely on
+     * offsets 0..n even on Geeklog 2.2.2.
+     */
+    $ordered = array();
+    foreach ($properties as $property) {
+        $property = trim($property);
+        $ordered[] = isset($values[$property]) ? $values[$property] : '';
+    }
+
+    return $ordered;
 }
 
 /**
