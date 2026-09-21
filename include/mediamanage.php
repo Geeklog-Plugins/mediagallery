@@ -46,7 +46,7 @@ require_once $_CONF['path'] . 'plugins/mediagallery/include/lib-media.php';
 
 function MG_imageAdmin($album_id, $page, $actionURL = '')
 {
-    global $_CONF, $_TABLES, $_USER, $_MG_CONF, $LANG_MG00, $LANG_MG01;
+    global $_CONF, $_TABLES, $_USER, $_MG_CONF, $LANG_MG00, $LANG_MG01, $LANG_MG03;
 
     $album = new mgAlbum($album_id);
 
