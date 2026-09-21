@@ -78,7 +78,6 @@
     }
 
     function render() {
-        captureMetadata();
         list.innerHTML = '';
 
         files.forEach(function (file, index) {
@@ -130,6 +129,7 @@
     }
 
     function setFiles(nextFiles) {
+        captureMetadata();
         files = nextFiles.slice();
         render();
     }
