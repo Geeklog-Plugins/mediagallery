@@ -53,6 +53,30 @@ function MG_escapeHTML($value)
     return htmlspecialchars((string) $value, ENT_QUOTES, COM_getCharset(), false);
 }
 
+function MG_getImageInfo180($path)
+{
+    if (!is_string($path) || $path === '' || !is_file($path) || !is_readable($path)) {
+        return false;
+    }
+
+    $info = @getimagesize($path);
+    if (!is_array($info) || !isset($info[0], $info[1]) || (int) $info[0] < 1 || (int) $info[1] < 1) {
+        return false;
+    }
+
+    return $info;
+}
+
+function MG_getImageDimensions180($path, $fallbackWidth = 0, $fallbackHeight = 0)
+{
+    $info = MG_getImageInfo180($path);
+    if ($info !== false) {
+        return array((int) $info[0], (int) $info[1]);
+    }
+
+    return array((int) $fallbackWidth, (int) $fallbackHeight);
+}
+
 function MG_prepareMetaDescription($value, $maxLength = 160)
 {
     $value = html_entity_decode(strip_tags((string) $value), ENT_QUOTES, COM_getCharset());
@@ -801,14 +825,13 @@ function MG_getImageUrl($name)
     $size = false;
     clearstatcache();
     foreach ($_MG_CONF['validExtensions'] as $ext) {
-        if (file_exists($_MG_CONF['path_mediaobjects'] . $name . $ext)) {
-            $imageSize = @getimagesize($_MG_CONF['path_mediaobjects'] . $name . $ext);
-            if ($imageSize !== false) {
-                return array(
-                    $_MG_CONF['mediaobjects_url'] . '/' . $name . $ext,
-                    $imageSize
-                );
-            }
+        $imagePath = $_MG_CONF['path_mediaobjects'] . $name . $ext;
+        $imageSize = MG_getImageInfo180($imagePath);
+        if ($imageSize !== false) {
+            return array(
+                $_MG_CONF['mediaobjects_url'] . '/' . $name . $ext,
+                $imageSize
+            );
         }
     }
     return array($url, $size);
