@@ -91,6 +91,11 @@
       </fieldset>
     </div>
 
+    <div class="mg-extra-options">
+      {playback_options}
+      {media_exif_info}
+    </div>
+
     <div class="mg_submit mg-edit-actions">
       <input type="submit" name="mode" value="{lang_save}" class="mg-action-save uk-button uk-button-primary"{xhtml}>
       <button type="button" class="mg-action-cancel uk-button" onclick="window.location.href='{site_url}/admin.php?mode=media&amp;album_id={album_id}';">{lang_cancel}</button>
@@ -102,11 +107,6 @@
       <input type="hidden" value="{queue}" name="queue"{xhtml}>
       <input type="hidden" name="action" value="savemedia"{xhtml}>
       <input type="hidden" name="{gltoken_name}" value="{gltoken}"{xhtml}>
-    </div>
-
-    <div class="mg-extra-options">
-      {playback_options}
-      {media_exif_info}
     </div>
   </form>
 
