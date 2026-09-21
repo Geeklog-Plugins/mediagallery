@@ -847,7 +847,7 @@ function MG_mediaEdit($album_id, $media_id, $actionURL='', $mqueue=0, $view=0, $
         'lang_access_ownership'         => $LANG_MG01['media_access_ownership'],
         'lang_access_inherited'         => $LANG_MG01['media_access_inherited'],
         'lang_edit_album_rights'        => $LANG_MG01['media_edit_album_rights'],
-        'access_inherited_text'          => sprintf($LANG_MG01['media_access_inherited'], $album->title),
+        'access_inherited_text'          => sprintf($LANG_MG01['media_access_inherited'], MG_escapeHTML($album->title)),
     ));
 
     $retval .= $T->finish($T->parse('output', 'admin'));
