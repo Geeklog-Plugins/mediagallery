@@ -86,8 +86,8 @@ function MG_processOriginal($srcImage, $mimeExt, $mimeType, $aid, $dnc)
         COM_errorLog("MG Upload: Entering MG_processOriginal()");
     }
     $imgsize = @getimagesize($srcImage);
-    $imgwidth = $imgsize[0];
-    $imgheight = $imgsize[1];
+    $imgwidth = (is_array($imgsize) && isset($imgsize[0])) ? (int) $imgsize[0] : 0;
+    $imgheight = (is_array($imgsize) && isset($imgsize[1])) ? (int) $imgsize[1] : 0;
 
     if ($imgwidth == 0 || $imgheight == 0) {
         $imgwidth = 620;
@@ -189,8 +189,8 @@ function MG_createDisplayImage($srcImage, $imageDisplay, $mimeExt, $mimeType, $a
     if ($imgsize == false && !in_array($mimeType, $_SPECIAL_IMAGES_MIMETYPE)) {
         return array(false, 'Unable to determine src image dimensions');
     }
-    $imgwidth  = $imgsize[0];
-    $imgheight = $imgsize[1];
+    $imgwidth = (is_array($imgsize) && isset($imgsize[0])) ? (int) $imgsize[0] : 0;
+    $imgheight = (is_array($imgsize) && isset($imgsize[1])) ? (int) $imgsize[1] : 0;
 
     $sql = "SELECT display_image_size "
          . "FROM {$_TABLES['mg_albums']} WHERE album_id = " . intval($aid);
