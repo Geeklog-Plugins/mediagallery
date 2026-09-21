@@ -202,6 +202,25 @@ class Media {
         return array($image, $pimage, $size);
     }
 
+    static public function getDefaultThumbnailInfo($info = '', $tn_size = '')
+    {
+        global $_MG_CONF;
+
+        $filename = self::getDefaultThumbnail($info, $tn_size);
+        $path = $_MG_CONF['path_mediaobjects'] . $filename;
+        $url = $_MG_CONF['mediaobjects_url'] . '/' . $filename;
+        $size = MG_getImageInfo180($path);
+
+        if ($size === false) {
+            $filename = 'missing.png';
+            $path = $_MG_CONF['path_mediaobjects'] . $filename;
+            $url = $_MG_CONF['mediaobjects_url'] . '/' . $filename;
+            $size = MG_getImageInfo180($path);
+        }
+
+        return array($url, $path, $size);
+    }
+
     // get the default thumbnail
     static public function getDefaultThumbnail($info='', $tn_size='')
     {
