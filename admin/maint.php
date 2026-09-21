@@ -272,7 +272,7 @@ if ($mode == 'thumbs') {
                 $display .= COM_showMessageText($LANG_MG01['remove_error']
                           . '  [ <a href=\'javascript:history.go(-1)\'>' . $LANG_MG02['go_back'] . '</a> ]');
                 $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
-                $display = COM_createHTMLDocument($display);
+                $display = MG_adminCreateHTMLDocument($display);
                 COM_output($display);
                 exit;
             }
@@ -302,9 +302,9 @@ if ($mode == 'thumbs') {
                 $actionURL = $_MG_CONF['admin_url'] . 'index.php';
                 $session_description = $LANG_MG01['discard_originals'];
                 $session_id = MG_beginSession('droporiginal', $actionURL, $session_description);
-                $mfn = $row['media_filename'][0] . '/' . $row['media_filename'];
                 for ($x=0; $x<$nRows; $x++) {
                     $row = DB_fetchArray($result);
+                    $mfn = $row['media_filename'][0] . '/' . $row['media_filename'];
                     $srcImage = $_MG_CONF['path_mediaobjects'] . 'orig/' . $mfn . '.' . $row['media_mime_ext'];
                     if (!file_exists($srcImage)) continue;
                     $ext = MG_getMediaExt($_MG_CONF['path_mediaobjects'] . 'disp/' . $mfn);
