@@ -1,9 +1,16 @@
-<form method="post" action="{s_form_action}" class="uk-form">
-<div>
-{lang_details}
-</div>
-<div class="mg_submit">
-  <input type="submit" name="submit" value="{lang_next}"{xhtml}>&nbsp;
-  <input type="submit" name="submit" value="{lang_cancel}"{xhtml}>
-</div>
-</form>
+<section class="mg-maintenance-confirm">
+  <div class="mg-maintenance-confirm__body">
+    <h2>{lang_title}</h2>
+{!if lang_help}
+    <p class="mg-maintenance-confirm__lead">{lang_help}</p>
+{!endif}
+{!if lang_details}
+    <div class="mg-maintenance-confirm__details">{lang_details}</div>
+{!endif}
+  </div>
+
+  <form method="post" action="{s_form_action}" class="uk-form mg-maintenance-confirm__actions">
+    <button type="submit" name="submit" value="{lang_next}" class="mg-admin-button mg-admin-button--primary">{action_label}</button>
+    <button type="submit" name="submit" value="{lang_cancel}" class="mg-admin-button mg-admin-button--secondary">{lang_cancel}</button>
+  </form>
+</section>
