@@ -1683,4 +1683,10 @@ $LANG_MG01['manager_slideshow'] = "スライドショー";
 $LANG_MG01['manager_cover_unavailable'] = "サムネイルがないため利用できません";
 $LANG_MG01['manager_slideshow_unavailable'] = "画像のみ";
 
+
+// MediaGallery 1.8 media access editor
+$LANG_MG01['media_access_ownership'] = "アクセスと所有権";
+$LANG_MG01['media_access_inherited'] = "このメディアのアクセス権はアルバム「%s」から継承されます。";
+$LANG_MG01['media_edit_album_rights'] = "アルバムのアクセス権を編集";
+
 ?>
