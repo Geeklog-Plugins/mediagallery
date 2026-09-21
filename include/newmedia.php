@@ -59,12 +59,60 @@ function MG_uploadForm($album_id)
  * @param int $album_id
  * @return string
  */
+function MG_uploadAccept180($validFormats)
+{
+    $validFormats = (int) $validFormats;
+
+    /*
+     * "Other" allows generic file types, so an HTML accept filter would be
+     * misleadingly restrictive. In that case leave filtering to MediaGallery's
+     * server-side validation.
+     */
+    if (($validFormats & 32768) === 32768) {
+        return '';
+    }
+
+    $formats = array(
+        1      => array('.jpg', '.jpeg'),
+        2      => array('.png'),
+        4      => array('.tif', '.tiff'),
+        8      => array('.gif'),
+        16     => array('.bmp'),
+        32     => array('.tga'),
+        64     => array('.psd'),
+        128    => array('.mp3'),
+        256    => array('.ogg', '.oga', '.ogv'),
+        512    => array('.asf', '.asx', '.wma', '.wmv'),
+        1024   => array('.swf'),
+        2048   => array('.mov', '.qt'),
+        4096   => array('.mp4', '.m4v'),
+        8192   => array('.mpg', '.mpeg', '.mpe'),
+        16384  => array('.zip'),
+        131072 => array('.flv')
+    );
+
+    $accepted = array();
+    foreach ($formats as $flag => $extensions) {
+        if (($validFormats & $flag) === $flag) {
+            $accepted = array_merge($accepted, $extensions);
+        }
+    }
+
+    if (empty($accepted)) {
+        return '';
+    }
+
+    return ' accept="' . implode(',', array_unique($accepted)) . '"';
+}
+
 function MG_userUpload($album_id)
 {
     global $_USER, $_TABLES, $_MG_CONF, $LANG_MG01, $LANG_MG03, $_SCRIPTS;
 
     $root_album = new mgAlbum(0);
+    $album = new mgAlbum($album_id);
     $album_selectbox = MG_buildAlbumBox($root_album, $album_id, 3, -1, 'upload');
+    $uploadAccept = ($album->valid) ? MG_uploadAccept180($album->valid_formats) : '';
 
     $result = DB_query("SELECT * FROM {$_TABLES['mg_category']} ORDER BY cat_id ASC");
     $categoryOptions = '<option value="0">' . htmlspecialchars($LANG_MG01['no_category'], ENT_QUOTES, COM_getCharset()) . '</option>';
@@ -135,6 +183,7 @@ function MG_userUpload($album_id)
         'album_select' => $album_selectbox,
         'max_upload_size' => $max_upload_size,
         'post_max_size' => $post_max_size,
+        'upload_accept' => $uploadAccept,
         'gltoken_name' => CSRF_TOKEN,
         'gltoken' => SEC_createToken(),
     ));
