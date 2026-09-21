@@ -156,6 +156,37 @@ function MG_buildSearchBox(&$T, $searchinfo=array())
 * @author           string          Get all results by this author
 *
 */
+function MG_getStoredSearch180($id)
+{
+    global $_TABLES;
+
+    $id = trim((string) $id);
+    if ($id === '') {
+        return false;
+    }
+
+    $result = DB_query(
+        "SELECT sort_id, sort_user, sort_query, sort_results, sort_datetime, referer, keywords "
+        . "FROM {$_TABLES['mg_sort']} WHERE sort_id='" . DB_escapeString($id) . "'"
+    );
+
+    if (DB_numRows($result) !== 1) {
+        return false;
+    }
+
+    $search = DB_fetchArray($result);
+    if (!is_array($search)) {
+        return false;
+    }
+
+    $query = ltrim((string) $search['sort_query']);
+    if ($query === '' || stripos($query, 'WHERE ') !== 0) {
+        return false;
+    }
+
+    return $search;
+}
+
 function MG_search($id, $page, $searchinfo='')
 {
     global $_USER, $_TABLES, $_CONF, $_MG_CONF, $LANG_MG00, $LANG_MG01, $LANG_MG03;
@@ -171,14 +202,11 @@ function MG_search($id, $page, $searchinfo='')
 
 //    $alertmsg = '<div class="pluginAlert">' . $LANG_MG03['no_search_found'] . '</div>';
 
-    // pull the query from the search database...
-
-    $result = DB_query("SELECT * FROM {$_TABLES['mg_sort']} WHERE sort_id='" . DB_escapeString($id) . "'");
-//    $nrows  = DB_numRows($result);
-//    if ($nrows < 1) {
-//        return $alertmsg;
-//    }
-    $S = DB_fetchArray($result);
+    // Pull and validate the stored search before composing SQL.
+    $S = MG_getStoredSearch180($id);
+    if ($S === false) {
+        return MG_showSearchForm($searchinfo);
+    }
 
     if (!isset($_USER['uid']) || $_USER['uid'] < 2) {
         $sort_user = 1;
@@ -206,7 +234,7 @@ function MG_search($id, $page, $searchinfo='')
          . $permsql;
     $result = DB_query($sql);
     $row = DB_fetchArray($result);
-    $total_media = $row['c'];
+    $total_media = (is_array($row) && isset($row['c'])) ? (int) $row['c'] : 0;
 
 //    if ($total_media < 1) {
 //        return $alertmsg;
@@ -220,7 +248,7 @@ function MG_search($id, $page, $searchinfo='')
          . $hiddensql
          . $permsql
          . " ORDER BY m.media_time DESC"
-         . " LIMIT " . $begin . "," . intval($begin + $end);
+         . " LIMIT " . intval($begin) . "," . intval($end);
     $result = DB_query($sql);
 
     $media_array = array();
@@ -385,13 +413,13 @@ if ($mode == $LANG_MG01['search'] || $mode == 'search') {
     if ($stype == 'phrase') { // search phrase
         switch ($skeywords) {
             case 0 :
-                $sqltmp .= "AND (m.media_title LIKE '%$keywords_db%' OR m.media_desc LIKE '%$keywords%' OR m.media_keywords LIKE '%$keywords%' OR m.artist LIKE '%$keywords%' OR m.album LIKE '%$keywords%' OR m.genre LIKE '%$keywords%')";
+                $sqltmp .= "AND (m.media_title LIKE '%$keywords_db%' OR m.media_desc LIKE '%$keywords_db%' OR m.media_keywords LIKE '%$keywords_db%' OR m.artist LIKE '%$keywords_db%' OR m.album LIKE '%$keywords_db%' OR m.genre LIKE '%$keywords_db%')";
                 break;
             case 1 :
                 $sqltmp .= "AND (m.media_keywords LIKE '%$keywords_db%')";
                 break;
             case 2 :
-                $sqltmp .= "AND (m.media_title LIKE '%$keywords_db%' OR m.media_desc LIKE '%$keywords%')";
+                $sqltmp .= "AND (m.media_title LIKE '%$keywords_db%' OR m.media_desc LIKE '%$keywords_db%')";
                 break;
             case 3 :
                 $sqltmp .= "AND (m.artist LIKE '%$keywords_db%')";
@@ -411,7 +439,7 @@ if ($mode == $LANG_MG01['search'] || $mode == 'search') {
             $mysearchitem = DB_escapeString($mysearchitem);
             switch ($skeywords) {
                 case 0 :
-                    $tmp .= "(m.media_title LIKE '%$mysearchitem%' OR m.media_desc LIKE '%$mysearchitem%' OR m.media_keywords LIKE '%$mysearchitem%' OR m.artist LIKE '%$keywords%' OR m.album LIKE '%$keywords%' OR m.genre LIKE '%$keywords%') OR ";
+                    $tmp .= "(m.media_title LIKE '%$mysearchitem%' OR m.media_desc LIKE '%$mysearchitem%' OR m.media_keywords LIKE '%$mysearchitem%' OR m.artist LIKE '%$keywords_db%' OR m.album LIKE '%$keywords_db%' OR m.genre LIKE '%$keywords_db%') OR ";
                     break;
                 case 1 :
                     $tmp .= "(m.media_keywords LIKE '%$mysearchitem%') OR ";
@@ -426,7 +454,7 @@ if ($mode == $LANG_MG01['search'] || $mode == 'search') {
                     $tmp .= "(m.album LIKE '%$mysearchitem%') OR ";
                     break;
                 case 5 :
-                    $tmp .= "(m.genre LIKE '%$keywords%') OR ";
+                    $tmp .= "(m.genre LIKE '%$keywords_db%') OR ";
                     break;
             }
         }
@@ -440,7 +468,7 @@ if ($mode == $LANG_MG01['search'] || $mode == 'search') {
             $mysearchitem = DB_escapeString($mysearchitem);
             switch ($skeywords) {
                 case 0 :
-                    $tmp .= "(m.media_title LIKE '%$mysearchitem%' OR m.media_desc LIKE '%$mysearchitem%' OR m.media_keywords LIKE '%$mysearchitem%' OR m.artist LIKE '%$keywords%' OR m.album LIKE '%$keywords%' OR m.genre LIKE '%$keywords%') AND ";
+                    $tmp .= "(m.media_title LIKE '%$mysearchitem%' OR m.media_desc LIKE '%$mysearchitem%' OR m.media_keywords LIKE '%$mysearchitem%' OR m.artist LIKE '%$keywords_db%' OR m.album LIKE '%$keywords_db%' OR m.genre LIKE '%$keywords_db%') AND ";
                     break;
                 case 1 :
                     $tmp .= "(m.media_keywords LIKE '%$mysearchitem%') AND ";
@@ -455,7 +483,7 @@ if ($mode == $LANG_MG01['search'] || $mode == 'search') {
                     $tmp .= "(m.album LIKE '%$mysearchitem%') AND ";
                     break;
                 case 5 :
-                    $tmp .= "(m.genre LIKE '%$keywords%') AND ";
+                    $tmp .= "(m.genre LIKE '%$keywords_db%') AND ";
                     break;
             }
         }
@@ -466,10 +494,10 @@ if ($mode == $LANG_MG01['search'] || $mode == 'search') {
     }
 
     if ($category != 0) {
-        $sqltmp .= " AND m.media_category=" . $category;
+        $sqltmp .= " AND m.media_category=" . (int) $category;
     }
     if ($users > 0) {
-        $sqltmp .= " AND m.media_user_id=" . $users;
+        $sqltmp .= " AND m.media_user_id=" . (int) $users;
     }
 
     $sqltmp = DB_escapeString($sqltmp);
