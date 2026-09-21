@@ -1696,4 +1696,17 @@ $LANG_MG01['media_access_ownership'] = "Access & ownership";
 $LANG_MG01['media_access_inherited'] = "Access rights for this media are inherited from album “%s”.";
 $LANG_MG01['media_edit_album_rights'] = "Edit album access rights";
 
+
+// MediaGallery 1.8 storage diagnostics
+$LANG_MG01['core_path_images'] = "Geeklog path_images";
+$LANG_MG01['core_images_url'] = "Geeklog images_url";
+$LANG_MG01['persistent_storage_files'] = "Persistent storage files";
+$LANG_MG01['legacy_storage_user_files'] = "Legacy storage user files";
+$LANG_MG01['legacy_storage_files_warning'] = "Unexpected on a fresh 1.8 installation";
+$LANG_MG01['local_media_db_rows'] = "Local media rows in database";
+$LANG_MG01['image_original_files'] = "Readable image originals";
+$LANG_MG01['image_display_files'] = "Readable display images";
+$LANG_MG01['image_thumbnail_files'] = "Readable thumbnails";
+$LANG_MG01['missing_media_files'] = "Missing media IDs";
+
 ?>
