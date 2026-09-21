@@ -1678,4 +1678,9 @@ $LANG_MG01['manager_select_media'] = "メディアを選択";
 $LANG_MG01['manager_album_cover'] = "アルバム表紙";
 $LANG_MG01['manager_slideshow'] = "スライドショー";
 
+
+// MediaGallery 1.8 non-image manager states
+$LANG_MG01['manager_cover_unavailable'] = "サムネイルがないため利用できません";
+$LANG_MG01['manager_slideshow_unavailable'] = "画像のみ";
+
 ?>
