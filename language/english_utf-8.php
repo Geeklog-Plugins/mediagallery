@@ -1690,4 +1690,10 @@ $LANG_MG01['manager_slideshow'] = "Slideshow";
 $LANG_MG01['manager_cover_unavailable'] = "Unavailable without a thumbnail";
 $LANG_MG01['manager_slideshow_unavailable'] = "Images only";
 
+
+// MediaGallery 1.8 media access editor
+$LANG_MG01['media_access_ownership'] = "Access & ownership";
+$LANG_MG01['media_access_inherited'] = "Access rights for this media are inherited from album “%s”.";
+$LANG_MG01['media_edit_album_rights'] = "Edit album access rights";
+
 ?>
