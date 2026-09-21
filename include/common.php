@@ -802,10 +802,13 @@ function MG_getImageUrl($name)
     clearstatcache();
     foreach ($_MG_CONF['validExtensions'] as $ext) {
         if (file_exists($_MG_CONF['path_mediaobjects'] . $name . $ext)) {
-            return array(
-                $_MG_CONF['mediaobjects_url'] . '/' . $name . $ext,
-                getimagesize($_MG_CONF['path_mediaobjects'] . $name . $ext)
-            );
+            $imageSize = @getimagesize($_MG_CONF['path_mediaobjects'] . $name . $ext);
+            if ($imageSize !== false) {
+                return array(
+                    $_MG_CONF['mediaobjects_url'] . '/' . $name . $ext,
+                    $imageSize
+                );
+            }
         }
     }
     return array($url, $size);
