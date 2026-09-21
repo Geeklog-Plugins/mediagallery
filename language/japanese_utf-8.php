@@ -1672,4 +1672,10 @@ $LANG_MG03['upload_file_details'] = "ファイルの詳細";
 $LANG_MG03['upload_files_selected'] = "個のファイルを選択";
 $LANG_MG03['upload_noscript'] = "複数ファイルの選択は利用できます。ドラッグ＆ドロップと編集可能な一覧にはJavaScriptが必要です。";
 
+
+// MediaGallery 1.8 media manager labels
+$LANG_MG01['manager_select_media'] = "メディアを選択";
+$LANG_MG01['manager_album_cover'] = "アルバム表紙";
+$LANG_MG01['manager_slideshow'] = "スライドショー";
+
 ?>
