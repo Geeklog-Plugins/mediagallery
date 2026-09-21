@@ -129,6 +129,10 @@ class Media {
              . "WHERE album_id = " . $this->album_id;
         $result = DB_query($sql);
         $A = DB_fetchArray($result);
+        if (!is_array($A)) {
+            $this->access = 0;
+            return;
+        }
         $this->access = self::hasAccess($A['owner_id'], $A['group_id'], $A['perm_owner'],
                                         $A['perm_group'], $A['perm_members'], $A['perm_anon']);
     }
