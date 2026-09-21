@@ -113,7 +113,7 @@ function MG_watermarkManage($actionURL = '')
                 $thumbnail  = $_MG_CONF['site_url']  . '/watermarks/' . $row['filename'];
                 $pThumbnail = $_MG_CONF['path_html'] . 'watermarks/' . $row['filename'];
 
-                $img_size = @getimagesize($pThumbnail);
+                $img_size = MG_getImageInfo180($pThumbnail);
                 $width = 166;
                 $height = 166;
                 if (is_array($img_size) && isset($img_size[0], $img_size[1])) {
