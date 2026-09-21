@@ -1425,4 +1425,15 @@ $LANG_MG01['reports_tools'] = 'Rapports et outils';
 $LANG_MG01['reports_tools_help'] = 'Accédez aux rapports d’utilisation, outils EXIF, reconstructions RSS et contrôles d’environnement.';
 $LANG_MG01['open_tools'] = 'Ouvrir les outils';
 
+
+// MediaGallery 1.8 modern browser uploader
+$LANG_MG03['upload_drop_title'] = "Déposez les fichiers ici pour les téléverser";
+$LANG_MG03['upload_drop_help'] = "Ajoutez plusieurs fichiers à la fois en les déposant ici ou en les sélectionnant sur votre ordinateur.";
+$LANG_MG03['upload_choose_files'] = "Choisir des fichiers";
+$LANG_MG03['upload_queue'] = "File de téléversement";
+$LANG_MG03['upload_remove'] = "Retirer";
+$LANG_MG03['upload_file_details'] = "Détails du fichier";
+$LANG_MG03['upload_files_selected'] = "fichiers sélectionnés";
+$LANG_MG03['upload_noscript'] = "La sélection de plusieurs fichiers reste disponible. Le glisser-déposer et la file modifiable nécessitent JavaScript.";
+
 ?>
