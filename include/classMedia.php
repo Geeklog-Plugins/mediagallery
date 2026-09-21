@@ -171,33 +171,36 @@ class Media {
     {
         global $_MG_CONF;
 
+        $resolved = false;
         if ($info['media_tn_attached'] == 1) {
-            $pimage = self::getFilePath('tn', $info['media_filename'], 'jpg', 1);
-            $image  = self::getFileUrl ('tn', $info['media_filename'], 'jpg', 1);
+            $relative = 'tn/' . $info['media_filename'][0] . '/tn_' . $info['media_filename'] . '.jpg';
+            $resolved = MG_resolveMediaStorageFile180($relative);
         } else {
             $fname = self::getDefaultThumbnail($info, $tn_size);
 
-            /*
-             * Generated thumbnails belong to the site's media storage.
-             * Built-in placeholder/type icons belong to the plugin itself and
-             * must stay available independently of multisite media storage.
-             */
             if (strpos($fname, '/') === false) {
                 $pimage = $_MG_CONF['path_html'] . 'mediaobjects/' . $fname;
                 $image  = $_MG_CONF['site_url'] . '/mediaobjects/' . $fname;
+                $size = MG_getImageInfo180($pimage);
+                if ($size !== false) {
+                    return array($image, $pimage, $size);
+                }
             } else {
-                $pimage = $_MG_CONF['path_mediaobjects'] . $fname;
-                $image  = $_MG_CONF['mediaobjects_url'] . '/' . $fname;
+                $resolved = MG_resolveMediaStorageFile180($fname);
             }
         }
 
-        $size = @getimagesize($pimage);
-        if ($size === false) {
-            $fname = 'missing.png';
-            $pimage = $_MG_CONF['path_html'] . 'mediaobjects/' . $fname;
-            $image  = $_MG_CONF['site_url'] . '/mediaobjects/' . $fname;
-            $size = @getimagesize($pimage);
+        if ($resolved !== false) {
+            $size = MG_getImageInfo180($resolved['path']);
+            if ($size !== false) {
+                return array($resolved['url'], $resolved['path'], $size);
+            }
         }
+
+        $fname = 'missing.png';
+        $pimage = $_MG_CONF['path_html'] . 'mediaobjects/' . $fname;
+        $image  = $_MG_CONF['site_url'] . '/mediaobjects/' . $fname;
+        $size = MG_getImageInfo180($pimage);
 
         return array($image, $pimage, $size);
     }
@@ -207,16 +210,28 @@ class Media {
         global $_MG_CONF;
 
         $filename = self::getDefaultThumbnail($info, $tn_size);
-        $path = $_MG_CONF['path_mediaobjects'] . $filename;
-        $url = $_MG_CONF['mediaobjects_url'] . '/' . $filename;
-        $size = MG_getImageInfo180($path);
 
-        if ($size === false) {
-            $filename = 'missing.png';
-            $path = $_MG_CONF['path_mediaobjects'] . $filename;
-            $url = $_MG_CONF['mediaobjects_url'] . '/' . $filename;
+        if (strpos($filename, '/') === false) {
+            $path = $_MG_CONF['path_html'] . 'mediaobjects/' . $filename;
+            $url = $_MG_CONF['site_url'] . '/mediaobjects/' . $filename;
             $size = MG_getImageInfo180($path);
+            if ($size !== false) {
+                return array($url, $path, $size);
+            }
+        } else {
+            $resolved = MG_resolveMediaStorageFile180($filename);
+            if ($resolved !== false) {
+                $size = MG_getImageInfo180($resolved['path']);
+                if ($size !== false) {
+                    return array($resolved['url'], $resolved['path'], $size);
+                }
+            }
         }
+
+        $filename = 'missing.png';
+        $path = $_MG_CONF['path_html'] . 'mediaobjects/' . $filename;
+        $url = $_MG_CONF['site_url'] . '/mediaobjects/' . $filename;
+        $size = MG_getImageInfo180($path);
 
         return array($url, $path, $size);
     }
