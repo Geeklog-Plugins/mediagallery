@@ -141,6 +141,12 @@ function MG_getMediaStorageAudit180()
 
         if ((int) $row['media_type'] === 0) {
             $audit['db_local_images']++;
+            if ($filename === '') {
+                $audit['missing_orig'][] = $row['media_id'];
+                $audit['missing_disp'][] = $row['media_id'];
+                $audit['missing_thumb'][] = $row['media_id'];
+                continue;
+            }
 
             $orig = Media::getReadableFileInfo('orig', $filename, $mimeExt);
             if ($orig !== false) {
