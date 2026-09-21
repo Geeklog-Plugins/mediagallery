@@ -203,7 +203,7 @@ function MG_imageAdmin($album_id, $page, $actionURL = '')
                     default :
                         $mediaClass = new Media($row, $album_id);
                         list($thumbnail,$pThumbnail) = $mediaClass->displayRawThumb(1);
-                        $img_size = @getimagesize($pThumbnail);
+                        $img_size = MG_getImageInfo180($pThumbnail);
                         break;
                 }
                 $media_time = MG_getUserDateTimeFormat($row['media_time']);
@@ -561,14 +561,7 @@ function MG_mediaEdit($album_id, $media_id, $actionURL='', $mqueue=0, $view=0, $
             $atnsize = 'width="' . $newwidth . '" height="' . $newheight . '"';
         }
         $attached_thumbnail = '<img src="' . $thumbnail . '" alt="" ' . $atnsize . XHTML . '>';
-        $tmpthumb = Media::getDefaultThumbnail($row, $tn_size);
-        $tmpthumbPath = $_MG_CONF['path_mediaobjects'] . $tmpthumb;
-        if (!is_file($tmpthumbPath) || !is_readable($tmpthumbPath)) {
-            $tmpthumb = 'missing.png';
-            $tmpthumbPath = $_MG_CONF['path_mediaobjects'] . $tmpthumb;
-        }
-        $thumbnail = $_MG_CONF['mediaobjects_url'] . '/' . $tmpthumb;
-        $size = @getimagesize($tmpthumbPath);
+        list($thumbnail, $tmpthumbPath, $size) = Media::getDefaultThumbnailInfo($row, $tn_size);
     }
 
     $preview = '';
@@ -725,7 +718,8 @@ function MG_mediaEdit($album_id, $media_id, $actionURL='', $mqueue=0, $view=0, $
         'album_id'           => $album_id,
         'album_title'        => MG_escapeHTML($album->title),
         'album_access_url'   => $_MG_CONF['site_url'] . '/admin.php?mode=edit&amp;album_id=' . intval($album_id),
-        'media_thumbnail'    => $thumbnail,
+        'media_type'          => (int) $row['media_type'],
+        'media_thumbnail'     => $thumbnail,
         'media_id'           => $row['media_id'],
         'media_title'        => $row['media_title'],
         'media_desc'         => $row['media_desc'],
@@ -853,6 +847,7 @@ function MG_mediaEdit($album_id, $media_id, $actionURL='', $mqueue=0, $view=0, $
         'lang_access_ownership'         => $LANG_MG01['media_access_ownership'],
         'lang_access_inherited'         => $LANG_MG01['media_access_inherited'],
         'lang_edit_album_rights'        => $LANG_MG01['media_edit_album_rights'],
+        'access_inherited_text'          => sprintf($LANG_MG01['media_access_inherited'], $album->title),
     ));
 
     $retval .= $T->finish($T->parse('output', 'admin'));
