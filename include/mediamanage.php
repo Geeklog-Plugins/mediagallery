@@ -125,10 +125,10 @@ function MG_imageAdmin($album_id, $page, $actionURL = '')
         'lang_cancel'             => $LANG_MG01['cancel'],
         'lang_delete'             => $LANG_MG01['delete'],
         'lang_move'               => $LANG_MG01['move'],
-        'lang_select'             => $LANG_MG01['select'],
+        'lang_select'             => $LANG_MG01['manager_select_media'],
         'lang_item'               => $LANG_MG01['item'],
         'lang_order'              => $LANG_MG01['order'],
-        'lang_cover'              => $LANG_MG01['cover'],
+        'lang_cover'              => $LANG_MG01['manager_album_cover'],
         'lang_title'              => $LANG_MG01['title'],
         'lang_description'        => $LANG_MG01['description'],
         'lang_checkall'           => $LANG_MG01['check_all'],
@@ -139,7 +139,7 @@ function MG_imageAdmin($album_id, $page, $actionURL = '')
         'lang_media_manage_title' => $LANG_MG01['manage_media'],
         'lang_media_manage_help'  => $LANG_MG01['media_manage_help'],
         'lang_reset_cover'        => $LANG_MG01['reset_cover'],
-        'lang_include_ss'         => $LANG_MG01['include_ss'],
+        'lang_include_ss'         => $LANG_MG01['manager_slideshow'],
         'lang_watermarked'        => $LANG_MG01['watermarked'],
         'lang_delete_confirm'     => MG_escapeHTML($LANG_MG01['delete_item_confirm']),
         'batchoptionselect'       => $batchOptionSelect,
@@ -572,8 +572,13 @@ function MG_mediaEdit($album_id, $media_id, $actionURL='', $mqueue=0, $view=0, $
         } elseif ($row['media_type'] == 0) {
             $path = Media::getFilePath('disp', $row['media_filename'], $row['media_mime_ext']);
             $media_size_disp = @getimagesize($path);
-            $win_width  = $media_size_disp[0] + 20;
-            $win_height = $media_size_disp[1] + 20;
+            if ($media_size_disp !== false) {
+                $win_width  = $media_size_disp[0] + 20;
+                $win_height = $media_size_disp[1] + 20;
+            } else {
+                $win_width  = 800;
+                $win_height = 600;
+            }
         } else {
             $win_width  = 800;
             $win_height = 600;
