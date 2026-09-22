@@ -5,14 +5,35 @@ var refresh;
 var ticker = {REFRESH_RATE};
 var label_next = "{L_NEXT}";
 var label = "{L_PROCESSING}";
+var batchSubmitting = false;
+
+function submitBatchProgress() {
+    if (batchSubmitting) {
+        return false;
+    }
+
+    batchSubmitting = true;
+    document.form_batch_progress.submit_button.value = label;
+    document.form_batch_progress.submit_button.disabled = true;
+    document.form_batch_progress.submit();
+    return false;
+}
+
+function markBatchSubmitting() {
+    if (batchSubmitting) {
+        return false;
+    }
+
+    batchSubmitting = true;
+    document.form_batch_progress.submit_button.disabled = true;
+    return true;
+}
 
 // update the button description/status
 function updateButton() {
     if (ticker >= 0) {
         if (ticker == 0) {
-            document.form_batch_progress.submit_button.value = label;
-            document.form_batch_progress.submit_button.disabled = true;
-            document.form_batch_progress.submit();
+            submitBatchProgress();
         } else {
             document.form_batch_progress.submit_button.value = label_next + " (" + ticker + ")";
             ticker--;
@@ -25,7 +46,7 @@ function updateButton() {
 
 <h2>{L_BATCH_PROCESS}</h2>
 <div class="pluginRow1 mg-batch-panel">
-<form name="form_batch_progress" method="post" action="{S_BATCH_ACTION}" class="uk-form">
+<form name="form_batch_progress" method="post" action="{S_BATCH_ACTION}" class="uk-form" onsubmit="return markBatchSubmitting();">
 <input type="hidden" name="mode" value="{BATCH_MODE}"{xhtml}>
 <input type="hidden" name="sid" value="{SESSION_ID}"{xhtml}>
 <input type="hidden" name="{gltoken_name}" value="{gltoken}"{xhtml}>
