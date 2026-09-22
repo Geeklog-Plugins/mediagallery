@@ -80,6 +80,51 @@ function MG_buildModerationEmail180($aid, $albumTitle, $username)
     );
 }
 
+
+/**
+ * Build HTML and plaintext approval notification bodies.
+ *
+ * @return array HTML body, plaintext body
+ */
+function MG_buildApprovalEmail180()
+{
+    global $_CONF, $LANG_MG01, $LANG31;
+
+    if (function_exists('CTL_plugin_templatePath')) {
+        $templatePath = CTL_plugin_templatePath('mediagallery', 'emails');
+    } else {
+        $templatePath = $_CONF['path'] . 'plugins/mediagallery/templates/emails/';
+    }
+
+    $template = COM_newTemplate($templatePath);
+    $template->set_file(array(
+        'email_html' => 'approval-html.thtml',
+        'email_plaintext' => 'approval-plaintext.thtml',
+    ));
+
+    if (function_exists('CTL_removeLineFeeds')) {
+        $template->preprocess_fn = 'CTL_removeLineFeeds';
+    }
+
+    $template->set_var(array(
+        'LB' => LB,
+        'email_divider' => isset($LANG31['email_divider']) ? $LANG31['email_divider'] : '----------------------------------------',
+        'email_divider_html' => isset($LANG31['email_divider_html']) ? $LANG31['email_divider_html'] : '<hr>',
+        'lang_upload_approved' => $LANG_MG01['upload_approved'],
+        'lang_thanks_submit' => $LANG_MG01['thanks_submit'],
+        'site_name' => htmlspecialchars($_CONF['site_name'], ENT_QUOTES, COM_getCharset()),
+        'site_name_plaintext' => strip_tags($_CONF['site_name']),
+        'site_url' => htmlspecialchars($_CONF['site_url'], ENT_QUOTES, COM_getCharset()),
+        'site_url_html' => htmlspecialchars($_CONF['site_url'], ENT_QUOTES, COM_getCharset()),
+        'site_url_plaintext' => $_CONF['site_url'],
+    ));
+
+    return array(
+        $template->parse('output', 'email_html'),
+        $template->parse('output', 'email_plaintext'),
+    );
+}
+
 /**
  * Send a moderation notification using Geeklog's configured mail backend.
  *
