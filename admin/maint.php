@@ -152,7 +152,7 @@ function MG_rebuildThumb()
                 'data3'      => $row['media_mime_ext']
             ));
         }
-        $display = MG_continueSession($session_id, 0, $_MG_CONF['def_refresh_rate']);
+        $display = MG_continueSession($session_id, max(1, (int) $_MG_CONF['def_item_limit']), $_MG_CONF['def_refresh_rate']);
         $display = COM_createHTMLDocument($display);
         COM_output($display);
         exit;
@@ -255,7 +255,7 @@ if ($mode == 'thumbs') {
                         'data3'      => $row['media_mime_ext']
                     ));
                 }
-                $display = MG_continueSession($session_id, 0, $_MG_CONF['def_refresh_rate']);
+                $display = MG_continueSession($session_id, max(1, (int) $_MG_CONF['def_item_limit']), $_MG_CONF['def_refresh_rate']);
                 $display = COM_createHTMLDocument($display);
                 COM_output($display);
                 exit;
@@ -325,7 +325,7 @@ if ($mode == 'thumbs') {
                         'data3'      => $row['media_mime_ext']
                     ));
                 }
-                $display = MG_continueSession($session_id, 0, $_MG_CONF['def_refresh_rate']);
+                $display = MG_continueSession($session_id, max(1, (int) $_MG_CONF['def_item_limit']), $_MG_CONF['def_refresh_rate']);
                 $display = COM_createHTMLDocument($display);
                 COM_output($display);
                 exit;
