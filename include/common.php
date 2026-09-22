@@ -804,6 +804,31 @@ function MG_getTNSize($val, $custom_height=0, $custom_width=0)
     return array($tn_width, $tn_height);
 }
 
+function MG_getSpecialImageMimeTypes180()
+{
+    return array(
+        'image/x-targa',
+        'image/tga',
+        'image/photoshop',
+        'image/x-photoshop',
+        'image/psd',
+        'application/photoshop',
+        'application/psd',
+        'image/tiff'
+    );
+}
+
+function MG_getDisplayExtension180($mimeType, $mimeExt)
+{
+    $mimeExt = ltrim((string) $mimeExt, '.');
+
+    if (in_array((string) $mimeType, MG_getSpecialImageMimeTypes180(), true)) {
+        return 'jpg';
+    }
+
+    return $mimeExt;
+}
+
 function MG_getMediaExt($path_and_filename)
 {
     global $_MG_CONF;
