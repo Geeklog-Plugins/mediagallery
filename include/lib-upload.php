@@ -1492,6 +1492,10 @@ function MG_attachThumbnail($aid, $thumbnail, $mediaFilename)
     }
     $attach_tn = $mediaFilename . $tnExt;
     list($rc,$msg) = MG_resizeImage($thumbnail, $attach_tn, $tnHeight, $tnWidth, $tn_mime_type['mime_type'], 1, $_MG_CONF['tn_jpg_quality']);
+    if ($rc === false) {
+        COM_errorLog('MG_attachThumbnail: ' . $msg);
+        return false;
+    }
     return true;
 }
 
