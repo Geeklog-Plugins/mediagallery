@@ -2,7 +2,7 @@
 
 MediaGallery is a full-featured media gallery plugin for Geeklog. The `modernize-1.8.0` branch is the active development line for MediaGallery 1.8.0 and is based on the historical 1.7.3 codebase.
 
-> **Development status:** 1.8.0 is not yet a final release. Test on a staging/local Geeklog installation and keep complete database and media backups before upgrading a production site.
+> **Release status:** MediaGallery 1.8.0 has completed its release validation for Geeklog 2.1.1 and Geeklog 2.2.2. Keep complete database and media backups before upgrading an existing production site.
 
 ## Compatibility target
 
@@ -30,7 +30,7 @@ MediaGallery 1.8.0 is primarily a modernization and hardening release. The major
 - improved album thumbnail sharpness and portrait-image rendering;
 - Geeklog 2.1.1-compatible PHP-block and batch-session fixes.
 
-See [ROADMAP.md](ROADMAP.md) for the implementation status and remaining release-candidate work.
+See [ROADMAP.md](ROADMAP.md) for the completed 1.8.0 implementation and validation record.
 
 ## Persistent media storage
 
@@ -194,7 +194,7 @@ Obsolete Flash/FlowPlayer controls are no longer created on fresh installations.
 
 ## Distribution
 
-The development branch produces one installable test archive:
+The release branch produces one installable archive:
 
 ```text
 dist/mediagallery_1.8.0_2.1.1.zip
@@ -202,13 +202,13 @@ dist/mediagallery_1.8.0_2.1.1.zip
 
 The archive contains one top-level `mediagallery/` directory and excludes repository/build-only content. Automated validation checks PHP syntax, required 1.8 helpers and Geeklog-compatible archive filenames.
 
-The final RC archive will be rebuilt after the remaining runtime tests and documentation cleanup are complete.
+The archive is rebuilt automatically from validated source changes and is the package intended for the 1.8.0 release.
 
 ## Documentation
 
-Current 1.8 development documentation:
+Current 1.8 documentation:
 
-- [ROADMAP.md](ROADMAP.md) — implementation status and RC plan;
+- [ROADMAP.md](ROADMAP.md) — implementation and validation status;
 - [TESTING-1.8.md](TESTING-1.8.md) — live regression checklist;
 - [IMPLEMENTATION_NOTES.md](IMPLEMENTATION_NOTES.md) — design/implementation notes;
 - [docs/SERVICES.md](docs/SERVICES.md) — public Geeklog service/lifecycle integration;
