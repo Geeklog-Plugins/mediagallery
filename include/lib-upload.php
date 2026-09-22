@@ -1015,10 +1015,7 @@ function MG_getFile($filename, $file, $album_id, $opt = array())
         case 'image/jpg' :
         case 'image/png' :
         case 'image/bmp' :
-            $dispExt = MG_getDisplayExtension180($mimeType, $mimeExt);
             $media_orig = MG_getFilePath('orig', $media_filename, $mimeExt);
-            $media_disp = MG_getFilePath('disp', $media_filename, $dispExt);
-            $media_tn   = MG_getFilePath('tn',   $media_filename, $dispExt);
 
             $mimeType = $mimeInfo['mime_type'];
             // process image file
@@ -1042,6 +1039,40 @@ function MG_getFile($filename, $file, $album_id, $opt = array())
                     @unlink($importSource);
                 }
                 @chmod($media_orig, 0644);
+
+                // When DNC is disabled, normalize the retained original to JPEG
+                // before creating display/thumbnail derivatives. This keeps the
+                // physical derivative extensions aligned with the final database
+                // MIME/extension values used by public rendering.
+                if ($dnc != 1 && $_MG_CONF['discard_original'] != 1
+                    && !in_array($mimeType, $_SPECIAL_IMAGES_MIMETYPE)
+                    && $mimeType != 'image/jpeg' && $mimeType != 'image/jpg') {
+                    $jpegOriginal = MG_getFilePath('orig', $media_filename, 'jpg');
+                    list($convertRc, $convertMsg) = MG_convertImageFormat(
+                        $media_orig,
+                        $jpegOriginal,
+                        'image/jpeg',
+                        0
+                    );
+
+                    if ($convertRc == false) {
+                        @unlink($jpegOriginal);
+                        $errors++;
+                        $errMsg .= $convertMsg;
+                    } else {
+                        @chmod($jpegOriginal, 0644);
+                        if ($jpegOriginal != $media_orig) {
+                            @unlink($media_orig);
+                        }
+                        $media_orig = $jpegOriginal;
+                        $mimeExt = 'jpg';
+                        $mimeType = 'image/jpeg';
+                    }
+                }
+
+                $dispExt = MG_getDisplayExtension180($mimeType, $mimeExt);
+                $media_disp = MG_getFilePath('disp', $media_filename, $dispExt);
+                $media_tn   = MG_getFilePath('tn',   $media_filename, $dispExt);
 
                 list($rc, $msg) = MG_convertImage($media_orig, $media_tn, $media_disp, $mimeExt, $mimeType, $album_id, $media_filename, $dnc);
                 if ($rc == false) {
@@ -1073,30 +1104,7 @@ function MG_getFile($filename, $file, $album_id, $opt = array())
                             }
                         }
                     }
-                    if ($dnc != 1 && $_MG_CONF['discard_original'] != 1
-                        && !in_array($mimeType, $_SPECIAL_IMAGES_MIMETYPE)) {
-                        $jpegOriginal = MG_getFilePath('orig', $media_filename, 'jpg');
-                        list($convertRc, $convertMsg) = MG_convertImageFormat(
-                            $media_orig,
-                            $jpegOriginal,
-                            'image/jpeg',
-                            0
-                        );
 
-                        if ($convertRc == false) {
-                            @unlink($jpegOriginal);
-                            $errors++;
-                            $errMsg .= $convertMsg;
-                        } else {
-                            @chmod($jpegOriginal, 0644);
-                            if ($jpegOriginal != $media_orig) {
-                                @unlink($media_orig);
-                            }
-                            $media_orig = $jpegOriginal;
-                            $mimeExt = 'jpg';
-                            $mimeType = 'image/jpeg';
-                        }
-                    }
                 }
             }
             break;
