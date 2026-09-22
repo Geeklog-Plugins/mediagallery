@@ -90,8 +90,8 @@ function MG_editCategory($cat_id, $mode)
         'xhtml'               => XHTML,
         'action'              => 'edit_category',
         'cat_id'              => $A['cat_id'],
-        'cat_name'            => $A['cat_name'],
-        'cat_description'     => $A['cat_description'],
+        'cat_name'            => MG_escapeHTML($A['cat_name']),
+        'cat_description'     => MG_escapeHTML($A['cat_description']),
         'lang_save'           => $LANG_MG01['save'],
         'lang_edit_category'  => ($mode=='create' ? $LANG_MG01['create_category'] : $LANG_MG01['edit_category']),
         's_form_action'       => $_MG_CONF['admin_url'] . 'category.php',
@@ -100,7 +100,7 @@ function MG_editCategory($cat_id, $mode)
         'lang_description'    => $LANG_MG01['description'],
         'lang_cancel'         => $LANG_MG01['cancel'],
         'lang_delete'         => $LANG_MG01['delete'],
-        'lang_delete_confirm' => $LANG_MG01['delete_item_confirm'],
+        'lang_delete_confirm' => MG_escapeHTML($LANG_MG01['delete_item_confirm']),
     ));
     if ($_MG_CONF['htmlallowed'] == 1) {
         $T->set_var('allowed_html', COM_allowedHTML());
@@ -231,7 +231,7 @@ function MG_displayCategories()
         'lang_checkall'             => $LANG_MG01['check_all'],
         'lang_uncheckall'           => $LANG_MG01['uncheck_all'],
         'lang_batch'                => $LANG_MG01['batch_process'],
-        'lang_delete_confirm'       => $LANG_MG01['delete_item_confirm'],
+        'lang_delete_confirm'       => MG_escapeHTML($LANG_MG01['delete_item_confirm']),
         'site_url'                  => $_CONF['site_url'],
         'site_admin_url'            => $_CONF['site_admin_url'],
         'xhtml'                     => XHTML,
@@ -309,7 +309,7 @@ $display = COM_startBlock($LANG_MG00['admin'], '', COM_getBlockTemplate('_admin_
 $display .= MG_showAdminMenu();
 $display .= $T->finish($T->parse('output', 'admin'));
 $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
-$display = COM_createHTMLDocument($display);
+$display = MG_adminCreateHTMLDocument($display);
 
 COM_output($display);
 ?>

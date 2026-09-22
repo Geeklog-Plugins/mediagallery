@@ -1,0 +1,64 @@
+.mg-admin-home{display:block}
+.mg-admin-toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;justify-content:space-between;margin:0 0 20px}
+.mg-admin-toolbar__menu{flex:1 1 520px;min-width:0}
+.mg-admin-toolbar__actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.mg-admin-config-form{display:inline-block;margin:0}
+.mg-admin-intro{margin:0 0 18px;padding:16px 18px;border:1px solid #d8dee6;border-radius:8px;background:#f7f9fb}
+.mg-admin-intro h2{margin:0 0 6px;font-size:1.15rem}
+.mg-admin-intro p{margin:0;line-height:1.5}
+.mg-admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.mg-admin-card{display:flex;flex-direction:column;gap:6px;min-height:110px;padding:16px 18px;border:1px solid #d8dee6;border-radius:8px;background:#fff;text-decoration:none;box-sizing:border-box}
+.mg-admin-card:hover,.mg-admin-card:focus{text-decoration:none;border-color:#9aa8b8;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.mg-admin-card__title{font-weight:700;font-size:1.05rem}
+.mg-admin-card__text{color:#5f6b76;line-height:1.45}
+@media (max-width:640px){.mg-admin-toolbar{display:block}.mg-admin-toolbar__actions{margin-top:12px}.mg-admin-grid{grid-template-columns:1fr}}
+
+.mg-admin-guide{max-width:1100px}
+.mg-admin-guide article{line-height:1.6}
+.mg-admin-guide h1{margin:0 0 12px;font-size:1.6rem}
+.mg-admin-guide h2{margin:28px 0 10px;font-size:1.25rem}
+.mg-admin-guide h3{margin:20px 0 8px;font-size:1.08rem}
+.mg-admin-guide p{margin:0 0 12px}
+.mg-admin-guide nav{margin:18px 0 24px;padding:16px 18px;border:1px solid #d8dee6;border-radius:8px;background:#f7f9fb}
+.mg-admin-guide nav h2{margin-top:0}
+.mg-admin-guide nav ul{columns:2;column-gap:28px;margin:0;padding-left:20px}
+.mg-admin-guide nav li{break-inside:avoid;margin:4px 0}
+.mg-admin-guide table{width:100%;border-collapse:collapse;margin:14px 0 22px}
+.mg-admin-guide th,.mg-admin-guide td{padding:9px 10px;border:1px solid #d8dee6;text-align:left;vertical-align:top}
+.mg-admin-guide th{background:#f7f9fb}
+.mg-admin-guide dl{margin:0 0 18px}
+.mg-admin-guide dt{font-weight:700;margin-top:10px}
+.mg-admin-guide dd{margin:3px 0 10px 20px}
+@media (max-width:640px){.mg-admin-guide nav ul{columns:1}.mg-admin-guide table{display:block;overflow-x:auto}}
+
+.mg-admin-nav{margin:0 0 20px}
+.mg-admin-nav__primary{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 12px}
+.mg-admin-subnav{padding:14px 16px;border:1px solid #d8dee6;border-radius:8px;background:#f7f9fb}
+.mg-admin-subnav__title{display:block;margin:0 0 8px;font-size:1rem}
+.mg-admin-subnav__links{display:flex;flex-wrap:wrap;gap:8px 14px}
+.mg-admin-subnav__links a{display:inline-block}
+.mg-admin-stats{margin-top:24px;padding-top:20px;border-top:1px solid #d8dee6}
+.mg-admin-stats h2,.mg-admin-stats h3{margin-top:0}
+.mg-admin-stats table{width:100%}
+.mg-admin-home .admin-list,.mg-admin-home .admin-list-table{margin-top:10px}
+@media (max-width:640px){
+.mg-admin-nav__primary{align-items:stretch}
+.mg-admin-nav__primary .uk-button,.mg-admin-nav__primary form{width:100%}
+.mg-admin-nav__primary form .uk-button{width:100%}
+.mg-admin-subnav__links{display:block}
+.mg-admin-subnav__links a{display:block;padding:5px 0}
+}
+
+
+.mg-maintenance-confirm{max-width:760px;margin:20px 0 0;border:1px solid #d8dee6;border-radius:10px;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.04);overflow:hidden}
+.mg-maintenance-confirm__body{padding:22px 24px}
+.mg-maintenance-confirm__body h2{margin:0 0 10px;font-size:1.3rem}
+.mg-maintenance-confirm__lead{margin:0 0 10px;font-size:1rem;line-height:1.55}
+.mg-maintenance-confirm__details{margin-top:10px;color:#5f6b76;line-height:1.5}
+.mg-maintenance-confirm__actions{display:flex;flex-wrap:wrap;gap:10px;padding:16px 24px;border-top:1px solid #e2e7ed;background:#f7f9fb}
+.mg-admin-button{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:9px 16px;border:1px solid #c8d0da;border-radius:6px;background:#fff;color:#202431;font:inherit;font-weight:600;cursor:pointer}
+.mg-admin-button:hover,.mg-admin-button:focus{background:#eef2f7;text-decoration:none}
+.mg-admin-button--primary{border-color:#3157d5;background:#3157d5;color:#fff}
+.mg-admin-button--primary:hover,.mg-admin-button--primary:focus{background:#2848b5;color:#fff}
+.mg-admin-button--secondary{background:#fff}
+@media (max-width:640px){.mg-maintenance-confirm{max-width:none}.mg-maintenance-confirm__actions{display:grid;grid-template-columns:1fr}.mg-admin-button{width:100%}}

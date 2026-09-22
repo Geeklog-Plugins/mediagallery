@@ -1,57 +1,74 @@
 <!-- start view_image.thtml -->
 {lbslideshow}
-<div class="bc_navigation">{birdseed}</div>
-<div class="mg_album_header">
-  <div class="mg_album_title"><strong>{album_title}</strong>{!if rsslink}&nbsp;{rsslink}{!endif}</div>
-  <div class="mg_search">
-    <form name="mgsearch" method="post" action="{site_url}/search.php" class="uk-form"><div>
-      <input type="text" name="keywords" value="{keywords}"{xhtml}>
-      <input type="hidden" name="mode" value="search"{xhtml}>
-      <input type="hidden" name="swhere" value="0"{xhtml}>
-      <input type="submit" value="{lang_search}"{xhtml}>
-    </div></form>
+<nav class="bc_navigation" aria-label="{lang_aria_breadcrumb}">{birdseed}</nav>
+<header class="mg_album_header mg_media_header">
+  <div class="mg_album_context">{album_title}{!if rsslink}&nbsp;{rsslink}{!endif}</div>
+  <details class="mg-compact-search">
+    <summary>{lang_search}</summary>
+    <div class="mg_search">
+      <form name="mgsearch" method="post" action="{site_url}/search.php" class="uk-form" role="search"><div>
+        <label for="mg-media-search-keywords" class="mg-visually-hidden">{lang_search}</label>
+        <input id="mg-media-search-keywords" type="search" name="keywords" value="{keywords}" aria-label="{lang_search}"{xhtml}>
+        <input type="hidden" name="mode" value="search"{xhtml}>
+        <input type="hidden" name="swhere" value="0"{xhtml}>
+        <input type="submit" value="{lang_search}"{xhtml}>
+      </div></form>
+    </div>
+  </details>
+</header>
+<nav class="mg_navbar mg-media-toolbar" aria-label="{lang_aria_media_actions}">
+  <div class="mg-media-pagination">
+    {!if prev_link}<a class="mg-action mg-action-nav mg-action-prev" href="{prev_link}">&larr; {lang_prev}</a>{!endif}
+    {!if pagination}<span class="mg-media-position" aria-label="{item_number} {lang_of} {total_items}">{item_number} / {total_items}</span>{!endif}
+    {!if next_link}<a class="mg-action mg-action-nav mg-action-next" href="{next_link}">{lang_next} &rarr;</a>{!endif}
   </div>
-</div>
-<div class="mg_navbar">
-{!if prev_link}<a class="button left" href="{prev_link}">{lang_prev}</a>{!endif}
-{!if next_link}<a class="button right" href="{next_link}">{lang_next}</a>{!endif}
-{!if url_slideshow}<a class="button" href="{url_slideshow}">{lang_slideshow}</a>{!endif}
-{!if download_link}<a class="button" href="{download_link}">{lang_download}</a>{!endif}
-{!if property}<a class="button" href="#" onclick="return popitup('{property}')">{lang_property}</a>{!endif}
-{!if switch_size}<a class="button" href="{switch_size}">{lang_switch_size}</a>{!endif}
-{!if edit_item_link}<a class="button" href="{edit_item_link}">{lang_edit}</a>{!endif}
-&nbsp;
-{!if pagination}<div class="mg_right_nav">{item_number}&nbsp;{lang_of}&nbsp;{total_items}</div>{!endif}
-</div>
-<div class="mg_media_title">{!if media_title}{media_title}{!else}&nbsp;{!endif}</div>
-<div class="mg_media_detail">{image_detail}</div>
-<div class="mg_media_desc">{!if media_desc}{media_desc}{!else}&nbsp;{!endif}</div>
-<div class="mg_info">
-  <div class="mg_info_left">
-    <p><strong>ID:</strong>&nbsp;{media_id}</p>
-    {!if media_properties}<p>{getid3}{media_properties}{getid3end}</p>{!endif}
+  <div class="mg-media-actions">
+    {!if url_slideshow}<a class="mg-action mg-action-secondary" href="{url_slideshow}"{slideshow_onclick}>{lang_slideshow}</a>{!endif}
+    {!if download_link}<a class="mg-action mg-action-secondary" href="{download_link}">{lang_download}</a>{!endif}
+    {!if property}<a class="mg-action mg-action-secondary" href="{property}" onclick="return popitup(this.href)">{lang_property}</a>{!endif}
+    {!if switch_size}<a class="mg-action mg-action-secondary" href="{switch_size}">{lang_switch_size}</a>{!endif}
+    {!if edit_item_link}<a class="mg-action mg-action-secondary mg-action-admin" href="{edit_item_link}">{lang_edit}</a>{!endif}
   </div>
-  <div class="mg_info_right">
-    <p><strong>{lang_uploaded_by}:</strong>&nbsp;{owner_username}</p>
-  </div>
-  <div class="mg_info_center">
-    <p>{media_time}</p>
-    <p>{lang_views} {media_views}</p>
-    <div>{rating_box}</div>
-    {!if media_keywords}<p><strong>{lang_keywords}</strong> {media_keywords}</p>{!endif}
-  </div>
-  {!if exif_info}
-  <div class="mg_exif_info" style="clear:both;margin:0 5px">
-  {exif_info}
-  </div>
-  {!endif}
-</div>
+</nav>
+<article class="mg-media-article">
+  <header class="mg-media-article-header">
+    <h1 class="mg_media_title">{media_title}</h1>
+  </header>
+  <figure class="mg-media-figure">
+    <div class="mg_media_detail">{image_detail}</div>
+    {!if media_desc}<figcaption class="mg_media_desc">{media_desc}</figcaption>{!endif}
+  </figure>
+  <footer class="mg-media-meta">
+    <div class="mg-media-meta-primary">
+      <span class="mg-media-author"><strong>{lang_uploaded_by}:</strong>&nbsp;{owner_username}</span>
+      <span class="mg-media-date">{media_time}</span>
+      <span class="mg-media-views">{lang_views} {media_views}</span>
+    </div>
+    {!if rating_box}<div class="mg-media-rating">{rating_box}</div>{!endif}
+    {!if media_keywords}
+    <div class="mg-media-tags">
+      <strong class="mg-media-tags-label">{lang_keywords}</strong>
+      <span class="mg-tag-list">{media_keywords}</span>
+    </div>
+    {!endif}
+    {!if edit_item_link}
+    <details class="mg-media-technical">
+      <summary>{lang_media_id}</summary>
+      <code>{media_id}</code>
+      {!if media_properties}<div class="mg-media-properties">{getid3}{media_properties}{getid3end}</div>{!endif}
+    </details>
+    {!else}
+      {!if media_properties}<div class="mg-media-properties">{getid3}{media_properties}{getid3end}</div>{!endif}
+    {!endif}
+    {!if exif_info}<div class="mg_exif_info">{exif_info}</div>{!endif}
+  </footer>
+</article>
 {!if jumpbox}<div class="mg_jumpbox">{jumpbox}</div>{!endif}
 <script type="text/javascript">
 //<![CDATA[
 function popitup(url)
 {
-    newwindow=window.open(url,'name','height=600,width=450,resizable=yes,toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes');
+    var newwindow = window.open(url,'name','height=600,width=450,resizable=yes,toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes');
     if (window.focus) {newwindow.focus()}
     return false;
 }

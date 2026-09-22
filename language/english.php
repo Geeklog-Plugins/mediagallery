@@ -194,6 +194,24 @@ $LANG_MG01 = array (
     'recheck'                   => 'Recheck',
     'mg_directories'            => 'Media Gallery Directories',
     'mg_dir_structure'          => 'Media Gallery Directory Structure',
+    'media_storage'             => 'Persistent media storage',
+    'active_media_path'         => 'Active media path',
+    'expected_media_path'       => 'Expected media path',
+    'active_media_url'          => 'Active media URL',
+    'media_storage_root'        => 'Storage root',
+    'plugin_media_assets'       => 'Plugin image resources',
+    'valid_media_assets'        => '%d of %d required images are valid',
+    'storage_unresolved'        => 'Unable to resolve the persistent storage target',
+    'storage_path_mismatch'     => 'Active path does not match the expected path',
+    'storage_root_invalid'      => 'Directory missing, unreadable or not writable',
+    'invalid_media_asset'       => 'Missing, unreadable or invalid image',
+    'storage_operation'         => 'Storage synchronization',
+    'repair_media_storage'      => 'Synchronize media storage',
+    'repair_media_storage_help' => 'Copies and verifies historical user media (originals, display images, thumbnails and covers) in the persistent images directory. Plugin images remain in the plugin directory and source files are retained.',
+    'repair_media_storage_success' => 'User media synchronization completed successfully.',
+    'media_storage_current'      => 'No historical user media needs to be synchronized.',
+    'repair_media_storage_failed' => 'Synchronization failed. See the Geeklog error log for the affected path.',
+    'invalid_security_token'    => 'The security token is invalid or has expired. Reload this page and try again.',
     'ok'                        => 'OK',
     'not_found'                 => 'Not Found',
     'not_writable'              => 'NOT Writable',
@@ -1615,3 +1633,69 @@ $LANG_configselects['mediagallery'] = array(
 if (isset($_MG_CONF, $_MG_CONF['custom_image_width'], $_MG_CONF['custom_image_height'])) {
     $LANG_configselects['mediagallery'][21][$LANG_MG01['size_custom'] . ' - ' . $_MG_CONF['custom_image_width'] . 'x' . $_MG_CONF['custom_image_height']] = 9;
 }
+
+$LANG_MG01['admin_help'] = 'MediaGallery administration gives you quick access to albums, member galleries, maintenance tasks, reports and plugin configuration.';
+
+
+$LANG_MG01['manage_albums'] = 'Manage Albums';
+$LANG_MG01['manage_albums_help'] = 'Manage albums, media items and the gallery structure.';
+$LANG_MG01['overview'] = 'Overview';
+$LANG_MG01['media_items'] = 'Media items';
+$LANG_MG01['pending_media'] = 'Pending media';
+$LANG_MG01['status_ok'] = 'OK';
+$LANG_MG01['status_check'] = 'Check';
+$LANG_MG01['media_storage'] = 'Media storage';
+$LANG_MG01['content'] = 'Content';
+$LANG_MG01['content_categories'] = 'Categories';
+$LANG_MG01['content_categories_help'] = 'Organize and maintain MediaGallery categories.';
+$LANG_MG01['member_albums_help'] = 'Manage member galleries, quotas and related album tools.';
+$LANG_MG01['manage'] = 'Manage';
+$LANG_MG01['maintenance_reports'] = 'Maintenance & reports';
+$LANG_MG01['maintenance_tools'] = 'Batch & maintenance';
+$LANG_MG01['maintenance_tools_help'] = 'Run thumbnail, resize, quota, sorting and batch maintenance tools.';
+$LANG_MG01['reports_tools'] = 'Reports & tools';
+$LANG_MG01['reports_tools_help'] = 'Open usage reports, EXIF tools, RSS rebuilds and environment checks.';
+$LANG_MG01['open_tools'] = 'Open tools';
+
+
+// MediaGallery 1.8 modern browser uploader
+$LANG_MG03['upload_drop_title'] = "Drop files here to upload";
+$LANG_MG03['upload_drop_help'] = "Add several files at once by dragging them here or by choosing them from your computer.";
+$LANG_MG03['upload_choose_files'] = "Choose files";
+$LANG_MG03['upload_queue'] = "Upload queue";
+$LANG_MG03['upload_remove'] = "Remove";
+$LANG_MG03['upload_file_details'] = "File details";
+$LANG_MG03['upload_files_selected'] = "files selected";
+$LANG_MG03['upload_noscript'] = "Multiple file selection is available. Drag-and-drop and the editable upload queue require JavaScript.";
+
+
+// MediaGallery 1.8 media manager labels
+$LANG_MG01['manager_select_media'] = "Select media";
+$LANG_MG01['manager_album_cover'] = "Album cover";
+$LANG_MG01['manager_slideshow'] = "Slideshow";
+
+
+// MediaGallery 1.8 non-image manager states
+$LANG_MG01['manager_cover_unavailable'] = "Unavailable without a thumbnail";
+$LANG_MG01['manager_slideshow_unavailable'] = "Images only";
+
+
+// MediaGallery 1.8 media access editor
+$LANG_MG01['media_access_ownership'] = "Access & ownership";
+$LANG_MG01['media_access_inherited'] = "Access rights for this media are inherited from album “%s”.";
+$LANG_MG01['media_edit_album_rights'] = "Edit album access rights";
+
+
+// MediaGallery 1.8 storage diagnostics
+$LANG_MG01['core_path_images'] = "Geeklog path_images";
+$LANG_MG01['core_images_url'] = "Geeklog images_url";
+$LANG_MG01['persistent_storage_files'] = "Persistent storage files";
+$LANG_MG01['legacy_storage_user_files'] = "Legacy storage user files";
+$LANG_MG01['legacy_storage_files_warning'] = "Unexpected on a fresh 1.8 installation";
+$LANG_MG01['local_media_db_rows'] = "Local media rows in database";
+$LANG_MG01['image_original_files'] = "Readable image originals";
+$LANG_MG01['image_display_files'] = "Readable display images";
+$LANG_MG01['image_thumbnail_files'] = "Readable thumbnails";
+$LANG_MG01['missing_media_files'] = "Missing media IDs";
+
+?>

@@ -1,0 +1,57 @@
+name: MediaGallery PHP lint
+
+on:
+  push:
+    branches:
+      - modernize-1.8.0
+    paths-ignore:
+      - 'dist/**'
+  pull_request:
+    paths-ignore:
+      - 'dist/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mediagallery-validate-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  php-lint:
+    name: PHP ${{ matrix.php }} syntax
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php:
+          - '5.6'
+          - '7.4'
+          - '8.1'
+          - '8.3'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+
+      - name: Lint PHP and INC files
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' file; do
+            php -l "$file"
+          done < <(find . -type f \( -name '*.php' -o -name '*.inc' \) -print0)
+
+  build-archive:
+    name: Build validated test archive
+    needs: php-lint
+    if: github.event_name == 'push' && github.ref == 'refs/heads/modernize-1.8.0'
+    permissions:
+      contents: write
+    uses: ./.github/workflows/build-dist.yml

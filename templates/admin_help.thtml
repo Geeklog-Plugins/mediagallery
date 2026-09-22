@@ -1,0 +1,9 @@
+<div class="mg-admin-home mg-admin-help">
+    <div class="mg-admin-toolbar">
+        {admin_menu}
+    </div>
+
+    <div class="mg-admin-guide">
+        {guide_content}
+    </div>
+</div>

@@ -5,17 +5,39 @@ var refresh;
 var ticker = {REFRESH_RATE};
 var label_next = "{L_NEXT}";
 var label = "{L_PROCESSING}";
+var batchSubmitting = false;
+
+function submitBatchProgress() {
+    if (batchSubmitting) {
+        return false;
+    }
+
+    batchSubmitting = true;
+    document.form_batch_progress.submit_button.value = label;
+    document.form_batch_progress.submit_button.disabled = true;
+    document.form_batch_progress.submit();
+    return false;
+}
+
+function markBatchSubmitting() {
+    if (batchSubmitting) {
+        return false;
+    }
+
+    batchSubmitting = true;
+    document.form_batch_progress.submit_button.disabled = true;
+    return true;
+}
 
 // update the button description/status
 function updateButton() {
     if (ticker >= 0) {
         if (ticker == 0) {
-            document.form_batch_progress.submit_button.value = label;
-            document.form_batch_progress.submit_button.disabled = true;
+            submitBatchProgress();
         } else {
             document.form_batch_progress.submit_button.value = label_next + " (" + ticker + ")";
             ticker--;
-            refresh = setTimeout("updateButton()", 1000);
+            refresh = setTimeout(updateButton, 1000);
         }
     }
 }
@@ -23,24 +45,27 @@ function updateButton() {
 </script>
 
 <h2>{L_BATCH_PROCESS}</h2>
-<div class="pluginRow1" style="padding:10px;">
-<form name="form_batch_progress" method="post" action="{S_BATCH_ACTION}" class="uk-form">
-<div style="margin-left:20px">
+<div class="pluginRow1 mg-batch-panel">
+<form name="form_batch_progress" method="post" action="{S_BATCH_ACTION}" class="uk-form" onsubmit="return markBatchSubmitting();">
+<input type="hidden" name="mode" value="{BATCH_MODE}"{xhtml}>
+<input type="hidden" name="sid" value="{SESSION_ID}"{xhtml}>
+<input type="hidden" name="{gltoken_name}" value="{gltoken}"{xhtml}>
+<div class="mg-batch-body">
 <p>{PROCESSING_MESSAGES}</p>
 
 <p><b>{L_ACTIVE_PARAMETERS}</b></p>
 <table cellspacing="1" cellpadding="1">
   <tr>
-    <td style="text-align:right;while-space:nowrap;width:220px">{L_TIME_LIMIT}: </td>
+    <td class="mg-batch-label mg-batch-label-wide">{L_TIME_LIMIT}: </td>
     <td>{TIME_LIMIT}</td>
   </tr>
   <tr>
-    <td style="text-align:right;while-space:nowrap;">{L_REFRESH_RATE}: </td>
-    <td><input type="text" name="refresh_rate" value="{REFRESH_RATE}" size="5" style="texi-align:right"{xhtml}></td>
+    <td class="mg-batch-label"><label for="mg-batch-refresh-rate">{L_REFRESH_RATE}</label>: </td>
+    <td><input type="text" id="mg-batch-refresh-rate" name="refresh_rate" value="{REFRESH_RATE}" size="5"{xhtml}></td>
   </tr>
   <tr>
-    <td style="text-align:right;while-space:nowrap;">{L_ITEMS_PER_CYCLE}: </td>
-    <td><input type="text" name="item_limit" value="{ITEM_LIMIT}" size="5" style="texi-align:right"{xhtml}></td>
+    <td class="mg-batch-label"><label for="mg-batch-item-limit">{L_ITEMS_PER_CYCLE}</label>: </td>
+    <td><input type="text" id="mg-batch-item-limit" name="item_limit" value="{ITEM_LIMIT}" size="5"{xhtml}></td>
   </tr>
 </table>
 
@@ -48,33 +73,33 @@ function updateButton() {
 <p><b>{L_PROCESSING_DETAILS}</b></p>
 <table cellspacing="1" cellpadding="1">
   <tr>
-    <td style="text-align:right;while-space:nowrap;width:220px">{L_TOTAL_ITEMS}: </td>
+    <td class="mg-batch-label mg-batch-label-wide">{L_TOTAL_ITEMS}: </td>
     <td>{TOTAL_ITEMS}</td>
   </tr>
   <tr>
-    <td style="text-align:right;while-space:nowrap;">{L_ITEMS_PROCESSED}: </td>
+    <td class="mg-batch-label">{L_ITEMS_PROCESSED}: </td>
     <td>{ITEMS_PROCESSED}</td>
   </tr>
   <tr>
-    <td style="text-align:right;while-space:nowrap;">{L_ITEMS_REMAINING}: </td>
+    <td class="mg-batch-label">{L_ITEMS_REMAINING}: </td>
     <td>{ITEMS_REMAINING}</td>
   </tr>
   <tr>
-    <td style="text-align:right;while-space:nowrap;">{L_POSTS_LAST_CYCLE}: </td>
+    <td class="mg-batch-label">{L_POSTS_LAST_CYCLE}: </td>
     <td>{POST_LIMIT}</td>
   </tr>
   <tr>
-    <td style="text-align:right;while-space:nowrap;">{L_ITEM_RATE}: </td>
+    <td class="mg-batch-label">{L_ITEM_RATE}: </td>
     <td>{ITEM_RATE}</td>
   </tr>
   <tr>
-    <td style="text-align:right;while-space:nowrap;">{L_STATUS}: </td>
+    <td class="mg-batch-label">{L_STATUS}: </td>
     <td>{SESSION_PERCENT}</td>
   </tr>
 </table>
 
 <div class="mg_submit">
-  <input class="mainoption" type="submit" name="submit_button" value="{L_NEXT}" onclick="javascript:ticker=0"{xhtml}>&nbsp;
+  <input class="mainoption" type="submit" name="submit_button" value="{L_NEXT}" onclick="ticker=0"{xhtml}>&nbsp;
   <input class="mainoption" type="submit" name="cancel_button" value="{L_CANCEL}"{xhtml}>
   <script type="text/javascript"><!--
       updateButton();

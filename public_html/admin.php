@@ -153,21 +153,6 @@ if ($mode === 'edit') {
     $display = MG_watermarkManage();
     $display = MG_createHTMLDocument($display);
     COM_output($display);
-} elseif ($mode == $LANG_MG01['save_exit']) {
-    $album_id = (int) Input::fGet('album_id', -1);
-    if ($album_id < 0) {
-        MG_invalidRequest();
-    }
-
-    require_once $include . 'batch.php';
-    if ($album_id == 0) {
-        $actionURL = $_MG_CONF['site_url'] . '/index.php';
-    } else {
-        $actionURL = $_MG_CONF['site_url'] . '/album.php?aid=' . $album_id;
-    }
-    $display = MG_batchCaptionSave($album_id, $actionURL);
-    $display = MG_createHTMLDocument($display);
-    COM_output($display);
 } elseif ($mode === 'create') {
     $album_id = (int) Input::fGet('album_id', -1);
     if ($album_id < 0) {
@@ -181,7 +166,7 @@ if ($mode === 'edit') {
     COM_output($display);
 } elseif ($mode == $LANG_MG01['reset_rating'] && !empty($LANG_MG01['reset_rating'])) {
     require_once $include . 'mediamanage.php';
-    $album_id = (int) Input::fGet('album_id', 0);
+    $album_id = (int) Input::fPost('album_id', 0);
     $mid      = Input::fPost('mid', '');
     $mqueue   = Input::fPost('queue');
     $display = MG_mediaResetRating($album_id, $mid, $mqueue);
@@ -189,7 +174,7 @@ if ($mode === 'edit') {
     COM_output($display);
 } elseif ($mode == $LANG_MG01['reset_views'] && !empty($LANG_MG01['reset_views'])) {
     require_once $include . 'mediamanage.php';
-    $album_id = (int) Input::fGet('album_id', 0);
+    $album_id = (int) Input::fPost('album_id', 0);
     $mid      = Input::fPost('mid', '');
     $mqueue   = Input::fPost('queue');
     $display = MG_mediaResetViews($album_id, $mid, $mqueue);
@@ -553,12 +538,13 @@ if ($mode === 'edit') {
     $display = MG_createHTMLDocument($display);
     COM_output($display);
 } elseif ($mode === 'rotate') {
-    $album_id = (int) Input::fGet('album_id', -1);
-    $media_id = (int) Input::fGet('media_id', -1);
-    $direction = Input::fGet('action');
+    $album_id = (int) Input::fPost('album_id', -1);
+    $media_id = (int) Input::fPost('media_id', -1);
+    $direction = Input::fPost('action');
 
     if (($album_id < 0) || ($media_id < 0) ||
-            empty($direction) || (($direction !== 'left') && ($direction !== 'right'))) {
+            empty($direction) || (($direction !== 'left') && ($direction !== 'right')) ||
+            !SEC_checkToken()) {
         MG_invalidRequest();
     }
 

@@ -46,7 +46,7 @@ require_once $_CONF['path'] . 'plugins/mediagallery/include/lib-media.php';
 
 function MG_imageAdmin($album_id, $page, $actionURL = '')
 {
-    global $_CONF, $_TABLES, $_USER, $_MG_CONF, $LANG_MG00, $LANG_MG01;
+    global $_CONF, $_TABLES, $_USER, $_MG_CONF, $LANG_MG00, $LANG_MG01, $LANG_MG03;
 
     $album = new mgAlbum($album_id);
 
@@ -71,13 +71,13 @@ function MG_imageAdmin($album_id, $page, $actionURL = '')
     // -- Get Album Cover Info..
     if ($album->access != 3) {
         COM_errorLog("Someone has tried to illegally edit media in Media Gallery. "
-                   . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: $REMOTE_ADDR",1);
+                   . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: " . MG_getRemoteAddress(),1);
         return COM_showMessageText($LANG_MG00['access_denied_msg']);
     }
 
     $album_cover = $album->cover;
 
-    $album_selectbox = '<select name="album">';
+    $album_selectbox = '<select id="mg-media-destination-album" name="album">';
     $root_album = new mgAlbum(0);
     $root_album->buildAlbumBox($album_selectbox, $album_id, 3, $album_id, 'manage');
     $album_selectbox .= '</select>';
@@ -106,7 +106,7 @@ function MG_imageAdmin($album_id, $page, $actionURL = '')
     $result = DB_query($sql);
     $nrows = DB_numRows($result);
 
-    $batchOptionSelect = '<select name="batchOption">';
+    $batchOptionSelect = '<select id="mg-media-batch-option" name="batchOption">';
     if ($_CONF['image_lib'] == 'gdlib' && !function_exists("imagerotate")) {
         $batchOptionSelect .= '';
     } else {
@@ -125,10 +125,10 @@ function MG_imageAdmin($album_id, $page, $actionURL = '')
         'lang_cancel'             => $LANG_MG01['cancel'],
         'lang_delete'             => $LANG_MG01['delete'],
         'lang_move'               => $LANG_MG01['move'],
-        'lang_select'             => $LANG_MG01['select'],
+        'lang_select'             => $LANG_MG01['manager_select_media'],
         'lang_item'               => $LANG_MG01['item'],
         'lang_order'              => $LANG_MG01['order'],
-        'lang_cover'              => $LANG_MG01['cover'],
+        'lang_cover'              => $LANG_MG01['manager_album_cover'],
         'lang_title'              => $LANG_MG01['title'],
         'lang_description'        => $LANG_MG01['description'],
         'lang_checkall'           => $LANG_MG01['check_all'],
@@ -139,9 +139,11 @@ function MG_imageAdmin($album_id, $page, $actionURL = '')
         'lang_media_manage_title' => $LANG_MG01['manage_media'],
         'lang_media_manage_help'  => $LANG_MG01['media_manage_help'],
         'lang_reset_cover'        => $LANG_MG01['reset_cover'],
-        'lang_include_ss'         => $LANG_MG01['include_ss'],
+        'lang_include_ss'         => $LANG_MG01['manager_slideshow'],
+        'lang_cover_unavailable'  => $LANG_MG01['manager_cover_unavailable'],
+        'lang_slideshow_unavailable' => $LANG_MG01['manager_slideshow_unavailable'],
         'lang_watermarked'        => $LANG_MG01['watermarked'],
-        'lang_delete_confirm'     => $LANG_MG01['delete_item_confirm'],
+        'lang_delete_confirm'     => MG_escapeHTML($LANG_MG01['delete_item_confirm']),
         'batchoptionselect'       => $batchOptionSelect,
         'lang_batch_options'      => $LANG_MG01['batch_options'],
         'lang_keywords'           => $LANG_MG01['keywords'],
@@ -149,6 +151,8 @@ function MG_imageAdmin($album_id, $page, $actionURL = '')
         'lang_batch'              => $LANG_MG01['batch_process'],
         'batchoptionselect'       => $batchOptionSelect,
         'val_reset_cover'         => (($album_cover == '-1') ? ' checked="checked"' : ''),
+        'gltoken_name'           => CSRF_TOKEN,
+        'gltoken'                => SEC_createToken(),
     ));
 
     $tn_size = 1; // include:150x150
@@ -170,19 +174,22 @@ function MG_imageAdmin($album_id, $page, $actionURL = '')
                 $row = DB_fetchArray($result);
 
                 $album_cover_check = '';
-                $radio_box = '&nbsp;';
+                $radio_box = '<span class="mg-manager-na">' . MG_escapeHTML($LANG_MG01['manager_cover_unavailable']) . '</span>';
                 if (($row['media_type'] == 0 || $row['media_tn_attached'] == 1) && $album->tn_attached == 0) {
                     $checked = ($album_cover == $row['media_id']) ? ' checked="checked"' : '';
                     $radio_box = '<input type="radio" name="cover" value="'
-                               . $row['media_id'] . '"' . $checked . XHTML . '>';
+                               . $row['media_id'] . '" aria-label="' . MG_escapeHTML($LANG_MG01['manager_album_cover']) . '"'
+                               . $checked . XHTML . '>';
                     $album_cover_check = $checked;
                 }
 
-                $include_ss = '&nbsp;';
+                $include_ss = '<input type="hidden" name="ss[' . $counter . ']" value="0"' . XHTML . '>';
                 if ($row['media_type'] == 0) {
                     $checked = ($row['include_ss'] == 1) ? ' checked="checked"' : '';
-                    $include_ss = '<input type="checkbox" name="ss[' . $counter . ']" value="1"'
-                                . $checked . XHTML . '>';
+                    $include_ss .= '<input type="checkbox" name="ss[' . $counter . ']" value="1" aria-label="'
+                                 . MG_escapeHTML($LANG_MG01['manager_slideshow']) . '"' . $checked . XHTML . '>';
+                } else {
+                    $include_ss .= '<span class="mg-manager-na">' . MG_escapeHTML($LANG_MG01['manager_slideshow_unavailable']) . '</span>';
                 }
 
                 switch ($row['media_type']) {
@@ -196,7 +203,7 @@ function MG_imageAdmin($album_id, $page, $actionURL = '')
                     default :
                         $mediaClass = new Media($row, $album_id);
                         list($thumbnail,$pThumbnail) = $mediaClass->displayRawThumb(1);
-                        $img_size = @getimagesize($pThumbnail);
+                        $img_size = MG_getImageInfo180($pThumbnail);
                         break;
                 }
                 $media_time = MG_getUserDateTimeFormat($row['media_time']);
@@ -208,16 +215,17 @@ function MG_imageAdmin($album_id, $page, $actionURL = '')
                     //$height = 75;
                     $width = 150;
                     $height = 112;
-                    $thumbnail = $_MG_CONF['mediaobjects_url'] . '/missing.png';
+                    $thumbnail = $_MG_CONF['mediaassets_url'] . '/missing.png';
                 }
 
-                $cat_select = '<select name="cat_id[]">';
+                $cat_select = '<select id="mg-media-category-' . $counter . '" name="cat_id[]" aria-label="'
+                            . MG_escapeHTML($LANG_MG01['category']) . '">';
                 $cat_select .= '<option value="0">' . $LANG_MG01['no_category'] . '</option>';
                 $cRows = count($catRow);
                 for ($i = 0; $i < $cRows; $i++) {
                     $cat_select .= '<option value="' . $catRow[$i]['cat_id'] . '" '
                                  . ($catRow[$i]['cat_id'] == $row['media_category'] ? ' selected="selected"' : '') . '>'
-                                 . $catRow[$i]['cat_name'] . '</option>';
+                                 . MG_escapeHTML($catRow[$i]['cat_name']) . '</option>';
                 }
                 $cat_select .= '</select>';
 
@@ -232,7 +240,7 @@ function MG_imageAdmin($album_id, $page, $actionURL = '')
                     'full_display'   => 0,
                 );
                 $object = MG_buildContent($row, $opt);
-                $media_zoom = '<a href="' . $object[4] . '">';
+                $media_zoom = '<a href="' . MG_escapeHTML($object[4]) . '">';
 
                 $T->set_var(array(
                     'lang_category'     => $LANG_MG01['category'],
@@ -241,10 +249,10 @@ function MG_imageAdmin($album_id, $page, $actionURL = '')
                     'media_id'          => $row['media_id'],
                     'mid'               => $row['media_id'],
                     'order'             => $row['media_order'],
-                    'u_thumbnail'       => $thumbnail,
-                    'media_title'       => $row['media_title'],
-                    'media_desc'        => $row['media_desc'],
-                    'media_keywords'    => $row['media_keywords'],
+                    'u_thumbnail'       => MG_escapeHTML($thumbnail),
+                    'media_title'       => MG_escapeHTML($row['media_title']),
+                    'media_desc'        => MG_escapeHTML($row['media_desc']),
+                    'media_keywords'    => MG_escapeHTML($row['media_keywords']),
                     'media_time'        => $media_time[0],
                     'media_views'       => $row['media_views'],
                     'radio_box'         => $radio_box,
@@ -254,7 +262,7 @@ function MG_imageAdmin($album_id, $page, $actionURL = '')
                     'height'            => $height,
                     'width'             => $width,
                     'counter'           => $counter,
-                    'media_edit'        => $media_edit,
+                    'media_edit'        => MG_escapeHTML($media_edit),
                     'media_zoom'        => $media_zoom,
                     'lang_edit'         => $LANG_MG01['edit'],
                 ));
@@ -271,6 +279,9 @@ function MG_imageAdmin($album_id, $page, $actionURL = '')
     $T->set_var(array(
         'album_id'               => $album_id,
         'url_album'              => $_MG_CONF['site_url'] . '/album.php?aid=' . $album_id,
+        'upload_url'             => $_MG_CONF['site_url'] . '/admin.php?mode=browser&amp;album_id=' . $album_id,
+        'lang_return_album'      => $LANG_MG03['return_to_album'],
+        'lang_upload_media'      => $LANG_MG01['upload_media'],
         's_mode'                 => 'cover',
         's_form_action'          => $actionURL,
         'mode'                   => 'media',
@@ -279,7 +290,7 @@ function MG_imageAdmin($album_id, $page, $actionURL = '')
         'lang_cancel'            => $LANG_MG01['cancel'],
         'lang_delete'            => $LANG_MG01['delete'],
         'lang_media_manage_help' => $LANG_MG01['media_manage_help'],
-        'lang_delete_confirm'    => $LANG_MG01['delete_item_confirm'],
+        'lang_delete_confirm'    => MG_escapeHTML($LANG_MG01['delete_item_confirm']),
         'albums'                 => $LANG_MG01['albums'],
         'batchoptionselect'      => $batchOptionSelect,
         'bottom_pagination'      => COM_printPageNavigation($_MG_CONF['site_url'] . '/admin.php?album_id=' . $album_id
@@ -307,7 +318,11 @@ function MG_saveMedia($album_id, $actionURL = '')
 
     if ($access != 3 && !SEC_hasRights('mediagallery.admin')) {
         COM_errorLog("Someone has tried to illegally manage (save) Media Gallery. "
-                   . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: $REMOTE_ADDR",1);
+                   . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: " . MG_getRemoteAddress(),1);
+        return COM_showMessageText($LANG_MG00['access_denied_msg']);
+    }
+    if (!SEC_checkToken()) {
+        COM_errorLog('MediaGallery: media manager save rejected because of an invalid CSRF token.', 1);
         return COM_showMessageText($LANG_MG00['access_denied_msg']);
     }
 
@@ -325,6 +340,12 @@ function MG_saveMedia($album_id, $actionURL = '')
     }
 
     for ($i=0; $i < $numItems; $i++) {
+        $media_id = COM_applyFilter($media[$i]['mid']);
+        if (DB_count($_TABLES['mg_media_albums'], array('album_id', 'media_id'), array(intval($album_id), $media_id)) < 1) {
+            COM_errorLog('MediaGallery: ignored media-manager update for media ' . $media_id . ' because it is not in album ' . intval($album_id), 1);
+            continue;
+        }
+        $media[$i]['mid'] = $media_id;
         $media_title_safe = substr($media[$i]['title'], 0, 254);
 
         if ($_MG_CONF['htmlallowed'] != 1) {
@@ -374,6 +395,11 @@ function MG_saveMedia($album_id, $actionURL = '')
 
     if ($cover != -1) {
 
+        if ($cover > 0 && DB_count($_TABLES['mg_media_albums'], array('album_id', 'media_id'), array(intval($album_id), $cover)) < 1) {
+            COM_errorLog('MediaGallery: ignored album cover media ' . intval($cover) . ' because it is not in album ' . intval($album_id), 1);
+            $cover = -1;
+        }
+
         $sql = "SELECT media_type,media_tn_attached,media_filename "
              . "FROM {$_TABLES['mg_media']} WHERE media_id='" . DB_escapeString($cover) . "'";
         $result = DB_query($sql);
@@ -409,6 +435,7 @@ function MG_saveMedia($album_id, $actionURL = '')
     }
     require_once $_CONF['path'] . 'plugins/mediagallery/include/rssfeed.php';
     MG_buildAlbumRSS($album_id);
+    MG_notifyAlbumSaved180($album_id);
     COM_redirect($actionURL);
 }
 
@@ -429,10 +456,7 @@ function MG_mediaEdit($album_id, $media_id, $actionURL='', $mqueue=0, $view=0, $
     $T->set_file(array(
         'admin'       => 'mediaedit.thtml',
         'asf_options' => 'edit_asf_options.thtml',
-        'mp3_options' => 'edit_mp3_options.thtml',
-        'swf_options' => 'edit_swf_options.thtml',
         'mov_options' => 'edit_mov_options.thtml',
-        'flv_options' => 'edit_flv_options.thtml',
     ));
 
     // pull the media information from the database...
@@ -445,10 +469,19 @@ function MG_mediaEdit($album_id, $media_id, $actionURL='', $mqueue=0, $view=0, $
             " WHERE media_id='" . DB_escapeString($media_id) . "'";
     $result = DB_query($sql);
     $row = DB_fetchArray($result);
+    if (!is_array($row) || empty($row['media_id'])) {
+        COM_errorLog('MediaGallery: media edit requested for missing media ' . DB_escapeString($media_id), 1);
+        return COM_showMessageText($LANG_MG00['access_denied_msg']);
+    }
+
+    if (!$mqueue && DB_count($_TABLES['mg_media_albums'], array('album_id', 'media_id'), array(intval($album_id), $media_id)) < 1) {
+        COM_errorLog('MediaGallery: media edit rejected because media ' . DB_escapeString($media_id) . ' is not in album ' . intval($album_id), 1);
+        return COM_showMessageText($LANG_MG00['access_denied_msg']);
+    }
 
     if ($album->access != 3 && !SEC_inGroup($album->mod_group_id) && $row['media_user_id'] != $_USER['uid']) {
         COM_errorLog("Someone has tried to illegally sort albums in Media Gallery. "
-                   . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: $REMOTE_ADDR",1);
+                   . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: " . MG_getRemoteAddress(),1);
         return COM_showMessageText($LANG_MG00['access_denied_msg']);
     }
 
@@ -528,9 +561,7 @@ function MG_mediaEdit($album_id, $media_id, $actionURL='', $mqueue=0, $view=0, $
             $atnsize = 'width="' . $newwidth . '" height="' . $newheight . '"';
         }
         $attached_thumbnail = '<img src="' . $thumbnail . '" alt="" ' . $atnsize . XHTML . '>';
-        $tmpthumb = Media::getDefaultThumbnail($row, $tn_size);
-        $thumbnail = $_MG_CONF['mediaobjects_url'] . '/' . $tmpthumb;
-        $size = getimagesize($_MG_CONF['path_mediaobjects'] . $tmpthumb);
+        list($thumbnail, $tmpthumbPath, $size) = Media::getDefaultThumbnailInfo($row, $tn_size);
     }
 
     $preview = '';
@@ -545,8 +576,13 @@ function MG_mediaEdit($album_id, $media_id, $actionURL='', $mqueue=0, $view=0, $
         } elseif ($row['media_type'] == 0) {
             $path = Media::getFilePath('disp', $row['media_filename'], $row['media_mime_ext']);
             $media_size_disp = @getimagesize($path);
-            $win_width  = $media_size_disp[0] + 20;
-            $win_height = $media_size_disp[1] + 20;
+            if ($media_size_disp !== false) {
+                $win_width  = $media_size_disp[0] + 20;
+                $win_height = $media_size_disp[1] + 20;
+            } else {
+                $win_width  = 800;
+                $win_height = 600;
+            }
         } else {
             $win_width  = 800;
             $win_height = 600;
@@ -558,17 +594,30 @@ function MG_mediaEdit($album_id, $media_id, $actionURL='', $mqueue=0, $view=0, $
 
     $rotate_right = '';
     $rotate_left  = '';
+    $rotation_forms = '';
     if ($row['media_type'] == 0 && ($_CONF['image_lib'] != 'gdlib' || function_exists("imagerotate"))) {
-        $rotate_right = '<a href="' . $_MG_CONF['site_url']
-                      . '/admin.php?mode=rotate&amp;action=right&amp;media_id='
-                      . $row['media_id'] . '&amp;album_id=' . $album_id . '">'
+        $rotation_token = SEC_createToken();
+        $rotation_common = '<input type="hidden" name="mode" value="rotate"' . XHTML . '>'
+                         . '<input type="hidden" name="media_id" value="' . intval($row['media_id']) . '"' . XHTML . '>'
+                         . '<input type="hidden" name="album_id" value="' . intval($album_id) . '"' . XHTML . '>'
+                         . '<input type="hidden" name="' . CSRF_TOKEN . '" value="' . $rotation_token . '"' . XHTML . '>';
+
+        $rotate_right = '<button type="submit" form="mg-rotate-right-form" class="mg-rotate-button">'
                       . '<img src="' . $_MG_CONF['site_url'] . '/images/rotate_right_icon.gif" alt="'
-                      . $LANG_MG01['rotate_left']  . '" style="border:none;"' . XHTML . '></a>';
-        $rotate_left  = '<a href="' . $_MG_CONF['site_url']
-                      . '/admin.php?mode=rotate&amp;action=left&amp;media_id='
-                      . $row['media_id'] . '&amp;album_id=' . $album_id . '">'
-                      . '<img src="' . $_MG_CONF['site_url'] . '/images/rotate_left_icon.gif" alt="'
-                      . $LANG_MG01['rotate_right'] . '" style="border:none;"' . XHTML . '></a>';
+                      . MG_escapeHTML($LANG_MG01['rotate_right']) . '"' . XHTML . '></button>';
+
+        $rotate_left = '<button type="submit" form="mg-rotate-left-form" class="mg-rotate-button">'
+                     . '<img src="' . $_MG_CONF['site_url'] . '/images/rotate_left_icon.gif" alt="'
+                     . MG_escapeHTML($LANG_MG01['rotate_left']) . '"' . XHTML . '></button>';
+
+        $rotation_forms = '<form id="mg-rotate-right-form" method="post" action="' . $_MG_CONF['site_url'] . '/admin.php" class="mg-hidden-form">'
+                        . $rotation_common
+                        . '<input type="hidden" name="action" value="right"' . XHTML . '>'
+                        . '</form>'
+                        . '<form id="mg-rotate-left-form" method="post" action="' . $_MG_CONF['site_url'] . '/admin.php" class="mg-hidden-form">'
+                        . $rotation_common
+                        . '<input type="hidden" name="action" value="left"' . XHTML . '>'
+                        . '</form>';
     }
 
     $resolution = '';
@@ -594,218 +643,36 @@ function MG_mediaEdit($album_id, $media_id, $actionURL='', $mqueue=0, $view=0, $
          $row['mime_type'] == 'video/x-ms-wmv' ||
          $row['mime_type'] == 'audio/x-ms-wma' ||
          $row['mime_type'] == 'video/x-msvideo' ) {
-        // pull defaults, then override...
-        $playback_options['autostart']         = $_MG_CONF['asf_autostart'];
-        $playback_options['enablecontextmenu'] = $_MG_CONF['asf_enablecontextmenu'];
-        $playback_options['stretchtofit']      = $_MG_CONF['asf_stretchtofit'];
-        $playback_options['uimode']            = $_MG_CONF['asf_uimode'];
-        $playback_options['showstatusbar']     = $_MG_CONF['asf_showstatusbar'];
-        $playback_options['playcount']         = $_MG_CONF['asf_playcount'];
-        $playback_options['height']            = $_MG_CONF['asf_height'];
-        $playback_options['width']             = $_MG_CONF['asf_width'];
-        $playback_options['bgcolor']           = $_MG_CONF['asf_bgcolor'];
+        $playback_options['height'] = $_MG_CONF['asf_height'];
+        $playback_options['width']  = $_MG_CONF['asf_width'];
 
         for ($i=0; $i < $poNumRows; $i++) {
             $poRow = DB_fetchArray($poResult);
             $playback_options[$poRow['option_name']] = $poRow['option_value'];
         }
 
-        $uimode_select = MG_optionlist(array(
-            'name'    => 'uimode',
-            'current' => $playback_options['uimode'],
-            'values'  => array(
-                'none' => $LANG_MG07['none'],
-                'mini' => $LANG_MG07['mini'],
-                'full' => $LANG_MG07['full'],
-            ),
-        ));
-
         $T->set_var(array(
-            'autostart_enabled'          => $playback_options['autostart'] ? ' checked="checked"' : '',
-            'autostart_disabled'         => $playback_options['autostart'] ? '' : ' checked="checked"',
-            'enablecontextmenu_enabled'  => $playback_options['enablecontextmenu'] ? ' checked="checked"' : '',
-            'enablecontextmenu_disabled' => $playback_options['enablecontextmenu'] ? '' : ' checked="checked"',
-            'stretchtofit_enabled'       => $playback_options['stretchtofit'] ? ' checked="checked"' : '',
-            'stretchtofit_disabled'      => $playback_options['stretchtofit'] ? '' : ' checked="checked"',
-            'showstatusbar_enabled'      => $playback_options['showstatusbar'] ? ' checked="checked"' : '',
-            'showstatusbar_disabled'     => $playback_options['showstatusbar'] ? '' : ' checked="checked"',
-            'uimode_select'              => $uimode_select,
-            'uimode'                     => $playback_options['uimode'],
-            'playcount'                  => $playback_options['playcount'],
-            'height'                     => $playback_options['height'],
-            'width'                      => $playback_options['width'],
-            'bgcolor'                    => $playback_options['bgcolor'],
-            'lang_resolution'            => $lang_resolution,
-            'resolution'                 => $resolution,
+            'height' => $playback_options['height'],
+            'width'  => $playback_options['width'],
         ));
         $T->parse('playback_options', 'asf_options');
-    }
-
-    if ($row['mime_type'] == 'audio/mpeg') {
-        // pull defaults, then override...
-        $playback_options['autostart']         = $_MG_CONF['mp3_autostart'];
-        $playback_options['enablecontextmenu'] = $_MG_CONF['mp3_enablecontextmenu'];
-        $playback_options['uimode']            = $_MG_CONF['mp3_uimode'];
-        $playback_options['showstatusbar']     = $_MG_CONF['mp3_showstatusbar'];
-        $playback_options['loop']              = $_MG_CONF['mp3_loop'];
-
-        for ($i=0; $i < $poNumRows; $i++) {
-            $poRow = DB_fetchArray($poResult);
-            $playback_options[$poRow['option_name']] = $poRow['option_value'];
-        }
-
-        $uimode_select = MG_optionlist(array(
-            'name'    => 'uimode',
-            'current' => $playback_options['uimode'],
-            'values'  => array(
-                'none' => $LANG_MG07['none'],
-                'mini' => $LANG_MG07['mini'],
-                'full' => $LANG_MG07['full'],
-            ),
-        ));
-
-        $T->set_var(array(
-            'autostart_enabled'          => $playback_options['autostart'] ? ' checked="checked"' : '',
-            'autostart_disabled'         => $playback_options['autostart'] ? '' : ' checked="checked"',
-            'enablecontextmenu_enabled'  => $playback_options['enablecontextmenu'] ? ' checked="checked"' : '',
-            'enablecontextmenu_disabled' => $playback_options['enablecontextmenu'] ? '' : ' checked="checked"',
-            'showstatusbar_enabled'      => $playback_options['showstatusbar'] ? ' checked="checked"' : '',
-            'showstatusbar_disabled'     => $playback_options['showstatusbar'] ? '' : ' checked="checked"',
-            'loop_enabled'               => $playback_options['loop'] ? ' checked="checked"' : '',
-            'loop_disabled'              => $playback_options['loop'] ? '' : ' checked="checked"',
-            'uimode_select'              => $uimode_select,
-            'uimode'                     => $playback_options['uimode'],
-        ));
-        $T->parse('playback_options', 'mp3_options');
-    }
-
-    if ($row['mime_type'] == 'application/x-shockwave-flash' ||
-        $row['mime_type'] == 'video/x-flv') {
-        // pull defaults, then override...
-        $playback_options['play']              = $_MG_CONF['swf_play'];
-        $playback_options['menu']              = $_MG_CONF['swf_menu'];
-        $playback_options['quality']           = $_MG_CONF['swf_quality'];
-        $playback_options['height']            = $_MG_CONF['swf_height'];
-        $playback_options['width']             = $_MG_CONF['swf_width'];
-        $playback_options['loop']              = $_MG_CONF['swf_loop'];
-        $playback_options['scale']             = $_MG_CONF['swf_scale'];
-        $playback_options['wmode']             = $_MG_CONF['swf_wmode'];
-        $playback_options['allowscriptaccess'] = $_MG_CONF['swf_allowscriptaccess'];
-        $playback_options['bgcolor']           = $_MG_CONF['swf_bgcolor'];
-        $playback_options['swf_version']       = $_MG_CONF['swf_version'];
-
-        for ($i=0; $i < $poNumRows; $i++) {
-            $poRow = DB_fetchArray($poResult);
-            $playback_options[$poRow['option_name']] = $poRow['option_value'];
-        }
-
-        $quality_select = MG_optionlist(array(
-            'name'    => 'quality',
-            'current' => $playback_options['quality'],
-            'values'  => array(
-                'low'  => $LANG_MG07['low'],
-                'high' => $LANG_MG07['high'],
-            ),
-        ));
-
-        $scale_select = MG_optionlist(array(
-            'name'    => 'scale',
-            'current' => $playback_options['scale'],
-            'values'  => array(
-                'showall'  => $LANG_MG07['showall'],
-                'noborder' => $LANG_MG07['noborder'],
-                'exactfit' => $LANG_MG07['exactfit'],
-            ),
-        ));
-
-        $wmode_select = MG_optionlist(array(
-            'name'    => 'wmode',
-            'current' => $playback_options['wmode'],
-            'values'  => array(
-                'window'      => $LANG_MG07['window'],
-                'opaque'      => $LANG_MG07['opaque'],
-                'transparent' => $LANG_MG07['transparent'],
-            ),
-        ));
-
-        $asa_select = MG_optionlist(array(
-            'name'    => 'allowscriptaccess',
-            'current' => $playback_options['allowscriptaccess'],
-            'values'  => array(
-                'always'     => $LANG_MG07['always'],
-                'sameDomain' => $LANG_MG07['sameDomain'],
-                'never'      => $LANG_MG07['never'],
-            ),
-        ));
-
-        $T->set_var(array(
-            'play_enabled'   => $playback_options['play'] ? ' checked="checked"' : '',
-            'play_disabled'  => $playback_options['play'] ? '' : ' checked="checked"',
-            'menu_enabled'   => $playback_options['menu'] ? ' checked="checked"' : '',
-            'menu_disabled'  => $playback_options['menu'] ? '' : ' checked="checked"',
-            'loop_enabled'   => $playback_options['loop'] ? ' checked="checked"' : '',
-            'loop_disabled'  => $playback_options['loop'] ? '' : ' checked="checked"',
-            'quality_select' => $quality_select,
-            'scale_select'   => $scale_select,
-            'wmode_select'   => $wmode_select,
-            'asa_select'     => $asa_select,
-            'flashvars'      => isset($playback_options['flashvars']) ? $playback_options['flashvars'] : '',
-            'height'         => $playback_options['height'],
-            'width'          => $playback_options['width'],
-            'bgcolor'        => $playback_options['bgcolor'],
-            'swf_version'    => $playback_options['swf_version'],
-        ));
-        if ($row['mime_type'] == 'application/x-shockwave-flash') {
-            $T->parse('playback_options', 'swf_options');
-        } else {
-            $T->parse('playback_options', 'flv_options');
-        }
     }
 
     if ($row['media_mime_ext'] == 'mov' ||
         $row['media_mime_ext'] == 'mp4' ||
         $row['mime_type'] == 'video/quicktime' ||
         $row['mime_type'] == 'video/mpeg') {
-        // pull defaults, then override...
-        $playback_options['autoref']    = $_MG_CONF['mov_autoref'];
-        $playback_options['autoplay']   = $_MG_CONF['mov_autoplay'];
-        $playback_options['controller'] = $_MG_CONF['mov_controller'];
-        $playback_options['kioskmode']  = isset($_MG_CONF['mov_kioskmod']) ? $_MG_CONF['mov_kiokmode'] : '';
-        $playback_options['scale']      = $_MG_CONF['mov_scale'];
-        $playback_options['loop']       = $_MG_CONF['mov_loop'];
-        $playback_options['height']     = $_MG_CONF['mov_height'];
-        $playback_options['width']      = $_MG_CONF['mov_width'];
-        $playback_options['bgcolor']    = $_MG_CONF['mov_bgcolor'];
+        $playback_options['height'] = $_MG_CONF['mov_height'];
+        $playback_options['width']  = $_MG_CONF['mov_width'];
 
         for ($i=0; $i < $poNumRows; $i++) {
             $poRow = DB_fetchArray($poResult);
             $playback_options[$poRow['option_name']] = $poRow['option_value'];
         }
 
-        $scale_select = MG_optionlist(array(
-            'name'    => 'scale',
-            'current' => $playback_options['scale'],
-            'values'  => array(
-                'tofit'  => $LANG_MG07['to_fit'],
-                'aspect' => $LANG_MG07['aspect'],
-                '1'      => $LANG_MG07['normal_size'],
-            ),
-        ));
-
         $T->set_var(array(
-            'autoref_enabled'     => $playback_options['autoref'] ? ' checked="checked"' : '',
-            'autoref_disabled'    => $playback_options['autoref'] ? '' : ' checked="checked"',
-            'autoplay_enabled'    => $playback_options['autoplay'] ? ' checked="checked"' : '',
-            'autoplay_disabled'   => $playback_options['autoplay'] ? '' : ' checked="checked"',
-            'controller_enabled'  => $playback_options['controller'] ? ' checked="checked"' : '',
-            'controller_disabled' => $playback_options['controller'] ? '' : ' checked="checked"',
-            'kioskmode_enabled'   => $playback_options['kioskmode'] ? ' checked="checked"' : '',
-            'kioskmode_disabled'  => $playback_options['kioskmode'] ? '' : ' checked="checked"',
-            'loop_enabled'        => $playback_options['loop'] ? ' checked="checked"' : '',
-            'loop_disabled'       => $playback_options['loop'] ? '' : ' checked="checked"',
-            'height'              => $playback_options['height'],
-            'width'               => $playback_options['width'],
-            'bgcolor'             => $playback_options['bgcolor'],
+            'height' => $playback_options['height'],
+            'width'  => $playback_options['width'],
         ));
         $T->parse('playback_options', 'mov_options');
     }
@@ -842,13 +709,23 @@ function MG_mediaEdit($album_id, $media_id, $actionURL='', $mqueue=0, $view=0, $
     }
     $cat_select .= '</select>';
 
+    $editPreviewWidth = 190;
+    $editPreviewHeight = 200;
+    if (is_array($size) && isset($size[0], $size[1]) && $size[0] > 0 && $size[1] > 0) {
+        $editPreviewWidth = $size[0] + 40;
+        $editPreviewHeight = $size[1] + 50;
+    }
+
     $T->set_var(array(
         'original_filename'  => $row['media_original_filename'],
         'attach_tn'          => $row['media_tn_attached'],
         'at_tn_checked'      => $row['media_tn_attached'] == 1 ? ' checked="checked"' : '',
         'attached_thumbnail' => $attached_thumbnail,
         'album_id'           => $album_id,
-        'media_thumbnail'    => $thumbnail,
+        'album_title'        => MG_escapeHTML($album->title),
+        'album_access_url'   => $_MG_CONF['site_url'] . '/admin.php?mode=edit&amp;album_id=' . intval($album_id),
+        'media_type'          => (int) $row['media_type'],
+        'media_thumbnail'     => $thumbnail,
         'media_id'           => $row['media_id'],
         'media_title'        => $row['media_title'],
         'media_desc'         => $row['media_desc'],
@@ -857,8 +734,8 @@ function MG_mediaEdit($album_id, $media_id, $actionURL='', $mqueue=0, $view=0, $
         'media_comments'     => $row['media_comments'],
         'media_exif_info'    => $exif_info,
         'media_rating_max'   => 5,
-        'height'             => $size[1] + 50,
-        'width'              => $size[0] + 40,
+        'height'             => $editPreviewHeight,
+        'width'              => $editPreviewWidth,
         'queue'              => $mqueue,
         'month_select'       => $month_select,
         'day_select'         => $day_select,
@@ -879,6 +756,12 @@ function MG_mediaEdit($album_id, $media_id, $actionURL='', $mqueue=0, $view=0, $
         'preview'            => $preview,
         'preview_end'        => $preview_end,
         'rpath'              => htmlentities($back, ENT_QUOTES, COM_getCharset()),
+        'cancel_url'         => htmlentities(
+            $back !== '' ? $back : $_MG_CONF['site_url'] . '/admin.php?mode=media&album_id=' . intval($album_id),
+            ENT_QUOTES,
+            COM_getCharset()
+        ),
+        'rotation_forms'     => $rotation_forms,
         'remoteurl'          => $remoteurl,
         'lang_remote_url'    => $lang_remote_url,
         'resolution'         => $resolution,
@@ -889,6 +772,8 @@ function MG_mediaEdit($album_id, $media_id, $actionURL='', $mqueue=0, $view=0, $
         'artist'             => $row['artist'],
         'musicalbum'         => $row['album'],
         'genre'              => $row['genre'],
+        'gltoken_name'       => CSRF_TOKEN,
+        'gltoken'            => SEC_createToken(),
     ));
 
     // language items
@@ -964,13 +849,17 @@ function MG_mediaEdit($album_id, $media_id, $actionURL='', $mqueue=0, $view=0, $
         'lang_reset'                    => $LANG_MG01['reset'],
         'lang_cancel'                   => $LANG_MG01['cancel'],
         'lang_delete'                   => $LANG_MG01['delete'],
-        'lang_delete_confirm'           => $LANG_MG01['delete_item_confirm'],
+        'lang_delete_confirm'           => MG_escapeHTML($LANG_MG01['delete_item_confirm']),
         'lang_reset_rating'             => $LANG_MG01['reset_rating'],
         'lang_reset_views'              => $LANG_MG01['reset_views'],
         'lang_replacefile'              => $LANG_MG01['replace_file'],
         'lang_artist'                   => $LANG_MG01['artist'],
         'lang_genre'                    => $LANG_MG01['genre'],
         'lang_music_album'              => $LANG_MG01['music_album'],
+        'lang_access_ownership'         => $LANG_MG01['media_access_ownership'],
+        'lang_access_inherited'         => $LANG_MG01['media_access_inherited'],
+        'lang_edit_album_rights'        => $LANG_MG01['media_edit_album_rights'],
+        'access_inherited_text'          => sprintf($LANG_MG01['media_access_inherited'], MG_escapeHTML($album->title)),
     ));
 
     $retval .= $T->finish($T->parse('output', 'admin'));
@@ -980,7 +869,21 @@ function MG_mediaEdit($album_id, $media_id, $actionURL='', $mqueue=0, $view=0, $
 
 function MG_mediaResetRating($album_id, $media_id, $mqueue)
 {
-    global $_MG_CONF, $_TABLES;
+    global $_USER, $_MG_CONF, $_TABLES, $LANG_MG00;
+
+    $album = new mgAlbum($album_id);
+    $table = $mqueue ? $_TABLES['mg_mediaqueue'] : $_TABLES['mg_media'];
+    $owner_id = DB_getItem($table, 'media_user_id', "media_id='" . DB_escapeString($media_id) . "'");
+    if (!$mqueue && DB_count($_TABLES['mg_media_albums'], array('album_id', 'media_id'), array(intval($album_id), $media_id)) < 1) {
+        return COM_showMessageText($LANG_MG00['access_denied_msg']);
+    }
+    if ($album->access != 3 && !SEC_inGroup($album->mod_group_id) && intval($owner_id) != intval($_USER['uid'])) {
+        return COM_showMessageText($LANG_MG00['access_denied_msg']);
+    }
+    if (!SEC_checkToken()) {
+        COM_errorLog('MediaGallery: rating reset rejected because of an invalid CSRF token.', 1);
+        return COM_showMessageText($LANG_MG00['access_denied_msg']);
+    }
 
     DB_change($_TABLES['mg_media'], 'media_rating', 0, 'media_id', DB_escapeString($media_id));
     DB_change($_TABLES['mg_media'], 'media_votes', 0, 'media_id', DB_escapeString($media_id));
@@ -993,7 +896,21 @@ function MG_mediaResetRating($album_id, $media_id, $mqueue)
 
 function MG_mediaResetViews($album_id, $media_id, $mqueue)
 {
-    global $_MG_CONF, $_TABLES;
+    global $_USER, $_MG_CONF, $_TABLES, $LANG_MG00;
+
+    $album = new mgAlbum($album_id);
+    $table = $mqueue ? $_TABLES['mg_mediaqueue'] : $_TABLES['mg_media'];
+    $owner_id = DB_getItem($table, 'media_user_id', "media_id='" . DB_escapeString($media_id) . "'");
+    if (!$mqueue && DB_count($_TABLES['mg_media_albums'], array('album_id', 'media_id'), array(intval($album_id), $media_id)) < 1) {
+        return COM_showMessageText($LANG_MG00['access_denied_msg']);
+    }
+    if ($album->access != 3 && !SEC_inGroup($album->mod_group_id) && intval($owner_id) != intval($_USER['uid'])) {
+        return COM_showMessageText($LANG_MG00['access_denied_msg']);
+    }
+    if (!SEC_checkToken()) {
+        COM_errorLog('MediaGallery: view reset rejected because of an invalid CSRF token.', 1);
+        return COM_showMessageText($LANG_MG00['access_denied_msg']);
+    }
 
     DB_change($_TABLES['mg_media'], 'media_views', 0, 'media_id', DB_escapeString($media_id));
     $retval = MG_mediaEdit($album_id, $media_id,
@@ -1020,12 +937,27 @@ function MG_saveMediaEdit($album_id, $media_id, $actionURL)
 {
     global $_USER, $_CONF, $_TABLES, $_MG_CONF, $LANG_MG00, $LANG_MG01, $LANG_MG03;
 
+    $queue = isset($_POST['queue']) ? COM_applyFilter($_POST['queue'], true) : 0;
+    $table = $queue ? $_TABLES['mg_mediaqueue'] : $_TABLES['mg_media'];
+    $album = new mgAlbum($album_id);
+    $owner_id = DB_getItem($table, 'media_user_id', "media_id='" . DB_escapeString($media_id) . "'");
+    if (!$queue && DB_count($_TABLES['mg_media_albums'], array('album_id', 'media_id'), array(intval($album_id), $media_id)) < 1) {
+        COM_errorLog('MediaGallery: media edit save rejected because media ' . DB_escapeString($media_id) . ' is not in album ' . intval($album_id), 1);
+        return COM_showMessageText($LANG_MG00['access_denied_msg']);
+    }
+    if ($album->access != 3 && !SEC_inGroup($album->mod_group_id) && intval($owner_id) != intval($_USER['uid'])) {
+        COM_errorLog('MediaGallery: media edit save rejected because of insufficient access.', 1);
+        return COM_showMessageText($LANG_MG00['access_denied_msg']);
+    }
+    if (!SEC_checkToken()) {
+        COM_errorLog('MediaGallery: media edit save rejected because of an invalid CSRF token.', 1);
+        return COM_showMessageText($LANG_MG00['access_denied_msg']);
+    }
+
     $back = COM_applyFilter($_POST['rpath']);
     if ($back != '') {
         $actionURL = $back;
     }
-
-    $queue = COM_applyFilter($_POST['queue'], true);
 
     $replacefile = 0;
     if (isset($_POST['replacefile'])) {
@@ -1124,86 +1056,19 @@ function MG_saveMediaEdit($album_id, $media_id, $actionURL)
         echo COM_errorLog("Media Gallery: ERROR Updating image in media database");
     }
     PLG_itemSaved($media_id, 'mediagallery');
+    MG_notifyMediaAlbumsSaved180($media_id);
 
-    // process playback options if any...
-    if (isset($_POST['autostart'])) {   // asf
-        $opt['autostart']         = COM_applyFilter($_POST['autostart'], true);
-        $opt['enablecontextmenu'] = COM_applyFilter($_POST['enablecontextmenu'], true);
-        $opt['stretchtofit']      = isset($_POST['stretchtofit']) ? COM_applyFilter($_POST['stretchtofit'],true) : 0;
-        $opt['showstatusbar']     = COM_applyFilter($_POST['showstatusbar'], true);
-        $opt['uimode']            = COM_applyFilter($_POST['uimode']);
-        $opt['height']            = isset($_POST['height'])    ? COM_applyFilter($_POST['height'],   true) : 0;
-        $opt['width']             = isset($_POST['width'])     ? COM_applyFilter($_POST['width'],    true) : 0;
-        $opt['bgcolor']           = isset($_POST['bgcolor'])   ? COM_applyFilter($_POST['bgcolor']) : 0;
-        $opt['playcount']         = isset($_POST['playcount']) ? COM_applyFilter($_POST['playcount'],true) : 0;
-        $opt['loop']              = isset($_POST['loop'])      ? COM_applyFilter($_POST['loop'],     true) : 0;
-
-        if ($opt['playcount'] < 1) {
-            $opt['playcount'] = 1;
+    // HTML5 playback no longer uses the old ActiveX/Flash/QuickTime option set.
+    // Preserve only per-media video dimensions; historical rows stay untouched for upgrades.
+    if (isset($_POST['playback_geometry'])) {
+        $width  = isset($_POST['width'])  ? COM_applyFilter($_POST['width'], true)  : 0;
+        $height = isset($_POST['height']) ? COM_applyFilter($_POST['height'], true) : 0;
+        if ($width > 0) {
+            MG_savePBOption($media_id, 'width', $width, true);
         }
-
-        MG_savePBOption($media_id, 'autostart',         $opt['autostart'], true);
-        MG_savePBOption($media_id, 'enablecontextmenu', $opt['enablecontextmenu'], true);
-        if ($opt['stretchtofit'] != '') {
-            MG_savePBOption($media_id, 'stretchtofit', $opt['stretchtofit'], true);
+        if ($height > 0) {
+            MG_savePBOption($media_id, 'height', $height, true);
         }
-        MG_savePBOption($media_id, 'showstatusbar', $opt['showstatusbar'], true);
-        MG_savePBOption($media_id, 'uimode',        $opt['uimode']);
-        MG_savePBOption($media_id, 'height',        $opt['height'], true);
-        MG_savePBOption($media_id, 'width',         $opt['width'], true);
-        MG_savePBOption($media_id, 'bgcolor',       $opt['bgcolor']);
-        MG_savePBOption($media_id, 'playcount',     $opt['playcount'], true);
-        MG_savePBOption($media_id, 'loop',          $opt['loop'], true);
-    }
-    if (isset($_POST['play'])) {    // swf
-        $opt['play']              = COM_applyFilter($_POST['play'],   true);
-        $opt['menu']              = isset($_POST['menu'])              ? COM_applyFilter($_POST['menu'], true) : 0;
-        $opt['quality']           = isset($_POST['quality'])           ? COM_applyFilter($_POST['quality'])    : '';
-        $opt['flashvars']         = isset($_POST['flashvars'])         ? COM_applyFilter($_POST['flashvars'])  : '';
-        $opt['height']            = COM_applyFilter($_POST['height'], true);
-        $opt['width']             = COM_applyFilter($_POST['width'],  true);
-        $opt['loop']              = isset($_POST['loop'])              ? COM_applyFilter($_POST['loop'], true) : 0;
-        $opt['scale']             = isset($_POST['scale'])             ? COM_applyFilter($_POST['scale'])      : '';
-        $opt['wmode']             = isset($_POST['wmode'])             ? COM_applyFilter($_POST['wmode'])      : '';
-        $opt['allowscriptaccess'] = isset($_POST['allowscriptaccess']) ? COM_applyFilter($_POST['allowscriptaccess']) : '';
-        $opt['bgcolor']           = isset($_POST['bgcolor'])           ? COM_applyFilter($_POST['bgcolor'])    : '';
-        $opt['swf_version']       = isset($_POST['swf_version'])       ? COM_applyFilter($_POST['swf_version'], true) : 9;
-
-        MG_savePBOption($media_id, 'play', $opt['play'], true);
-        if ($opt['menu'] != '') {
-            MG_savePBOption($media_id, 'menu', $opt['menu'], true);
-        }
-        MG_savePBOption($media_id, 'quality',           $opt['quality']);
-        MG_savePBOption($media_id, 'flashvars',         $opt['flashvars']);
-        MG_savePBOption($media_id, 'height',            $opt['height'], true);
-        MG_savePBOption($media_id, 'width',             $opt['width'], true);
-        MG_savePBOption($media_id, 'loop',              $opt['loop'], true);
-        MG_savePBOption($media_id, 'scale',             $opt['scale']);
-        MG_savePBOption($media_id, 'wmode',             $opt['wmode']);
-        MG_savePBOption($media_id, 'allowscriptaccess', $opt['allowscriptaccess']);
-        MG_savePBOption($media_id, 'bgcolor',           $opt['bgcolor']);
-        MG_savePBOption($media_id, 'swf_version',       $opt['swf_version'], true);
-    }
-    if (isset($_POST['autoplay'])) {    // quicktime
-        $opt['autoplay']    = COM_applyFilter($_POST['autoplay'], true);
-        $opt['autoref']     = COM_applyFilter($_POST['autoref'], true);
-        $opt['controller']  = COM_applyFilter($_POST['controller'], true);
-        $opt['kioskmode']   = COM_applyFilter($_POST['kioskmode'], true);
-        $opt['scale']       = COM_applyFilter($_POST['scale']);
-        $opt['height']      = COM_applyFilter($_POST['height'], true);
-        $opt['width']       = COM_applyFilter($_POST['width'], true);
-        $opt['bgcolor']     = COM_applyFilter($_POST['bgcolor']);
-        $opt['loop']        = COM_applyFilter($_POST['loop'], true);
-
-        MG_savePBOption($media_id, 'autoref',    $opt['autoref'], true);
-        MG_savePBOption($media_id, 'autoplay',   $opt['autoplay'], true);
-        MG_savePBOption($media_id, 'controller', $opt['controller'], true);
-        MG_savePBOption($media_id, 'kioskmode',  $opt['kioskmode'], true);
-        MG_savePBOption($media_id, 'scale',      $opt['scale']);
-        MG_savePBOption($media_id, 'height',     $opt['height'], true);
-        MG_savePBOption($media_id, 'width',      $opt['width'], true);
-        MG_savePBOption($media_id, 'bgcolor',    $opt['bgcolor'], true);
-        MG_savePBOption($media_id, 'loop',       $opt['loop'], true);
     }
 
     if ($attachtn == 1 && $thumbnail != '') {

@@ -1,69 +1,167 @@
 {lbslideshow}
-<script type="text/javascript" src="{site_url}/players/audio-player.js"></script>
 
-<div class="bc_navigation">
+<style type="text/css">
+@media (max-width: 640px) {
+  .mg-album-page-header {
+    display: block !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin-bottom: .55rem !important;
+    padding: .7rem .75rem !important;
+  }
+
+  .mg-album-page-header .mg-album-heading {
+    display: block !important;
+    flex: none !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+  }
+
+  .mg-album-page-header .mg_album_title {
+    margin: 0 !important;
+    font-size: clamp(1.3rem, 6.6vw, 1.6rem) !important;
+    line-height: 1.18 !important;
+  }
+
+  .mg-album-page-header .mg-album-inline-actions {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: .25rem .8rem;
+    margin-top: .45rem;
+    font-size: .9rem;
+  }
+
+  .mg-album-page-header .mg-album-controls {
+    display: grid !important;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center !important;
+    gap: .5rem !important;
+    width: 100%;
+    margin-top: .65rem;
+  }
+
+  .mg-album-page-header .mg-compact-search,
+  .mg-album-page-header .mg_adminbox {
+    flex: none !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    width: auto !important;
+    margin: 0 !important;
+  }
+
+  .mg-album-page-header .mg-compact-search summary {
+    min-height: 2.25rem;
+    padding: .4rem .7rem;
+    white-space: nowrap;
+  }
+
+  .mg-album-page-header .mg_adminbox,
+  .mg-album-page-header .mg_adminbox form,
+  .mg-album-page-header .mg_adminbox form > div {
+    width: 100% !important;
+  }
+
+  .mg-album-page-header .mg_adminbox form > div {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+  }
+
+  .mg-album-page-header .mg_adminbox select {
+    flex: 1 1 auto;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  .mg-album-page-header .mg_adminbox input[type="submit"] {
+    flex: 0 0 auto;
+  }
+
+  .mg-album-page-header .mg-compact-search[open] {
+    grid-column: 1 / -1;
+  }
+
+  .mg-album-page-header .mg-compact-search[open] .mg_search {
+    margin-top: .45rem;
+  }
+}
+</style>
+
+<nav class="bc_navigation" aria-label="{lang_aria_breadcrumb}">
 {birdseed}
-</div>
+</nav>
 
-<div class="mg_album_header">
-<div class="mg_album_title"><strong>{album_title}</strong>{!if rsslink}&nbsp;&nbsp;{rsslink}{!endif}</div>
-<div class="mg_search">
-<form name="mgsearch" method="post" action="{site_url}/search.php" class="uk-form">
-<div>
-  <input type="text" name="keywords" value="{keywords}"{xhtml}>
-  <input type="hidden" name="mode" value="search"{xhtml}>
-  <input type="hidden" name="swhere" value="0"{xhtml}>
-  <input type="submit" value="{lang_search}"{xhtml}>
-</div>
-</form>
-</div>
-{!if select_adminbox}
-<div class="mg_adminbox">
-{select_adminbox}
-</div>
-{!endif}
-</div>
+<header class="mg_album_header mg-album-page-header">
+  <div class="mg-album-heading">
+    <h1 class="mg_album_title">{album_title}{!if rsslink}&nbsp;&nbsp;{rsslink}{!endif}</h1>
+    <nav class="mg-album-inline-actions" aria-label="{lang_aria_album_actions}">
+      {!if url_slideshow}
+      <a href="{url_slideshow}"{slideshow_onclick}>{lang_slideshow}</a>
+      {!endif}
+      {!if edit_album}
+      <a class="mg-album-admin-action" href="{url_edit}">{lang_edit}</a>
+      {!endif}
+    </nav>
+  </div>
+  <div class="mg-album-controls">
+    <details class="mg-compact-search">
+      <summary>{lang_search}</summary>
+      <div class="mg_search">
+        <form name="mgsearch" method="post" action="{site_url}/search.php" class="uk-form" role="search">
+          <div>
+            <label for="mg-search-keywords" class="mg-visually-hidden">{lang_search}</label>
+            <input id="mg-search-keywords" type="search" name="keywords" value="{keywords}" aria-label="{lang_search}"{xhtml}>
+            <input type="hidden" name="mode" value="search"{xhtml}>
+            <input type="hidden" name="swhere" value="0"{xhtml}>
+            <input type="submit" value="{lang_search}"{xhtml}>
+          </div>
+        </form>
+      </div>
+    </details>
+    {!if select_adminbox}
+    <div class="mg_adminbox mg-secondary-control">
+      {select_adminbox}
+    </div>
+    {!endif}
+  </div>
+</header>
 
-<div class="mg_navbar">
-
-  {!if url_slideshow}
-  <a class="button" href="{url_slideshow}">{lang_slideshow}</a>
-  {!endif}
-
-  {!if edit_album}
-  <a class="button" href="{url_edit}">{lang_edit}</a>
-  {!endif}
-
-  {!if top_pagination}
+{!if top_pagination}
+<nav class="mg-album-top-pagination" aria-label="{lang_aria_album_pagination}">
   <div class="mg_pagination">{top_pagination}</div>
-  {!endif}
-
-</div>
+</nav>
+{!endif}
 
 {!if album_description}
-<div class="mg_album_description">
+<section class="mg_album_description">
    {album_description}
-</div>
+</section>
 {!endif}
 
 {!if album_body}
-<div style="width:100%;margin:10px 0;clear:both">
+<div class="mg_album_grid mg-album-default-grid {grid_class}" role="list">
 <!-- BEGIN ImageRow -->
 <!-- BEGIN ImageColumn -->
-<div class="mg_album_cell" style="width:{table_column_width};{clear_float}">
+<div class="mg_album_cell" role="listitem">
 {CELL_DISPLAY_IMAGE}
 </div>
 <!-- END ImageColumn -->
 <!-- END ImageRow -->
 </div>
-<div style="clear:both"></div>
 {!endif}
 
 {!if lang_no_image}<div class="noitems">{lang_no_image}</div>{!endif}
 
-<div class="mg_navbar">
-  <span>{album_id_display}</span><span class="mg_separator" style="">|</span><span>{page_number}</span>
-  <div class="mg_pagination">{bottom_pagination}</div>
-</div>
-<div class="mg_jumpbox">{jumpbox}</div>
-<div class="mg_sortbox">{select_sortbox}</div>
+<footer class="mg-album-footer mg-album-footer-compact">
+  <nav class="mg-album-pagination-bar" aria-label="{lang_aria_album_pagination_info}">
+    <div class="mg-album-page-info">
+      <span>{page_number}</span>
+    </div>
+    <div class="mg_pagination">{bottom_pagination}</div>
+  </nav>
+  <div class="mg-album-secondary-controls">
+    <div class="mg_jumpbox mg-secondary-control">{jumpbox}</div>
+    <div class="mg_sortbox mg-secondary-control">{select_sortbox}</div>
+  </div>
+</footer>

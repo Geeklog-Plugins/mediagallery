@@ -52,6 +52,123 @@ switch ( $_CONF['image_lib'] ) {
         break;
 }
 
+/**
+ * Check that the image backend selected in Geeklog is actually usable.
+ *
+ * MediaGallery historically assumed the configured backend was available.
+ * With GD selected but the PHP GD extension missing, image uploads could end
+ * in an undefined-function fatal while non-image uploads continued to work.
+ * Keep the check centralized here so uploads, conversions, rotations and
+ * watermarks all fail cleanly for the same reason.
+ *
+ * @return array bool availability and human-readable error message
+ */
+function MG_getImageBackendStatus180()
+{
+    global $_CONF, $_MG_CONF;
+
+    $backend = isset($_CONF['image_lib']) ? strtolower(trim($_CONF['image_lib'])) : 'gdlib';
+    if ($backend === '') {
+        $backend = 'gdlib';
+    }
+
+    if ($backend === 'gdlib') {
+        $required = array(
+            'imagecreatetruecolor',
+            'imagecreatefromjpeg',
+            'imagecreatefrompng',
+            'imagecreatefromgif',
+        );
+        foreach ($required as $function) {
+            if (!function_exists($function)) {
+                return array(
+                    false,
+                    'MediaGallery image processing is unavailable: GD is selected but the PHP GD extension is not loaded. Install/enable GD or configure ImageMagick/NetPBM in Geeklog.'
+                );
+            }
+        }
+        return array(true, '');
+    }
+
+    if (!function_exists('exec')) {
+        return array(
+            false,
+            'MediaGallery image processing is unavailable: the selected external image backend requires PHP exec(), but exec() is disabled.'
+        );
+    }
+
+    if ($backend === 'imagemagick') {
+        $prefix = isset($_MG_CONF['path_to_imagemagick']) ? $_MG_CONF['path_to_imagemagick'] : '';
+        if (!MG_imageCommandAvailable180($prefix, 'identify') || !MG_imageCommandAvailable180($prefix, 'convert')) {
+            return array(
+                false,
+                'MediaGallery image processing is unavailable: ImageMagick is selected but the identify/convert commands cannot be executed. Check the ImageMagick path in Geeklog.'
+            );
+        }
+        return array(true, '');
+    }
+
+    if ($backend === 'netpbm') {
+        $prefix = isset($_CONF['path_to_netpbm']) ? $_CONF['path_to_netpbm'] : '';
+        $hasScaler = MG_imageCommandAvailable180($prefix, 'pamscale') || MG_imageCommandAvailable180($prefix, 'pnmscale');
+        if (!$hasScaler || !MG_imageCommandAvailable180($prefix, 'jpegtopnm') || !MG_imageCommandAvailable180($prefix, 'pnmtojpeg')) {
+            return array(
+                false,
+                'MediaGallery image processing is unavailable: NetPBM is selected but required NetPBM commands cannot be executed. Check the NetPBM path in Geeklog.'
+            );
+        }
+        return array(true, '');
+    }
+
+    return array(
+        false,
+        'MediaGallery image processing is unavailable: Geeklog image_lib is set to an unsupported backend (' . $backend . ').'
+    );
+}
+
+/**
+ * Resolve an external image command either from an explicit configured path
+ * or from the process PATH. This intentionally does not execute the command.
+ */
+function MG_imageCommandAvailable180($prefix, $binary)
+{
+    $suffix = (PHP_OS === 'WINNT') ? '.exe' : '';
+    $binary .= $suffix;
+    $prefix = trim((string) $prefix);
+
+    if ($prefix !== '') {
+        $path = rtrim($prefix, '/\\') . DIRECTORY_SEPARATOR . $binary;
+        if (!is_file($path)) {
+            return false;
+        }
+        return (PHP_OS === 'WINNT') ? true : is_executable($path);
+    }
+
+    $output = array();
+    $status = 1;
+    if (PHP_OS === 'WINNT') {
+        @exec('where ' . escapeshellarg($binary), $output, $status);
+    } else {
+        @exec('command -v ' . escapeshellarg($binary), $output, $status);
+    }
+    return $status === 0 && !empty($output);
+}
+
+/**
+ * Common guard used immediately before an operation requires image processing.
+ */
+function MG_requireImageBackend180()
+{
+    static $logged = false;
+
+    list($available, $message) = MG_getImageBackendStatus180();
+    if (!$available && !$logged) {
+        COM_errorLog($message, 1);
+        $logged = true;
+    }
+    return array($available, $message);
+}
+
 /* - the next two calls need to move to a new library -- */
 
 
@@ -191,6 +308,11 @@ function MG_helper_getImageWH($imgwidth, $imgheight, $maxwidth, $maxheight, $str
  */
 
 function MG_resizeImage($srcImage, $destImage, $dImageHeight, $dImageWidth, $mimeType='', $deleteSrc=0, $JpegQuality=85) {
+    list($backendAvailable, $backendMessage) = MG_requireImageBackend180();
+    if (!$backendAvailable) {
+        return array(false, $backendMessage);
+    }
+
     global $_CONF, $_MG_CONF;
 
     if ( $dImageHeight == 0 ) {
@@ -200,13 +322,16 @@ function MG_resizeImage($srcImage, $destImage, $dImageHeight, $dImageWidth, $mim
         $dImageWidth = 200;
     }
 
-    $imgsize    = @getimagesize("$srcImage");
-    $imgwidth   = $imgsize[0];
-    $imgheight  = $imgsize[1];
-    if ($imgwidth == 0 || $imgheight == 0 ) {
-        $imgwidth   = $dImageWidth;
-        $imgheight  = $dImageHeight;
+    $imgsize = MG_getImageInfo180($srcImage);
+    if ($imgsize === false
+        && $mimeType != 'image/x-targa'
+        && $mimeType != 'image/tga'
+    ) {
+        return array(false, 'Unable to determine source image dimensions.');
     }
+
+    $imgwidth = (is_array($imgsize) && isset($imgsize[0])) ? (int) $imgsize[0] : 0;
+    $imgheight = (is_array($imgsize) && isset($imgsize[1])) ? (int) $imgsize[1] : 0;
 
     if ( $mimeType == '' ) {
         $metaData = MG_getMediaMetaData($srcImage);
@@ -250,17 +375,51 @@ function MG_resizeImage($srcImage, $destImage, $dImageHeight, $dImageWidth, $mim
     // if smaller, do not upsize, simply copy the src to the dest.
 
     if (($newheight > $imgheight) && ($newwidth > $imgwidth)) {
-        $rc = copy($srcImage, $destImage);
-        COM_errorLog("MG_resizeImage: Original (" . $srcImage . ") is smaller than target, original copied to target image (" . $destImage . ".");
-        return array(true,'Original is smaller than target, original copied to target image.');
+        if (!@copy($srcImage, $destImage)) {
+            COM_errorLog(
+                "MG_resizeImage: unable to copy smaller source image (" . $srcImage
+                . ") to destination (" . $destImage . ")."
+            );
+            return array(false, 'Unable to copy source image to destination image.');
+        }
+
+        clearstatcache(true, $destImage);
+        if (!is_file($destImage) || !is_readable($destImage) || filesize($destImage) < 1) {
+            COM_errorLog("MG_resizeImage: copied destination image is missing or unreadable: " . $destImage);
+            return array(false, 'Destination image was not created correctly.');
+        }
+
+        COM_errorLog(
+            "MG_resizeImage: Original (" . $srcImage
+            . ") is smaller than target, original copied to target image (" . $destImage . ")."
+        );
+        return array(true, 'Original is smaller than target, original copied to target image.');
     }
 
-    list($rc, $msg) = _img_resizeImage($srcImage, $destImage, $imgheight, $imgwidth, $newheight, $newwidth, $mimeType, $JpegQuality);
+    list($rc, $msg) = _img_resizeImage(
+        $srcImage,
+        $destImage,
+        $imgheight,
+        $imgwidth,
+        $newheight,
+        $newwidth,
+        $mimeType,
+        $JpegQuality
+    );
     if ($rc == false) {
-        return array($rc, $msg);
+        return array(false, $msg);
     }
 
-    return array(true,'Image successfully resized');
+    clearstatcache(true, $destImage);
+    if (!is_file($destImage) || !is_readable($destImage) || filesize($destImage) < 1) {
+        COM_errorLog(
+            "MG_resizeImage: image backend reported success but destination is missing or unreadable: "
+            . $destImage
+        );
+        return array(false, 'Image backend did not create a valid destination image.');
+    }
+
+    return array(true, 'Image successfully resized');
 }
 
 /*
@@ -268,6 +427,11 @@ function MG_resizeImage($srcImage, $destImage, $dImageHeight, $dImageWidth, $mim
  */
 
 function MG_rotateImage($srcImage, $direction) {
+    list($backendAvailable, $backendMessage) = MG_requireImageBackend180();
+    if (!$backendAvailable) {
+        return array(false, $backendMessage);
+    }
+
     global $_CONF, $_MG_CONF;
 
     $metaData = MG_getMediaMetaData($srcImage);
@@ -322,6 +486,11 @@ function MG_rotateImage($srcImage, $direction) {
  */
 
 function MG_convertImageFormat( $srcImage, $destImage, $destFormat, $deleteOriginal=1 ) {
+    list($backendAvailable, $backendMessage) = MG_requireImageBackend180();
+    if (!$backendAvailable) {
+        return array(false, $backendMessage);
+    }
+
     global $_CONF;
 
     $newSrc = $srcImage;
@@ -369,6 +538,11 @@ function MG_convertImageFormat( $srcImage, $destImage, $destFormat, $deleteOrigi
 }
 
 function MG_watermarkImage( $origImage, $watermarkImage, $opacity, $location ) {
+    list($backendAvailable, $backendMessage) = MG_requireImageBackend180();
+    if (!$backendAvailable) {
+        return array(false, $backendMessage);
+    }
+
     global $_MG_CONF, $_CONF;
 
     if ( $_CONF['debug_image_upload'] ) {

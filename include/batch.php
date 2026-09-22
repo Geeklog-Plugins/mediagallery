@@ -42,11 +42,19 @@ require_once $_CONF['path'] . 'plugins/mediagallery/include/sort.php';
 
 function MG_batchProcess($album_id, $media_id_array, $action, $actionURL = '')
 {
-    global $_CONF, $_TABLES, $_MG_CONF, $LANG_MG01;
+    global $_USER, $_CONF, $_TABLES, $_MG_CONF, $LANG_MG00, $LANG_MG01;
+
+    $album_data = MG_getAlbumData($album_id, array('album_title', 'wm_id'), true);
+    if (!isset($album_data['access']) || ($album_data['access'] != 3 && !SEC_hasRights('mediagallery.admin'))) {
+        COM_errorLog('MediaGallery: batch mutation rejected because the user has no write access to album ' . intval($album_id), 1);
+        return COM_showMessageText($LANG_MG00['access_denied_msg']);
+    }
+    if (!SEC_checkToken()) {
+        COM_errorLog('MediaGallery: batch mutation rejected because of an invalid CSRF token.', 1);
+        return COM_showMessageText($LANG_MG00['access_denied_msg']);
+    }
 
     $numItems = count($media_id_array);
-
-    $album_data = MG_getAlbumData($album_id, array('album_title', 'wm_id'), false);
 
     switch ($action) {
         case 'rrt' :
@@ -56,6 +64,10 @@ function MG_batchProcess($album_id, $media_id_array, $action, $actionURL = '')
             $session_id = MG_beginSession('rotate', $actionURL, $session_description);
             for ($i=0; $i < $numItems; $i++) {
                 $media_id = COM_applyFilter($media_id_array[$i]);
+                if (DB_count($_TABLES['mg_media_albums'], array('album_id', 'media_id'), array(intval($album_id), $media_id)) < 1) {
+                    COM_errorLog('MediaGallery: ignored batch rotate media ' . $media_id . ' because it is not in album ' . intval($album_id), 1);
+                    continue;
+                }
                 MG_registerSession(array(
                     'session_id' => $session_id,
                     'mid'        => $media_id,
@@ -74,6 +86,10 @@ function MG_batchProcess($album_id, $media_id_array, $action, $actionURL = '')
             $session_id = MG_beginSession('watermark', $actionURL, $session_description);
             for ($i=0; $i < $numItems; $i++) {
                 $media_id = COM_applyFilter($media_id_array[$i]);
+                if (DB_count($_TABLES['mg_media_albums'], array('album_id', 'media_id'), array(intval($album_id), $media_id)) < 1) {
+                    COM_errorLog('MediaGallery: ignored batch watermark media ' . $media_id . ' because it is not in album ' . intval($album_id), 1);
+                    continue;
+                }
                 MG_registerSession(array(
                     'session_id' => $session_id,
                     'mid'        => $media_id,
@@ -121,6 +137,8 @@ function MG_albumResizeConfirm($aid, $actionURL)
         'lang_next'     => $LANG_MG01['next'],
         'action'        => 'doresize',
         's_form_action' => $actionURL,
+        'gltoken_name'  => CSRF_TOKEN,
+        'gltoken'       => SEC_createToken(),
     ));
 
     $retval .= $T->finish($T->parse('output', 'admin'));
@@ -134,6 +152,10 @@ function MG_albumResizeDisplay($aid, $actionURL)
     $album_data = MG_getAlbumData($aid, array('album_title'), true);
 
     if ($album_data['access'] != 3) {
+        COM_redirect($actionURL);
+    }
+    if (!SEC_checkToken()) {
+        COM_errorLog('MediaGallery: album resize rejected because of an invalid CSRF token.', 1);
         COM_redirect($actionURL);
     }
 
@@ -213,6 +235,8 @@ function MG_albumRebuildConfirm($aid, $actionURL)
         'lang_next'     => $LANG_MG01['next'],
         'action'        => 'dorebuild',
         's_form_action' => $actionURL,
+        'gltoken_name'  => CSRF_TOKEN,
+        'gltoken'       => SEC_createToken(),
     ));
 
     $retval .= $T->finish($T->parse('output', 'admin'));
@@ -227,6 +251,10 @@ function MG_albumRebuildThumbs($aid, $actionURL)
     $album_data = MG_getAlbumData($aid, array('album_title'), true);
 
     if ($album_data['access'] != 3) {
+        COM_redirect($actionURL);
+    }
+    if (!SEC_checkToken()) {
+        COM_errorLog('MediaGallery: thumbnail rebuild rejected because of an invalid CSRF token.', 1);
         COM_redirect($actionURL);
     }
 
@@ -300,20 +328,33 @@ function MG_batchDeleteMedia($album_id, $media_id_array, $actionURL = '')
     $sql = "SELECT * FROM {$_TABLES['mg_albums']} WHERE album_id=" . intval($album_id);
     $result = DB_query($sql);
     $A = DB_fetchArray($result);
+    if (!is_array($A)) {
+        COM_errorLog('MediaGallery: batch operation rejected because album ' . intval($album_id) . ' does not exist', 1);
+        return COM_showMessageText($LANG_MG00['access_denied_msg']);
+    }
 
     $access = SEC_hasAccess($A['owner_id'], $A['group_id'], $A['perm_owner'],
                             $A['perm_group'], $A['perm_members'], $A['perm_anon']);
 
     if ($access != 3 && !SEC_hasRights('mediagallery.admin')) {
         COM_errorLog("Someone has tried to illegally delete items from album in Media Gallery. "
-                   . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: $REMOTE_ADDR",1);
+                   . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: " . MG_getRemoteAddress(),1);
+        return COM_showMessageText($LANG_MG00['access_denied_msg']);
+    }
+    if (!SEC_checkToken()) {
+        COM_errorLog('MediaGallery: media deletion rejected because of an invalid CSRF token.', 1);
         return COM_showMessageText($LANG_MG00['access_denied_msg']);
     }
     $mediaCount = $A['media_count'];
 
     $numItems = count($media_id_array);
     for ($i=0; $i < $numItems; $i++) {
-        MG_deleteMedia($media_id_array[$i]);
+        $media_id = COM_applyFilter($media_id_array[$i]);
+        if (DB_count($_TABLES['mg_media_albums'], array('album_id', 'media_id'), array(intval($album_id), $media_id)) < 1) {
+            COM_errorLog('MediaGallery: refused deletion of media ' . $media_id . ' because it is not in album ' . intval($album_id), 1);
+            continue;
+        }
+        MG_deleteMedia($media_id);
         $mediaCount--;
     }
 
@@ -332,6 +373,7 @@ function MG_batchDeleteMedia($album_id, $media_id_array, $actionURL = '')
     require_once $_CONF['path'] . 'plugins/mediagallery/include/rssfeed.php';
     MG_buildFullRSS();
     MG_buildAlbumRSS($album_id);
+    MG_notifyAlbumSaved180($album_id);
     COM_redirect($actionURL);
 }
 
@@ -344,13 +386,21 @@ function MG_batchMoveMedia($album_id, $destination, $media_id_array, $actionURL 
     $sql = "SELECT * FROM {$_TABLES['mg_albums']} WHERE album_id=" . intval($album_id);
     $result = DB_query($sql);
     $A = DB_fetchArray($result);
+    if (!is_array($A)) {
+        COM_errorLog('MediaGallery: batch operation rejected because album ' . intval($album_id) . ' does not exist', 1);
+        return COM_showMessageText($LANG_MG00['access_denied_msg']);
+    }
 
     $access = SEC_hasAccess($A['owner_id'], $A['group_id'], $A['perm_owner'],
                             $A['perm_group'], $A['perm_members'], $A['perm_anon']);
 
     if ($access != 3 && !SEC_hasRights('mediagallery.admin')) {
         COM_errorLog("Someone has tried to illegally delete items from album in Media Gallery. "
-                   . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: $REMOTE_ADDR",1);
+                   . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: " . MG_getRemoteAddress(),1);
+        return COM_showMessageText($LANG_MG00['access_denied_msg']);
+    }
+    if (!SEC_checkToken()) {
+        COM_errorLog('MediaGallery: media move rejected because of an invalid CSRF token.', 1);
         return COM_showMessageText($LANG_MG00['access_denied_msg']);
     }
 
@@ -364,13 +414,17 @@ function MG_batchMoveMedia($album_id, $destination, $media_id_array, $actionURL 
     $sql = "SELECT * FROM {$_TABLES['mg_albums']} WHERE album_id=" . intval($destination);
     $result = DB_query($sql);
     $D = DB_fetchArray($result);
+    if (!is_array($D)) {
+        COM_errorLog('MediaGallery: media move rejected because destination album ' . intval($destination) . ' does not exist', 1);
+        return COM_showMessageText($LANG_MG00['access_denied_msg']);
+    }
 
     $access = SEC_hasAccess($D['owner_id'], $D['group_id'], $D['perm_owner'],
                             $D['perm_group'], $D['perm_members'], $D['perm_anon']);
 
     if ($access != 3 && !SEC_hasRights('mediagallery.admin')) {
         COM_errorLog("Someone has tried to illegally move items from album in Media Gallery. "
-                   . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: $REMOTE_ADDR",1);
+                   . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: " . MG_getRemoteAddress(),1);
         return COM_showMessageText($LANG_MG00['access_denied_msg']);
     }
 
@@ -395,11 +449,16 @@ function MG_batchMoveMedia($album_id, $destination, $media_id_array, $actionURL 
     $numItems = count($media_id_array);
 
     for ($i=0; $i < $numItems; $i++) {
-        $media_id = $media_id_array[$i];
+        $media_id = COM_applyFilter($media_id_array[$i]);
+        if (DB_count($_TABLES['mg_media_albums'], array('album_id', 'media_id'), array(intval($album_id), $media_id)) < 1) {
+            COM_errorLog('MediaGallery: refused move of media ' . $media_id . ' because it is not in source album ' . intval($album_id), 1);
+            continue;
+        }
         $sql = "UPDATE {$_TABLES['mg_media_albums']} "
              . "SET album_id=" . intval($destination) . ", media_order=" . intval($media_seq)
              . " WHERE album_id=" . intval($album_id) . " AND media_id='" . DB_escapeString($media_id) . "'";
         DB_query($sql);
+        PLG_itemSaved($media_id, 'mediagallery');
         $media_seq += 10;
 
         // update the media count in both albums...
@@ -424,6 +483,8 @@ function MG_batchMoveMedia($album_id, $destination, $media_id_array, $actionURL 
     MG_buildFullRSS();
     MG_buildAlbumRSS($album_id);
     MG_buildAlbumRSS($destination);
+    MG_notifyAlbumSaved180($album_id);
+    MG_notifyAlbumSaved180($destination);
 
     COM_redirect($actionURL);
 }
@@ -451,13 +512,13 @@ function MG_deleteAlbumConfirm($album_id, $actionURL = '')
 
     if ($album->access != 3) {
         COM_errorLog("MediaGallery: Someone has tried to delete a album they do not have permissions. "
-                   . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: $REMOTE_ADDR",1);
+                   . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: " . MG_getRemoteAddress(),1);
         return COM_showMessageText($LANG_MG00['access_denied_msg']);
     }
 
     if (!isset($album->id)) {
         COM_errorLog("MediaGallery: Someone has tried to delete a album to non-existent parent album. "
-                   . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: $REMOTE_ADDR",1);
+                   . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: " . MG_getRemoteAddress(),1);
         return COM_showMessageText($LANG_MG00['access_denied_msg']);
     }
 
@@ -478,7 +539,9 @@ function MG_deleteAlbumConfirm($album_id, $actionURL = '')
         'lang_title'             => $LANG_MG01['title'],
         'lang_description'       => $LANG_MG01['description'],
         'lang_move_all_media'    => $LANG_MG01['move_all_media'],
-        'lang_album_delete_help' => $LANG_MG01['album_delete_help']
+        'lang_album_delete_help' => $LANG_MG01['album_delete_help'],
+        'gltoken_name'          => CSRF_TOKEN,
+        'gltoken'               => SEC_createToken()
     ));
 
     $retval .= $T->finish($T->parse('output', 'admin'));
@@ -508,7 +571,11 @@ function MG_deleteAlbum($album_id, $target_id, $actionURL='')
 
     if ($album->access != 3) {
         COM_errorLog("MediaGallery: Someone has tried to illegally delete an album in Media Gallery. "
-                   . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: $REMOTE_ADDR",1);
+                   . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: " . MG_getRemoteAddress(),1);
+        return COM_showMessageText($LANG_MG00['access_denied_msg']);
+    }
+    if (!SEC_checkToken()) {
+        COM_errorLog('MediaGallery: album deletion rejected because of an invalid CSRF token.', 1);
         return COM_showMessageText($LANG_MG00['access_denied_msg']);
     }
 
@@ -558,6 +625,14 @@ function MG_deleteAlbum($album_id, $target_id, $actionURL='')
     MG_buildFullRSS();
     if ($target_id != 0) MG_buildAlbumRSS($target_id);
 
+    MG_notifyAlbumDeleted180($album_id);
+    if ($target_id > 0) {
+        MG_notifyAlbumSaved180($target_id);
+    }
+    if ($album->parent > 0 && $album->parent != $target_id) {
+        MG_notifyAlbumSaved180($album->parent);
+    }
+
     COM_redirect($actionURL);
 }
 
@@ -592,6 +667,7 @@ function MG_deleteChildAlbums($album_id) {
 
     DB_delete($_TABLES['mg_media_albums'], 'album_id', intval($album_id));
     DB_delete($_TABLES['mg_albums'], 'album_id', intval($album_id));
+    MG_notifyAlbumDeleted180($album_id);
 
     $feedname = sprintf($_MG_CONF['rss_feed_name'] . "%06d", $album_id);
     $feedpath = MG_getFeedPath();
@@ -599,50 +675,4 @@ function MG_deleteChildAlbums($album_id) {
     if (file_exists($feedpath . $feedname . '.rss')) {
         @unlink($feedpath . $feedname . '.rss');
     }
-}
-
-
-function MG_batchCaptionSave($album_id, $actionURL)
-{
-    global $_CONF, $_TABLES, $_MG_CONF;
-
-    $media_title = array();
-    $media_desc  = array();
-    $media_id    = array();
-
-    $media_title = $_POST['media_title'];
-    $media_desc  = $_POST['media_desc'];
-    $media_id    = $_POST['media_id'];
-
-    $total_media = count($media_id);
-
-    $table = $_TABLES['mg_media'];
-    $id = DB_getItem($table, 'media_id', 'media_id="' . DB_escapeString($media_id[0]) . '"');
-    if (empty($id)) {
-        $table = $_TABLES['mg_mediaqueue'];
-    }
-
-    for ($i=0; $i < $total_media; $i++) {
-        if ($_MG_CONF['htmlallowed']) {
-            $title = DB_escapeString(COM_checkWords(COM_stripslashes($media_title[$i])));
-            $desc  = DB_escapeString(COM_checkWords(COM_stripslashes($media_desc[$i])));
-        } else {
-            $title = DB_escapeString(htmlspecialchars(strip_tags(COM_checkWords(COM_stripslashes($media_title[$i])))));
-            $desc  = DB_escapeString(htmlspecialchars(strip_tags(COM_checkWords(COM_stripslashes($media_desc[$i])))));
-        }
-
-        $media_time = time();
-        $sql = "UPDATE " . $table
-            . " SET media_title='" . $title . "', media_time='" . $media_time
-            . "', media_upload_time='" . $media_time  . "', media_desc='" . $desc
-            . "' WHERE media_id='" . DB_escapeString(COM_applyFilter($media_id[$i])) . "'";
-
-        DB_query($sql);
-        PLG_itemSaved($media_id[$i], 'mediagallery');
-
-    }
-    require_once $_CONF['path'] . 'plugins/mediagallery/include/rssfeed.php';
-    MG_buildAlbumRSS($album_id);
-
-    COM_redirect($actionURL);
 }

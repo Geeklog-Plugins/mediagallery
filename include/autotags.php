@@ -37,17 +37,43 @@ if (strpos(strtolower($_SERVER['PHP_SELF']), strtolower(basename(__FILE__))) !==
 
 require_once $_CONF['path'] . 'plugins/mediagallery/include/common.php';
 
+function MG_hasUsableImageSize180($size)
+{
+    return is_array($size)
+        && isset($size[0], $size[1])
+        && (int) $size[0] > 0
+        && (int) $size[1] > 0;
+}
+
+/**
+ * Return dimensions that are always safe for aspect-ratio calculations.
+ */
+function MG_getSafeImageSize180($filename, $context = '')
+{
+    $size = @getimagesize($filename);
+    if (MG_hasUsableImageSize180($size)) {
+        return array((int) $size[0], (int) $size[1]);
+    }
+
+    COM_errorLog(
+        'MediaGallery: unable to read valid image dimensions'
+        . ($context !== '' ? ' for ' . $context : '')
+        . ': ' . $filename,
+        1
+    );
+
+    return array(200, 150);
+}
+
 function MG_helper_getContainer($media, $align, $container)
 {
-    $style = '';
-    if ($align == 'center') {
-        $style = 'text-align:center;';
-    } else if ($align != '') {
-        $style = 'float:' . $align . ';';
+    $allowedAlign = array('left', 'right', 'center');
+    $class = 'MG_autotag_media';
+    if (in_array($align, $allowedAlign)) {
+        $class .= ' MG_autotag_media_' . $align;
     }
-    $retval = '<' . $container . ' class="MG_autotag_media" style="' . $style . '">' . $media . '</' . $container . '>';
 
-    return $retval;
+    return '<' . $container . ' class="' . $class . '">' . $media . '</' . $container . '>';
 }
 
 
@@ -803,7 +829,7 @@ function MG_autotags($op, $content = '', $autotag = '')
                         $src = 'tn';
                         break;
                 }
-                if ($media_size == false) {
+                if (!MG_hasUsableImageSize180($media_size)) {
                     continue;
                 }
 
@@ -951,7 +977,7 @@ function MG_autotags($op, $content = '', $autotag = '')
                         $src = 'tn';
                         break;
                 }
-                if ($media_size == false) {
+                if (!MG_hasUsableImageSize180($media_size)) {
                     continue;
                 }
 
@@ -1067,30 +1093,21 @@ function MG_autotags($op, $content = '', $autotag = '')
             }
 //            $aid = $parm1;
 
-            if ($album_data['tn_attached'] == 1) {
-                $tfn = 'covers/cover_' . $parm1;
-                $ext = MG_getMediaExt($_MG_CONF['path_mediaobjects'] . $tfn);
-                $tnImage = $_MG_CONF['mediaobjects_url'] . '/' . $tfn . $ext;
-                $tnFileName = $_MG_CONF['path_mediaobjects'] . $tfn . $ext;
-            } else {
-                $filename = MG_getAlbumCover($parm1);
-                if ($filename != '') {
-                    $tfn = 'tn/' . $filename[0] . '/' . $filename;
-                    $ext = MG_getMediaExt($_MG_CONF['path_mediaobjects'] . $tfn);
-                    $tnImage = $_MG_CONF['mediaobjects_url'] . '/' . $tfn . $ext;
-                    $tnFileName = $_MG_CONF['path_mediaobjects'] . $tfn . $ext;
-                } else {
-                    $tnImage = $_MG_CONF['mediaobjects_url'] . '/empty.png';
-                    $tnFileName = $_MG_CONF['path_mediaobjects'] . 'empty.png';
-                }
+            list($tnImage, $media_size) = MG_getAlbumPreviewImage180(
+                $parm1,
+                $album_data['tn_attached'] == 1
+            );
+
+            if ($media_size === false || $tnImage == '') {
+                /* No usable album image exists. Do not emit a broken
+                 * missing.png URL; keep the album link/caption usable. */
+                $media_size = array(0, 0);
             }
-            $media_size = @getimagesize($tnFileName);
-            if ($media_size == false) {
-                $tnImage = $_MG_CONF['mediaobjects_url'] . '/missing.png';
-                $tnFileName = $_MG_CONF['path_mediaobjects'] . 'missing.png';
-                $media_size = @getimagesize($tnFileName);
-            }
-            if ($width > 0 && $height == 0) {
+
+            if ($tnImage == '' || empty($media_size[0]) || empty($media_size[1])) {
+                $newwidth = 0;
+                $newheight = 0;
+            } else if ($width > 0 && $height == 0) {
                 $ratio = $media_size[0] / $width;
                 $newwidth = $width;
                 $newheight = round($media_size[1] / $ratio);
@@ -1112,7 +1129,15 @@ function MG_autotags($op, $content = '', $autotag = '')
                 $newwidth = $width;
                 $newheight = $height;
             }
-            $tagtext = '<img src="' . $tnImage . '" ' . $alttag . 'style="width:' . $newwidth . 'px;height:' . $newheight . 'px;border:none;vertical-align:bottom;"' . XHTML . '>';
+            if ($tnImage != '') {
+                $tagtext = '<img src="' . $tnImage . '" ' . $alttag . 'style="width:' . $newwidth . 'px;height:' . $newheight . 'px;border:none;vertical-align:bottom;"' . XHTML . '>';
+            } else {
+                $tagtext = htmlspecialchars(
+                    $caption != '' ? $caption : $album_data['album_title'],
+                    ENT_QUOTES,
+                    COM_getCharset()
+                );
+            }
 
             if ($linkID == 0) {
                 $url = $_MG_CONF['site_url'] . '/album.php?aid=' . $parm1;
@@ -1264,7 +1289,14 @@ function MG_autotags($op, $content = '', $autotag = '')
             }
 
             $mediaSize = @getimagesize($media_thumbnail_file);
-            if ($mediaSize == false) return str_replace($autotag['tagstr'], '', $content);
+            if (!MG_hasUsableImageSize180($mediaSize)) {
+                COM_errorLog(
+                    'MediaGallery: unable to read valid image dimensions for media autotag '
+                    . $parm1 . ': ' . $media_thumbnail_file,
+                    1
+                );
+                return str_replace($autotag['tagstr'], '', $content);
+            }
             if ($autotag['tag'] == 'oimage' || $src == 'orig') {
                 $newwidth  = $mediaSize[0];
                 $newheight = $mediaSize[1];

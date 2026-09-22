@@ -1,1 +1,163 @@
-See the docs/INSTALL file for Upgrading instructions.
+MediaGallery 1.8.0 upgrade notes
+===============================
+
+MediaGallery 1.8.0 supports upgrades from the 1.7.x line, but it changes where
+user media are stored so plugin ZIP replacement can no longer delete them.
+
+Supported baseline
+------------------
+
+MediaGallery 1.8.0 requires Geeklog 2.1.1 or newer.
+
+The development branch keeps PHP 5.6-compatible syntax for legacy Geeklog
+2.1.1 installations and is also validated against newer PHP versions.
+
+Before upgrading
+----------------
+
+1. Back up the Geeklog database.
+2. Back up the complete existing MediaGallery media tree.
+3. Record any local MediaGallery modifications.
+4. Test the upgrade on a staging/local copy first.
+5. If upgrading a 1.7.x site whose media still live below
+   public_html/mediagallery/mediaobjects/, run the 1.8 pre-migration tool
+   BEFORE uploading the 1.8 plugin ZIP.
+
+Why pre-migration is mandatory for legacy storage
+-------------------------------------------------
+
+Geeklog's plugin ZIP updater replaces the old public plugin directory before
+MediaGallery's new upgrade code is loaded.
+
+A historical MediaGallery 1.7.x installation commonly stores user data below:
+
+    public_html/mediagallery/mediaobjects/
+
+Uploading the 1.8 ZIP first could therefore remove the old plugin public tree
+before those media have been copied to the new persistent location.
+
+MediaGallery 1.8.0 runtime storage
+---------------------------------
+
+Public media are stored below Geeklog's image root:
+
+    $_MG_CONF['path_mediaobjects']
+        = rtrim($_CONF['path_images'], '/\\') . '/mediagallery/';
+
+The public URL is derived from Geeklog's image URL configuration.
+
+A normal single-site installation typically resolves to:
+
+    public_html/images/mediagallery/
+    https://example.com/images/mediagallery/
+
+A shared-code multisite installation can use site-specific Geeklog image paths,
+for example:
+
+    $_CONF['path_images'] = $_CONF['path'] . 'public_html/images/site-a/';
+    $_CONF['images_url']  = $_CONF['site_url'] . '/images/site-a';
+
+MediaGallery then uses:
+
+    public_html/images/site-a/mediagallery/
+    https://example.com/images/site-a/mediagallery/
+
+Private temporary/upload data are similarly derived from each site's
+$_CONF['path_data'].
+
+Pre-migrating a 1.7.x media tree
+--------------------------------
+
+Extract the MediaGallery 1.8.0 package on the server without installing it over
+the live plugin, then run:
+
+    php tools/migrate-media-storage.php /path/to/geeklog
+
+The tool:
+
+* discovers the legacy MediaGallery media tree;
+* copies files into the persistent Geeklog image location;
+* verifies copied files by relative path and size;
+* refuses conflicting destination files rather than silently overwriting them;
+* deliberately leaves the legacy source untouched.
+
+Only after the tool reports a successful migration should the 1.8.0 ZIP be
+uploaded through Geeklog's plugin updater.
+
+Fresh 1.8.0 installations
+-------------------------
+
+Fresh installations create/use the persistent images/mediagallery storage from
+the start. No legacy pre-migration step is required.
+
+Configuration migration
+-----------------------
+
+The 1.8.0 upgrade adds missing MediaGallery Configuration API values without
+overwriting existing administrator values. Valid zero/false values are
+preserved.
+
+The historical manually edited MediaGallery config.php is not restored.
+Derived plugin URLs, template locations, media storage paths and similar runtime
+values remain derived from Geeklog configuration.
+
+Obsolete fresh-install Flash/FlowPlayer controls are no longer created. Some
+harmless legacy rows can remain in upgraded databases until their automatic
+removal is proven safe across the full supported upgrade matrix.
+
+Security and behavior changes to test
+-------------------------------------
+
+MediaGallery 1.8.0 hardens several mutation/import paths. After an upgrade,
+test at least:
+
+* browser image/media upload;
+* media edit/delete/move and album cover changes;
+* album create/edit/delete;
+* FTP and ZIP imports if used;
+* Remote Media if used;
+* moderation approval/rejection if used;
+* batch operations;
+* image rotation/watermark/resize if used;
+* RSS/podcast feeds;
+* comments and search;
+* member albums and sidebar blocks.
+
+Batch processing on Geeklog 2.1.1
+---------------------------------
+
+Normal actions that start a batch remain protected by Geeklog CSRF validation.
+Internal batch continuation/cancellation uses POST plus the server-generated
+batch session id and verifies that the batch session belongs to the current
+user (with the existing administrator override).
+
+This avoids Geeklog 2.1.1's one-time, referer-bound token expiring during a
+multi-step batch while retaining session ownership checks.
+
+Interoperability changes
+------------------------
+
+MediaGallery 1.8.0 reports media and album changes through Geeklog lifecycle
+APIs. Existing media IDs remain unchanged; albums use namespaced IDs such as:
+
+    album:52
+
+This allows plugins such as IndexNow, XML Sitemap and Hub to react to
+MediaGallery changes without querying MediaGallery tables directly.
+
+After upgrade
+-------------
+
+Confirm that:
+
+* existing albums/media are visible;
+* new uploads are written below the persistent Geeklog image path;
+* re-uploading/replacing the plugin ZIP does not remove user media;
+* administrator configuration remains intact;
+* no unexpected PHP warnings/deprecations appear in the Geeklog error log.
+
+For the current implementation status and complete test matrix, see:
+
+    README.md
+    ROADMAP.md
+    TESTING-1.8.md

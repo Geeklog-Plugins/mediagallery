@@ -1,19 +1,18 @@
-<div class="mg_thumbnail" style="height:{row_height}px">
-  <div class="mg_thumbnail_wrapper">{media_item_thumbnail}</div>
-</div>
+<article class="mg_album_item mg-card mg-card-square">
+  <div class="mg-card-media">
+    <div class="mg_thumbnail">
+      <div class="mg_thumbnail_wrapper"><a class="mg-card-image-link" href="{u_viewalbum}"><span class="mg-card-preview-stack"><img class="mg-card-preview-image mg-card-preview-cover" src="{album_last_image}" alt="{album_title}" loading="lazy" decoding="async"><img class="mg-card-preview-image mg-card-preview-full" src="{album_full_image}" alt="" aria-hidden="true" loading="lazy" decoding="async"></span></a></div>
+    </div>
+  </div>
 
-<div><span class="mg_strong">{lang_album} {album_title}</span> ({subalbum_media_count})</div>
+  <div class="mg-card-body">
+    <h2 class="mg_album_item_title mg-card-title"><a href="{u_viewalbum}">{album_title}</a> <span class="mg_item_count" aria-label="Media count">{subalbum_media_count}</span></h2>
 
-<div class="pluginSmallText">{album_desc}</div>
+    {!if album_desc}<div class="mg-card-description">{album_desc}</div>{!endif}
 
-{!if updated}
-<div class="pluginSmallText"><span class="mg_strong">{updated}</span> {album_last_update}</div>
-{!endif}
-
-{!if lang_views}
-<div class="pluginSmallText"><span class="mg_strong">{lang_views}</span> {views}</div>
-{!endif}
-
-{!if lang_subalbums}
-<div class="pluginSmallText"><span class="mg_strong">{lang_subalbums}</span> {subalbumcount}</div>
-{!endif}
+    <div class="mg-card-meta mg-card-meta-album">
+      {!if lang_views}<span class="mg-card-album-views"><span class="mg-visually-hidden">{lang_views}: </span>{views}</span>{!endif}
+      {!if lang_subalbums}<span><strong>{lang_subalbums}</strong> {subalbumcount}</span>{!endif}
+    </div>
+  </div>
+</article>

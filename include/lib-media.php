@@ -124,6 +124,7 @@ function MG_displayASF($I, $opt=array())
             list($u_image, $p_image, $media_size_orig) = Media::getThumbInfo($I);
             break;
         case 1: // download
+        case 3: // legacy MMS mode now falls back to a normal download
             $u_pic = $_MG_CONF['site_url'] . '/download.php?mid=' . $I['media_id'];
             $raw_link_url = $u_pic;
             list($u_image, $p_image, $media_size_orig) = Media::getThumbInfo($I);
@@ -132,51 +133,19 @@ function MG_displayASF($I, $opt=array())
             $V = COM_newTemplate(MG_getTemplatePath_byName($opt['skin']));
             $V->set_file('video', 'view_asf.thtml');
             $V->set_var(array(
-                'autostart'          => ($playback_options['autostart'] ? 'true' : 'false'),
-                'enablecontextmenu'  => ($playback_options['enablecontextmenu'] ? 'true' : 'false'),
-                'stretchtofit'       => ($playback_options['stretchtofit'] ? 'true' : 'false'),
-                'showstatusbar'      => ($playback_options['showstatusbar'] ? 'true' : 'false'),
-                'uimode'             => $playback_options['uimode'],
-                'playcount'          => $playback_options['playcount'],
                 'height'             => $playback_options['height'],
                 'width'              => $playback_options['width'],
-                'bgcolor'            => $playback_options['bgcolor'],
                 'movie'              => Media::getFileUrl('orig', $I['media_filename'], $I['media_mime_ext']),
-                'autostart0'         => ($playback_options['autostart'] ? '1' : '0'),
-                'enablecontextmenu0' => ($playback_options['enablecontextmenu'] ? '1' : '0'),
-                'stretchtofit0'      => ($playback_options['stretchtofit'] ? '1' : '0'),
-                'showstatusbar0'     => ($playback_options['showstatusbar'] ? '1' : '0'),
             ));
-            switch ($playback_options['uimode']) {
-                case 'mini' :
-                case 'full' :
-                    $V->set_var(array(
-                        'showcontrols'  => 'true',
-                        'showcontrols0' => '1',
-                    ));
-                    break;
-                case 'none' :
-                    $V->set_var(array(
-                        'showcontrols'  => 'false',
-                        'showcontrols0' => '0',
-                    ));
-                    break;
-            }
             $u_image = $V->finish($V->parse('output','video'));
             return array($u_image, '', $resolution_x, $resolution_y, '');
-            break;
-        case 3: // use mms links
-            $mms_path = preg_replace("/http/i", 'mms', $_MG_CONF['mediaobjects_url']);
-            $u_pic = $mms_path . '/orig/'.  $I['media_filename'][0] . '/' . $I['media_filename'] . '.' . $I['media_mime_ext'];
-            $raw_link_url = $u_pic;
-            list($u_image, $p_image, $media_size_orig) = Media::getThumbInfo($I);
             break;
     }
 
     $retval = MG_getFramedImage($opt['display_skin'], $I['media_title'],
-                  $u_pic, $u_image, $media_size_disp[0], $media_size_disp[1]);
+                  $u_pic, $u_image, $media_size_orig[0], $media_size_orig[1]);
 
-    return array($retval, $u_image, $media_size_disp[0], $media_size_disp[1], $raw_link_url);
+    return array($retval, $u_image, $media_size_orig[0], $media_size_orig[1], $raw_link_url);
 }
 
 function MG_displayMOV($I, $opt=array())
@@ -236,15 +205,8 @@ function MG_displayMOV($I, $opt=array())
             $V->set_file('video', 'view_quicktime.thtml');
             $V->set_var(array(
                 'site_url'         => $_MG_CONF['site_url'],
-                'autoref'          => ($playback_options['autoref'] ? 'true' : 'false'),
-                'autoplay'         => ($playback_options['autoplay'] ? 'true' : 'false'),
-                'controller'       => ($playback_options['controller'] ? 'true' : 'false'),
-                'kioskmode'        => ($playback_options['kioskmode'] ? 'true' : 'false'),
-                'loop'             => ($playback_options['loop'] ? 'true' : 'false'),
-                'scale'            => $playback_options['scale'],
-                'height'           => $playback_options['height'] + ($playback_options['controller'] ? 20 : 0),
+                'height'           => $playback_options['height'],
                 'width'            => $playback_options['width'],
-                'bgcolor'          => $playback_options['bgcolor'],
                 'movie'            => Media::getFileUrl('orig', $I['media_filename'], $I['media_mime_ext']),
                 'filename'         => $I['media_original_filename'],
                 'lang_noquicktime' => $LANG_MG03['no_quicktime'],
@@ -256,339 +218,24 @@ function MG_displayMOV($I, $opt=array())
     }
 
     $retval = MG_getFramedImage($opt['display_skin'], $I['media_title'],
-                  $u_pic, $u_image, $media_size_disp[0], $media_size_disp[1]);
+                  $u_pic, $u_image, $media_size_orig[0], $media_size_orig[1]);
 
-    return array($retval, $u_image, $media_size_disp[0], $media_size_disp[1], $u_pic);
+    return array($retval, $u_image, $media_size_orig[0], $media_size_orig[1], $u_pic);
 }
 
 function MG_displaySWF($I, $opt=array())
 {
-    global $_TABLES, $_CONF, $_MG_CONF, $LANG_MG03;
-
-    // set the default playback options...
-    $playback_options['play']        = $_MG_CONF['swf_play'];
-    $playback_options['menu']        = $_MG_CONF['swf_menu'];
-    $playback_options['quality']     = $_MG_CONF['swf_quality'];
-    $playback_options['height']      = $_MG_CONF['swf_height'];
-    $playback_options['width']       = $_MG_CONF['swf_width'];
-    $playback_options['loop']        = $_MG_CONF['swf_loop'];
-    $playback_options['scale']       = $_MG_CONF['swf_scale'];
-    $playback_options['wmode']       = $_MG_CONF['swf_wmode'];
-    $playback_options['allowscriptaccess'] = $_MG_CONF['swf_allowscriptaccess'];
-    $playback_options['bgcolor']     = $_MG_CONF['swf_bgcolor'];
-    $playback_options['swf_version'] = $_MG_CONF['swf_version'];
-    $playback_options['flashvars']   = $_MG_CONF['swf_flashvars'];
-
-    $poResult = DB_query("SELECT * FROM {$_TABLES['mg_playback_options']} WHERE media_id='" . DB_escapeString($I['media_id']) . "'");
-    while ($poRow = DB_fetchArray($poResult)) {
-        $playback_options[$poRow['option_name']] = $poRow['option_value'];
-    }
-
-    $_MG_USERPREFS = MG_getUserPrefs();
-    if (isset($_MG_USERPREFS['playback_mode']) && $_MG_USERPREFS['playback_mode'] != -1) {
-        $playback_type = $_MG_USERPREFS['playback_mode'];
-    } else {
-        $playback_type = $opt['playback_type'];
-    }
-
-    $resolution_x = $I['resolution_x'];
-    $resolution_y = $I['resolution_y'];
-    if ($resolution_x == 0) {
-        $resolution_x = $I['media_resolution_x'];
-        $resolution_y = $I['media_resolution_y'];
-        if ($resolution_x == 0) {
-            $filepath = Media::getFilePath('orig', $I['media_filename'], $I['media_mime_ext']);
-            list($resolution_x, $resolution_y) = Media::getResolutionID3($filepath);
-        }
-    }
-
-    switch ($playback_type) {
-        case 0: // Popup Window
-            $win_width  = $playback_options['width'] + 40;
-            $win_height = $playback_options['height'] + 40;
-            $u_pic = Media::getHref_showvideo($I['media_id'], $win_height, $win_width);
-            list($u_image, $p_image, $media_size_orig) = Media::getThumbInfo($I);
-            break;
-        case 1: // download
-        case 3: // mms - not supported for flash
-            $u_pic = $_MG_CONF['site_url'] . '/download.php?mid=' . $I['media_id'];
-            list($u_image, $p_image, $media_size_orig) = Media::getThumbInfo($I);
-            break;
-        case 2: // inline
-            $u_image = '';
-            $V = COM_newTemplate(MG_getTemplatePath_byName($opt['skin']));
-            $V->set_file('video', 'view_swf.thtml');
-            $V->set_var(array(
-                'site_url'     => $_MG_CONF['site_url'],
-                'lang_noflash' => $LANG_MG03['no_flash'],
-                'play'         => ($playback_options['play'] ? 'true' : 'false'),
-                'menu'         => ($playback_options['menu'] ? 'true' : 'false'),
-                'loop'         => ($playback_options['loop'] ? 'true' : 'false'),
-                'scale'        => $playback_options['scale'],
-                'wmode'        => $playback_options['wmode'],
-                'quality'      => $playback_options['quality'],
-                'height'       => $playback_options['height'],
-                'width'        => $playback_options['width'],
-                'asa'          => $playback_options['allowscriptaccess'],
-                'bgcolor'      => $playback_options['bgcolor'],
-                'swf_version'  => $playback_options['swf_version'],
-                'filename'     => $I['media_original_filename'],
-                'id'           => 'swf' . rand(),
-                'id2'          => 'swf2' . rand(),
-                'movie'        => Media::getFileUrl('orig', $I['media_filename'], $I['media_mime_ext']),
-            ));
-
-            $flasharray = array();
-            $flasharray = explode('&',$playback_options['flashvars']);
-
-            $i = 0;
-            $V->set_block('video','flashvars','flashvar');
-
-            foreach ($flasharray as $var) {
-                $temp = split("=", $var);
-                $variable = $temp[0];
-                $value = implode("=", array_slice($temp, 1));
-                if (!isset($variable) && $variable != '') {
-                    $V->set_var('fv', 'flashvars.' . $variable . '="' . $value . '";' .  LB);
-                    $V->parse('flashvar', 'flashvars', true);
-                    $i++;
-                }
-                $i++;
-            }
-            $u_image .= $V->finish($V->parse('output','video'));
-            return array($u_image,'',$resolution_x,$resolution_y,'');
-            break;
-    }
-
-    $retval = MG_getFramedImage($opt['display_skin'], $I['media_title'],
-                  $u_pic, $u_image, $media_size_disp[0], $media_size_disp[1]);
-
-    return array($retval, $u_image, $media_size_disp[0], $media_size_disp[1], $u_pic);
+    return MG_displayGeneric($I, $opt);
 }
 
 function MG_displayFLV($I, $opt=array())
 {
-    global $_TABLES, $_CONF, $_MG_CONF, $LANG_MG03;
-
-    // set the default playback options...
-    $playback_options['play']    = $_MG_CONF['swf_play'];
-    $playback_options['menu']    = $_MG_CONF['swf_menu'];
-    $playback_options['quality'] = $_MG_CONF['swf_quality'];
-    $playback_options['height']  = $_MG_CONF['swf_height'];
-    $playback_options['width']   = $_MG_CONF['swf_width'];
-    $playback_options['loop']    = $_MG_CONF['swf_loop'];
-    $playback_options['scale']   = $_MG_CONF['swf_scale'];
-    $playback_options['wmode']   = $_MG_CONF['swf_wmode'];
-    $playback_options['allowscriptaccess'] = $_MG_CONF['swf_allowscriptaccess'];
-    $playback_options['bgcolor']     = $_MG_CONF['swf_bgcolor'];
-    $playback_options['swf_version'] = $_MG_CONF['swf_version'];
-    $playback_options['flashvars']   = $_MG_CONF['swf_flashvars'];
-
-    $poResult = DB_query("SELECT * FROM {$_TABLES['mg_playback_options']} WHERE media_id='" . DB_escapeString($I['media_id']) . "'");
-    while ($poRow = DB_fetchArray($poResult)) {
-        $playback_options[$poRow['option_name']] = $poRow['option_value'];
-    }
-
-    $_MG_USERPREFS = MG_getUserPrefs();
-    if (isset($_MG_USERPREFS['playback_mode']) && $_MG_USERPREFS['playback_mode'] != -1) {
-        $playback_type = $_MG_USERPREFS['playback_mode'];
-    } else {
-        $playback_type = $opt['playback_type'];
-    }
-
-    $resolution_x = $I['resolution_x'];
-    $resolution_y = $I['resolution_y'];
-    if ($resolution_x == 0) {
-        $resolution_x = 320; //$I['media_resolution_x'];
-        $resolution_y = 240; //$I['media_resolution_y'];
-        if ($I['media_resolution_x'] == 0 && $I['remote_media'] == 0) {
-            $filepath = Media::getFilePath('orig', $I['media_filename'], $I['media_mime_ext']);
-            list($resolution_x, $resolution_y) = Media::getResolutionID3($filepath);
-        }
-    }
-
-    switch ($playback_type) {
-        case 0: // Popup Window
-            $resolution_x = $playback_options['width'];
-            $resolution_y = $playback_options['height'];
-            if ($resolution_x < 1 || $resolution_y < 1) {
-                $resolution_x = 480;
-                $resolution_y = 320;
-            } else {
-                $resolution_x = $resolution_x + 40;
-                $resolution_y = $resolution_y + 40;
-            }
-            if ($I['mime_type'] == 'video/x-flv' && $_MG_CONF['use_flowplayer'] != 1) {
-                $resolution_x = $resolution_x + 60;
-                if ($resolution_x < 590) {
-                    $resolution_x = 590;
-                }
-                $resolution_y = $resolution_y + 80;
-                if ($resolution_y < 500) {
-                    $resolution_y = 500;
-                }
-            }
-            if ($I['media_type'] == 5) {
-                $resolution_x = 460;
-                $resolution_y = 380;
-            }
-            $u_pic = Media::getHref_showvideo($I['media_id'], $resolution_y, $resolution_x);
-            list($u_image, $p_image, $media_size_orig) = Media::getThumbInfo($I);
-            break;
-        case 1: // download
-            $u_pic = $_MG_CONF['site_url'] . '/download.php?mid=' . $I['media_id'];
-            $raw_link_url = $u_pic;
-            list($u_image, $p_image, $media_size_orig) = Media::getThumbInfo($I);
-            break;
-        case 3: // mms - not supported for flash
-        case 2: // inline
-            $u_image = '';
-            // Initialize the view_flv.thtml template
-            $V = COM_newTemplate(MG_getTemplatePath_byName($opt['skin']));
-            $V->set_file('video', 'view_flv.thtml');
-
-            // now the player specific items.
-            $F = COM_newTemplate(MG_getTemplatePath_byName($opt['skin']));
-            if ($_MG_CONF['use_flowplayer'] == 1) {    // FlowPlayer Setup
-                $F->set_file('player', 'flvfp.thtml');
-            } else {
-                $F->set_file('player', 'flvmg.thtml');
-            }
-
-            if ($playback_options['play'] == 1) {  // auto start
-                $playButton = '';
-                $playButtonMG = '';
-                $autoplay   = 'true';
-            } else {
-                if ($I['media_tn_attached'] == 1) {
-                    $playImage = Media::getFileUrl ('tn', $I['media_filename'], 'jpg', 1);
-                    $playButtonMG = 'flashvars.thumbUrl="' . $playImage . '";';
-                } else {
-                    $playImage = $_MG_CONF['site_url'] . MG_getImageFile('blank_blk.jpg');
-                    $playButtonMG = '';
-                }
-                $playButton = "{ url: '" . $playImage . "', overlayId: 'play' },";
-                $autoplay = 'false';
-            }
-            if ($I['remote_media'] == 1) {
-                $urlParts = array();
-                $urlParts = parse_url($I['remote_url']);
-
-                $pathParts = array();
-                $pathParts = explode('/',$urlParts['path']);
-
-                $ppCount = count($pathParts);
-                $pPath = '';
-                for ($I=1; $I<$ppCount-1;$I++) {
-                    $pPath .= '/' . $pathParts[$I];
-                }
-                $videoFile = $pathParts[$ppCount-1];
-
-                $pos = strrpos($videoFile, '.');
-                if($pos === false) {
-                    $basefilename = $videoFile;
-                } else {
-                    $basefilename = substr($videoFile,0,$pos);
-                }
-                $videoFile            = $basefilename;
-                $streamingServerURL   = "streamingServerURL: '" . $urlParts['scheme'] . '://' . $urlParts['host'] . $pPath . "',";
-                $streamingServerURLmg = 'flashvars.streamingServerUrl="' . $urlParts['scheme'] . '://' . $urlParts['host'] . $pPath . '";';
-                $streamingServer      = "streamingServer: 'fms',";
-            } else {
-                $videoFile            = urlencode(Media::getFileUrl('orig', $I['media_filename'], $I['media_mime_ext']));
-                $streamingServerURL   = '';
-                $streamingServerURLmg = '';
-                $streamingServer      = '';
-            }
-            $width  = $playback_options['width'];
-            $height = $playback_options['height'];
-            if ($opt['allow_download'] == 1) {
-                $allowDl = 'true';
-            } else {
-                $allowDl = 'false';
-            }
-            if ($I['media_title'] != '' && $I['media_title'] != ' ') {
-                $title = urlencode($I['media_title']);
-            } else {
-                $title = urlencode($I['media_original_filename']);
-            }
-
-            if ($_MG_CONF['use_flowplayer'] == 1) {
-                $resolution_x = $width;
-                $resolution_y = $height;
-            } else {
-                $resolution_x = $resolution_x + 60;
-                $resolution_y = $resolution_y + 190;
-                if ($resolution_x < 565) {
-                    $resolution_x = 565;
-                }
-            }
-            $id  = 'id'  . rand();
-            $id2 = 'idtwo' . rand();
-            $F->set_var(array(
-                'site_url'             => $_MG_CONF['site_url'],
-                'lang_noflash'         => $LANG_MG03['no_flash'],
-                'play'                 => $autoplay,
-                'autoplay'             => $autoplay,
-                'menu'                 => ($playback_options['menu'] ? 'true' : 'false'),
-                'loop'                 => ($playback_options['loop'] ? 'true' : 'false'),
-                'scale'                => $playback_options['scale'],
-                'wmode'                => $playback_options['wmode'],
-                'width'                => $width,
-                'height'               => $height,
-                'allowDl'              => $allowDl,
-                'title'                => $title,
-                'streamingServerURL'   => $streamingServerURL,
-                'videoFile'            => $videoFile,
-                'playButton'           => $playButton,
-                'streamingServerURLmg' => $streamingServerURLmg,
-                'playButtonMG'         => $playButtonMG,
-                'id'                   => $id,
-                'id2'                  => $id2,
-                'lang_download'        => $LANG_MG03['download'],
-                'lang_large'           => $LANG_MG03['large'],
-                'lang_normal'          => $LANG_MG03['normal'],
-                'resolution_x'         => $resolution_x,
-                'resolution_y'         => $resolution_y,
-            ));
-            $flv_player = $F->finish($F->parse('output', 'player'));
-
-            $V->set_var(array(
-                'site_url'      => $_MG_CONF['site_url'],
-                'lang_noflash'  => $LANG_MG03['no_flash'],
-                'id'            => $id,
-                'id2'           => $id2,
-                'resolution_x'  => $resolution_x,
-                'resolution_y'  => $resolution_y,
-                'flv_player'    => $flv_player,
-            ));
-            $u_image .= $V->finish($V->parse('output','video'));
-            return array($u_image, '', $resolution_x, $resolution_y, '');
-            break;
-    }
-
-    $retval = MG_getFramedImage($opt['display_skin'], $I['media_title'],
-                  $u_pic, $u_image, $media_size_disp[0], $media_size_disp[1]);
-
-    return array($retval, $u_image, $media_size_disp[0], $media_size_disp[1], $u_pic);
+    return MG_displayGeneric($I, $opt);
 }
 
 function MG_displayMP3($I, $opt=array())
 {
     global $_TABLES, $_CONF, $_MG_CONF, $LANG_MG03;
-
-    // set the default playback options...
-    $playback_options['autostart']         = $_MG_CONF['mp3_autostart'];
-    $playback_options['enablecontextmenu'] = $_MG_CONF['mp3_enablecontextmenu'];
-    $playback_options['showstatusbar']     = $_MG_CONF['mp3_showstatusbar'];
-    $playback_options['uimode']            = $_MG_CONF['mp3_uimode'];
-    $playback_options['loop']              = $_MG_CONF['mp3_loop'];
-
-    $poResult = DB_query("SELECT * FROM {$_TABLES['mg_playback_options']} WHERE media_id='" . DB_escapeString($I['media_id']) . "'");
-    while ($poRow = DB_fetchArray($poResult)) {
-        $playback_options[$poRow['option_name']] = $poRow['option_value'];
-        $playback_options[$poRow['option_name']. '_tf'] = ($poRow['option_value'] ? 'true' : 'false');
-    }
 
     $_MG_USERPREFS = MG_getUserPrefs();
     if (isset($_MG_USERPREFS['playback_mode']) && $_MG_USERPREFS['playback_mode'] != -1) {
@@ -610,6 +257,7 @@ function MG_displayMP3($I, $opt=array())
             list($u_image, $p_image, $media_size_orig) = Media::getThumbInfo($I);
             break;
         case 1: // download
+        case 3: // legacy MMS mode now falls back to a normal download
             $u_pic = $_MG_CONF['site_url'] . '/download.php?mid=' . $I['media_id'];
             list($u_image, $p_image, $media_size_orig) = Media::getThumbInfo($I);
             break;
@@ -618,9 +266,10 @@ function MG_displayMP3($I, $opt=array())
             $playback_options['height'] = 50;
             $u_pic='';
             if ($I['media_tn_attached'] == 1) {
-                $u_tn = Media::getFileUrl('tn', $I['media_filename'], 'jpg', 1);
-                $media_size_disp = @getimagesize(Media::getFilePath('tn', $I['media_filename'], '', 1));
-                $u_pic = '<img src="' . $u_tn . '"' . XHTML . '>';
+                list($u_tn, $p_tn, $media_size_disp) = Media::getThumbInfo($I);
+                if (!empty($u_tn)) {
+                    $u_pic = '<img src="' . $u_tn . '"' . XHTML . '>';
+                }
             }
             $win_width  = $playback_options['width'];
             $win_height = $playback_options['height'];
@@ -642,11 +291,7 @@ function MG_displayMP3($I, $opt=array())
             } else {
                 $mp3_artist = '';
             }
-
-            $S = COM_newTemplate(MG_getTemplatePath_byName($opt['skin']));
-            $S->set_file('swf', 'swfobject.thtml');
-            $S->set_var('site_url', $_MG_CONF['site_url']);
-            $u_image = $S->finish($S->parse('output', 'swf'));
+            $u_image = '';
 
             $V = COM_newTemplate(MG_getTemplatePath_byName($opt['skin']));
             $tfile = 'view_mp3_swf.thtml';
@@ -657,13 +302,6 @@ function MG_displayMP3($I, $opt=array())
             $V->set_var(array(
                 'u_pic'             => $u_pic,
                 'u_tn'              => $u_tn,
-                'autostart'         => ($playback_options['autostart'] ? 'true' : 'false'),
-                'enablecontextmenu' => ($playback_options['enablecontextmenu'] ? 'true' : 'false'),
-                'stretchtofit'      => isset($playback_options['stretchtofit']) ? ($playback_options['stretchtofit'] ? 'true' : 'false') : 'false',
-                'showstatusbar'     => ($playback_options['showstatusbar'] ? 'true' : 'false'),
-                'loop'              => ($playback_options['loop'] ? 'true' : 'false'),
-                'playcount'         => ($playback_options['loop'] ? '9999' : '1'),
-                'uimode'            => $playback_options['uimode'],
                 'height'            => $playback_options['height'],
                 'width'             => $playback_options['width'],
                 'movie'             => Media::getFileUrl('orig', $I['media_filename'], $I['media_mime_ext']),
@@ -682,20 +320,15 @@ function MG_displayMP3($I, $opt=array())
                 'lang_noflash'      => $LANG_MG03['no_flash'],
                 'swf_version'       => '9',
             ));
-            $u_image .= $V->finish($V->parse('output', 'video'));
+            $u_image = $V->finish($V->parse('output', 'video'));
             return array($u_image, '', $win_width, $win_height, '');
-            break;
-        case 3: // use mms links
-            $mms_path = preg_replace("/http/i", 'mms', $_MG_CONF['mediaobjects_url']);
-            $u_pic = $mms_path . '/orig/'.  $I['media_filename'][0] . '/' . $I['media_filename'] . '.' . $I['media_mime_ext'];
-            list($u_image, $p_image, $media_size_orig) = Media::getThumbInfo($I);
             break;
     }
 
     $retval = MG_getFramedImage($opt['display_skin'], $I['media_title'],
-                  $u_pic, $u_image, $media_size_disp[0], $media_size_disp[1]);
+                  $u_pic, $u_image, $media_size_orig[0], $media_size_orig[1]);
 
-    return array($retval, $u_image, $media_size_disp[0], $media_size_disp[1], $u_pic);
+    return array($retval, $u_image, $media_size_orig[0], $media_size_orig[1], $u_pic);
 }
 
 function MG_displayGeneric($I, $opt=array())
@@ -705,9 +338,9 @@ function MG_displayGeneric($I, $opt=array())
     $u_pic = $_MG_CONF['site_url'] . '/download.php?mid=' . $I['media_id'];
     list($u_image, $p_image, $media_size_orig) = Media::getThumbInfo($I);
     $retval = MG_getFramedImage($opt['display_skin'], $I['media_title'],
-                  $u_pic, $u_image, $media_size_disp[0], $media_size_disp[1]);
+                  $u_pic, $u_image, $media_size_orig[0], $media_size_orig[1]);
 
-    return array($retval, $u_image, $media_size_disp[0], $media_size_disp[1], $u_pic);
+    return array($retval, $u_image, $media_size_orig[0], $media_size_orig[1], $u_pic);
 }
 
 function MG_displayTGA($I, $opt=array())
@@ -807,7 +440,10 @@ function MG_displayJPG($I, $opt=array())
 
     $media_size_disp = false;
     if ($full == 1) {
-        $u_image = Media::getFileUrl('orig', $I['media_filename'], $I['media_mime_ext']);
+        $originalFile = Media::getReadableFileInfo('orig', $I['media_filename'], $I['media_mime_ext']);
+        $u_image = ($originalFile !== false)
+            ? $originalFile['url']
+            : Media::getFileUrl('orig', $I['media_filename'], $I['media_mime_ext']);
     } else {
         if ($I['remote_media'] == 1) {
             if ($I['media_resolution_x'] != 0 && $I['media_resolution_y'] != 0) {
@@ -818,29 +454,36 @@ function MG_displayJPG($I, $opt=array())
             }
             $u_image = $I['remote_url'];
         } else {
-            $u_image = Media::getFileUrl('disp', $I['media_filename'], $I['media_mime_ext']);
-            $media_size_disp = @getimagesize(Media::getFilePath('disp', $I['media_filename'], $I['media_mime_ext']));
-            if ($media_size_disp == false) {
-                $u_image = Media::getFileUrl('disp', $I['media_filename'], 'jpg');
-                $media_size_disp = @getimagesize(Media::getFilePath('disp', $I['media_filename'], 'jpg'));
-                if ($media_size_disp == false) {
-                    $fname = 'missing.png';
-                    $u_image = $_MG_CONF['mediaobjects_url'] . '/' . $fname;
-                    $p_image = $_MG_CONF['path_mediaobjects']      . $fname;
-                    $media_size_disp = @getimagesize($pimage);
-                }
+            $displayFile = Media::getReadableFileInfo('disp', $I['media_filename'], $I['media_mime_ext']);
+            if ($displayFile === false && strtolower($I['media_mime_ext']) !== 'jpg') {
+                $displayFile = Media::getReadableFileInfo('disp', $I['media_filename'], 'jpg');
+            }
+
+            if ($displayFile !== false) {
+                $u_image = $displayFile['url'];
+                $media_size_disp = MG_getImageInfo180($displayFile['path']);
+            }
+
+            if ($displayFile === false || $media_size_disp === false) {
+                /* Built-in fallback image is a plugin asset, not site media. */
+                $fname = 'missing.png';
+                $u_image = $_MG_CONF['site_url'] . '/mediaobjects/' . $fname;
+                $p_image = $_MG_CONF['path_html'] . 'mediaobjects/' . $fname;
+                $media_size_disp = MG_getImageInfo180($p_image);
             }
         }
     }
 
     if ($media_size_disp == false) {
-        $media_size_disp[0] = 0;
-        $media_size_disp[1] = 0;
+        $media_size_disp = array(0, 0);
     }
 
     $media_link_start = '';
     $media_link_end   = '';
-    $media_size_orig = @getimagesize(Media::getFilePath('orig', $I['media_filename'], $I['media_mime_ext']));
+    $originalFile = Media::getReadableFileInfo('orig', $I['media_filename'], $I['media_mime_ext']);
+    $media_size_orig = ($originalFile !== false)
+        ? MG_getImageInfo180($originalFile['path'])
+        : false;
     
     if ($media_size_orig == false ||
             $opt['full_display'] == 2 ||
@@ -922,19 +565,12 @@ function MG_buildContent($media, &$opt)
         case 'video/mpeg' :
         case 'video/x-mpeg' :
         case 'video/x-mpeq2a' :
-            if ($_MG_CONF['use_wmp_mpeg'] == 1) {
-                $function = 'MG_displayASF';
-                break;
-            }
         case 'video/x-motion-jpeg' :
         case 'video/quicktime' :
         case 'video/x-qtc' :
         case 'video/x-m4v' :
+            // MediaGallery 1.8 uses the HTML5 video renderer for MPEG/MOV/MP4.
             $function = 'MG_displayMOV';
-            if ($media['media_mime_ext'] == 'mp4' &&
-                isset($_MG_CONF['play_mp4_flv']) && $_MG_CONF['play_mp4_flv'] == true) {
-                $function = 'MG_displayFLV';
-            }
             break;
         case 'embed' :
             $function = 'MG_displayEmbed';
@@ -1036,6 +672,15 @@ function MG_displayMedia($id, $full=0, $sortOrder=0, $comments=0, $spage=0)
 
     $media = $media_array[$key];
 
+    // One meaningful title is reused by the H1, page title and comments.
+    $media_title_plain = trim(strip_tags(isset($media['media_title']) ? $media['media_title'] : ''));
+    if ($media_title_plain === '') {
+        $media_title_plain = $LANG_MG03['image'] . ' ' . ($key + 1) . ' - ' . strip_tags($mg_album->title);
+    }
+    $media_title_display = (isset($media['media_title']) && trim(strip_tags($media['media_title'])) !== '')
+        ? PLG_replaceTags($media['media_title'])
+        : MG_escapeHTML($media_title_plain);
+
     if ($mg_album->full == 2 || $_MG_CONF['discard_original'] == 1 || ($mg_album->full == 1 && $_USER['uid'] > 1)) {
         $full = 0;
     }
@@ -1134,6 +779,10 @@ function MG_displayMedia($id, $full=0, $sortOrder=0, $comments=0, $spage=0)
     }
     $vf = $full;
 
+    $switch_size = '';
+    $lang_switch_size = '';
+    $switch_viewsize_link = '';
+
     if ($media['media_type'] == '0') { // image
         $switch_size = $_MG_CONF['site_url'] . "/media.php?f=" . ($full ? '0' : '1')
                      . '&amp;sort=' . $sortOrder
@@ -1167,7 +816,7 @@ function MG_displayMedia($id, $full=0, $sortOrder=0, $comments=0, $spage=0)
     }
 
     $rating_box = '';
-    if ($mg_album->enable_rating > 0) {
+    if ($mg_album->enable_rating > 0 && intval($media['media_votes']) > 0) {
         require_once $_CONF['path'] . 'plugins/mediagallery/include/lib-rating.php';
         $rating_box = MG_getRatingBar(
             $mg_album->enable_rating,
@@ -1194,9 +843,6 @@ function MG_displayMedia($id, $full=0, $sortOrder=0, $comments=0, $spage=0)
     }
 
     $media_desc = PLG_replaceTags(nl2br($media['media_desc']));
-    if (strlen($media_desc) > 0) {
-        $media_desc = '<p style="margin:5px">'.$media_desc.'</p>';
-    }
 
     $getid3link = '';
     $getid3linkend = '';
@@ -1206,14 +852,20 @@ function MG_displayMedia($id, $full=0, $sortOrder=0, $comments=0, $spage=0)
     $lang_keywords = '';
     if ($mg_album->enable_keywords == 1 && !empty($media['media_keywords'])) {
         $lang_keywords = $LANG_MG01['keywords'];
-        $keyWords = array();
-        $keyWords = explode(' ', $media['media_keywords']);
-        $numKeyWords = count($keyWords);
-        for ($i=0; $i<$numKeyWords; $i++) {
-            $keyWords[$i] = str_replace('"', ' ', $keyWords[$i]);
-            $searchKeyword = $keyWords[$i];
-            $keyWords[$i] = str_replace('_', ' ', $keyWords[$i]);
-            $kwText .= '<a href="' . $_MG_CONF['site_url'] . '/search.php?mode=search&amp;swhere=1&amp;keywords=' . $searchKeyword . '&amp;keyType=any">' . $keyWords[$i] . '</a>';
+        $keyWords = preg_split('/[\s,]+/', trim($media['media_keywords']));
+        if (!is_array($keyWords)) {
+            $keyWords = array();
+        }
+        foreach ($keyWords as $keyword) {
+            $keyword = trim(str_replace('\"', ' ', $keyword));
+            if ($keyword === '') {
+                continue;
+            }
+            $searchKeyword = rawurlencode($keyword);
+            $displayKeyword = MG_escapeHTML(str_replace('_', ' ', $keyword));
+            $kwText .= '<a class="mg-tag" href="' . $_MG_CONF['site_url']
+                . '/search.php?mode=search&amp;swhere=1&amp;keywords=' . $searchKeyword
+                . '&amp;keyType=any">' . $displayKeyword . '</a>';
         }
     }
 
@@ -1277,7 +929,7 @@ function MG_displayMedia($id, $full=0, $sortOrder=0, $comments=0, $spage=0)
         'birdseed'            => $birdseed,
         'lang_slideshow_link' => $LANG_MG03['slide_show'],
         'image_detail'        => $u_image,
-        'media_title'         => (isset($media['media_title']) && $media['media_title'] != ' ') ? PLG_replaceTags($media['media_title']) : '',
+        'media_title'         => $media_title_display,
         'album_title'         => $mg_album->title,
         'media_desc'          => (isset($media['media_desc']) && $media['media_desc'] != ' ') ? $media_desc : '',
         'media_time'          => $media_date[0],
@@ -1316,7 +968,7 @@ function MG_displayMedia($id, $full=0, $sortOrder=0, $comments=0, $spage=0)
         'media_keywords'      => $kwText,
         'lang_keywords'       => $lang_keywords,
         'owner_username'      => $owner_link,
-        'property'            => $property,
+        'property'            => MG_escapeHTML($property),
         'lang_property'       => $LANG_MG04['exif_header'],
         'media_id'            => $media_id,
         'exif_info'           => $exif_info,
@@ -1326,6 +978,9 @@ function MG_displayMedia($id, $full=0, $sortOrder=0, $comments=0, $spage=0)
         'lang_uploaded_by'    => $LANG_MG01['uploaded_by'],
         'album_id'            => $aid,
         'lang_search'         => $LANG_MG01['search'],
+        'lang_aria_breadcrumb' => $LANG_MG03['aria_breadcrumb'],
+        'lang_aria_media_actions' => $LANG_MG03['aria_media_actions'],
+        'lang_media_id' => $LANG_MG03['media_id_label'],
     ));
     MG_buildSlideshow($mg_album, $T, $sortOrder);
 
@@ -1354,12 +1009,12 @@ function MG_displayMedia($id, $full=0, $sortOrder=0, $comments=0, $spage=0)
         } elseif (isset($_GET['mode'])) {
             $commode = COM_applyFilter($_GET['mode']);
         }
-        $commentcode = 0; // ¡‚Ì‚Æ‚±‚ë–³ðŒ‚ÉƒRƒƒ“ƒg“Še‚ð‹–‰ÂB
-        $retval .= CMT_userComments($sid, $media['media_title'], 'mediagallery',
+        $commentcode = 0; // ä»Šã®ã¨ã“ã‚ç„¡æ¡ä»¶ã«ã‚³ãƒ¡ãƒ³ãƒˆæŠ•ç¨¿ã‚’è¨±å¯ã€‚
+        $retval .= CMT_userComments($sid, $media_title_plain, 'mediagallery',
                        $comorder, $commode, 0, $page, false, $delete_option, $commentcode);
     }
 
-    return array(strip_tags($media['media_title']), $retval, $aid);
+    return array($media_title_plain, $retval, $aid);
 }
 
 
@@ -1369,10 +1024,46 @@ function MG_rotateMedia($album_id, $media_id, $direction, $actionURL = '')
 
     $album_id = (int) $album_id;
     $media_id = (int) $media_id;
-    $sql = "SELECT media_filename, media_mime_ext FROM {$_TABLES['mg_media']} "
+
+    $album = new mgAlbum($album_id);
+    if (!isset($album->id) || !$album->valid || ($album->access != 3 && !SEC_hasRights('mediagallery.admin'))) {
+        COM_errorLog('MediaGallery: rotate rejected because the user has no write access to album ' . $album_id, 1);
+        if ($actionURL == -1 || $actionURL == '') {
+            return false;
+        }
+        COM_redirect($_MG_CONF['site_url'] . '/index.php');
+    }
+
+    $linkCount = DB_count($_TABLES['mg_media_albums'], array('album_id', 'media_id'), array($album_id, $media_id));
+    if ($linkCount < 1) {
+        COM_errorLog('MediaGallery: rotate rejected because media ' . $media_id . ' is not in album ' . $album_id, 1);
+        if ($actionURL == -1 || $actionURL == '') {
+            return false;
+        }
+        COM_redirect($_MG_CONF['site_url'] . '/album.php?aid=' . $album_id);
+    }
+
+    $sql = "SELECT media_filename, media_mime_ext, media_type FROM {$_TABLES['mg_media']} "
          . "WHERE media_id = " . $media_id;
     $result = DB_query($sql);
-    list($filename, $mime_ext) = DB_fetchArray($result);
+    $mediaRow = DB_fetchArray($result);
+    if (!is_array($mediaRow)) {
+        COM_errorLog('MediaGallery: rotate rejected because media ' . $media_id . ' does not exist', 1);
+        if ($actionURL == -1 || $actionURL == '') {
+            return false;
+        }
+        COM_redirect($_MG_CONF['site_url'] . '/album.php?aid=' . $album_id);
+    }
+    $filename = $mediaRow['media_filename'];
+    $mime_ext = $mediaRow['media_mime_ext'];
+    $media_type = $mediaRow['media_type'];
+    if ((int) $media_type !== 0) {
+        COM_errorLog('MediaGallery: rotate rejected for non-image media ' . $media_id, 1);
+        if ($actionURL == -1 || $actionURL == '') {
+            return false;
+        }
+        COM_redirect($_MG_CONF['site_url'] . '/album.php?aid=' . $album_id);
+    }
     if (DB_error()) {
         COM_errorLog("MG_rotateMedia: Unable to retrieve media object data");
         if ($actionURL == '') {

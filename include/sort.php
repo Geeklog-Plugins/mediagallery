@@ -105,6 +105,8 @@ function MG_sortAlbums($parent=0, $actionURL = '')
         'lang_save'            => $LANG_MG01['save'],
         'lang_cancel'          => $LANG_MG01['cancel'],
         's_form_action'        => $_MG_CONF['site_url'] . '/admin.php',
+        'gltoken_name'         => CSRF_TOKEN,
+        'gltoken'              => SEC_createToken(),
     ));
 
     $rowcounter = 1;
@@ -194,7 +196,11 @@ function MG_saveAlbumSort($album_id)
 
     if (!SEC_hasRights('mediagallery.admin')) {
         COM_errorLog("MediaGallery: Someone has tried to illegally sort albums in Media Gallery. "
-                   . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: $REMOTE_ADDR",1);
+                   . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: " . MG_getRemoteAddress(),1);
+        return COM_showMessageText($LANG_MG00['access_denied_msg']);
+    }
+    if (!SEC_checkToken()) {
+        COM_errorLog('MediaGallery: album sort rejected because of an invalid CSRF token.', 1);
         return COM_showMessageText($LANG_MG00['access_denied_msg']);
     }
 
@@ -238,7 +244,7 @@ function MG_staticSortMedia($album_id, $actionURL='')
     $album = new mgAlbum($album_id);
     if ($album->access != 3) {
         COM_errorLog("Someone has tried to illegally sort albums in Media Gallery. "
-                   . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: $REMOTE_ADDR",1);
+                   . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: " . MG_getRemoteAddress(),1);
         return COM_showMessageText($LANG_MG00['access_denied_msg']);
     }
 
@@ -270,6 +276,8 @@ function MG_staticSortMedia($album_id, $actionURL='')
         'lang_descending'         => $LANG_MG01['descending'],
         'lang_sort_options'       => $LANG_MG01['sort_options'],
         'lang_order_options'      => $LANG_MG01['order_options'],
+        'gltoken_name'            => CSRF_TOKEN,
+        'gltoken'                 => SEC_createToken(),
     ));
 
     $retval .= $T->finish($T->parse('output', 'admin'));
@@ -285,6 +293,16 @@ function MG_saveStaticSortMedia($album_id, $actionURL='')
 
     if ($album_id == 0) {
         COM_errorLog("Media Gallery: Invalid album_id passed to sort");
+        return COM_showMessageText($LANG_MG00['access_denied_msg']);
+    }
+
+    $album = new mgAlbum($album_id);
+    if (!isset($album->id) || !$album->valid || ($album->access != 3 && !SEC_hasRights('mediagallery.admin'))) {
+        COM_errorLog('MediaGallery: static media sort rejected because the user has no write access to album ' . intval($album_id), 1);
+        return COM_showMessageText($LANG_MG00['access_denied_msg']);
+    }
+    if (!SEC_checkToken()) {
+        COM_errorLog('MediaGallery: static media sort rejected because of an invalid CSRF token.', 1);
         return COM_showMessageText($LANG_MG00['access_denied_msg']);
     }
 

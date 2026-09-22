@@ -129,6 +129,10 @@ class Media {
              . "WHERE album_id = " . $this->album_id;
         $result = DB_query($sql);
         $A = DB_fetchArray($result);
+        if (!is_array($A)) {
+            $this->access = 0;
+            return;
+        }
         $this->access = self::hasAccess($A['owner_id'], $A['group_id'], $A['perm_owner'],
                                         $A['perm_group'], $A['perm_members'], $A['perm_anon']);
     }
@@ -167,23 +171,75 @@ class Media {
     {
         global $_MG_CONF;
 
+        $resolved = false;
         if ($info['media_tn_attached'] == 1) {
-            $pimage = self::getFilePath('tn', $info['media_filename'], 'jpg', 1);
-            $image  = self::getFileUrl ('tn', $info['media_filename'], 'jpg', 1);
+            $relativeBase = 'tn/' . $info['media_filename'][0] . '/tn_' . $info['media_filename'];
+            $attachedExtensions = array('jpg', 'jpeg', 'png', 'gif', 'bmp');
+            foreach ($attachedExtensions as $attachedExt) {
+                $resolved = MG_resolveMediaStorageFile180($relativeBase . '.' . $attachedExt);
+                if ($resolved !== false) {
+                    break;
+                }
+            }
         } else {
             $fname = self::getDefaultThumbnail($info, $tn_size);
-            $pimage = $_MG_CONF['path_mediaobjects']      . $fname;
-            $image  = $_MG_CONF['mediaobjects_url'] . '/' . $fname;
-        }
-        $size = @getimagesize($pimage);
-        if ($size == false) {
-            $fname = 'missing.png';
-            $pimage = $_MG_CONF['path_mediaobjects']      . $fname;
-            $image  = $_MG_CONF['mediaobjects_url'] . '/' . $fname;
-            $size = @getimagesize($pimage);
+
+            if (strpos($fname, '/') === false) {
+                $pimage = $_MG_CONF['path_html'] . 'mediaobjects/' . $fname;
+                $image  = $_MG_CONF['site_url'] . '/mediaobjects/' . $fname;
+                $size = MG_getImageInfo180($pimage);
+                if ($size !== false) {
+                    return array($image, $pimage, $size);
+                }
+            } else {
+                $resolved = MG_resolveMediaStorageFile180($fname);
+            }
         }
 
+        if ($resolved !== false) {
+            $size = MG_getImageInfo180($resolved['path']);
+            if ($size !== false) {
+                return array($resolved['url'], $resolved['path'], $size);
+            }
+        }
+
+        $fname = 'missing.png';
+        $pimage = $_MG_CONF['path_html'] . 'mediaobjects/' . $fname;
+        $image  = $_MG_CONF['site_url'] . '/mediaobjects/' . $fname;
+        $size = MG_getImageInfo180($pimage);
+
         return array($image, $pimage, $size);
+    }
+
+    static public function getDefaultThumbnailInfo($info = '', $tn_size = '')
+    {
+        global $_MG_CONF;
+
+        $filename = self::getDefaultThumbnail($info, $tn_size);
+
+        if (strpos($filename, '/') === false) {
+            $path = $_MG_CONF['path_html'] . 'mediaobjects/' . $filename;
+            $url = $_MG_CONF['site_url'] . '/mediaobjects/' . $filename;
+            $size = MG_getImageInfo180($path);
+            if ($size !== false) {
+                return array($url, $path, $size);
+            }
+        } else {
+            $resolved = MG_resolveMediaStorageFile180($filename);
+            if ($resolved !== false) {
+                $size = MG_getImageInfo180($resolved['path']);
+                if ($size !== false) {
+                    return array($resolved['url'], $resolved['path'], $size);
+                }
+            }
+        }
+
+        $filename = 'missing.png';
+        $path = $_MG_CONF['path_html'] . 'mediaobjects/' . $filename;
+        $url = $_MG_CONF['site_url'] . '/mediaobjects/' . $filename;
+        $size = MG_getImageInfo180($path);
+
+        return array($url, $path, $size);
     }
 
     // get the default thumbnail
@@ -317,6 +373,7 @@ class Media {
     // Testing!
     static public function getThumbPath($path, $tn_size)
     {
+        $postfix = '';
         switch ($tn_size) {
             case '0':
                 $postfix = '_100.';
@@ -354,6 +411,39 @@ class Media {
 
         return $retval;
 		*/
+    }
+
+    static public function getReadableFileInfo($type, $filename, $ext = '', $atttn = 0)
+    {
+        global $_MG_CONF;
+
+        if ($filename === '') {
+            return false;
+        }
+
+        $tn = ($atttn == 1) ? 'tn_' : '';
+        $relativeBase = $type . '/' . $filename[0] . '/' . $tn . $filename;
+
+        if ($atttn == 1) {
+            $extensions = array('jpg');
+        } elseif ($ext !== '') {
+            $extensions = array(ltrim($ext, '.'));
+        } else {
+            $extensions = array();
+            foreach ($_MG_CONF['validExtensions'] as $candidate) {
+                $extensions[] = ltrim($candidate, '.');
+            }
+        }
+
+        foreach ($extensions as $candidate) {
+            $resolved = MG_resolveMediaStorageFile180($relativeBase . '.' . $candidate);
+            if ($resolved !== false) {
+                $resolved['extension'] = $candidate;
+                return $resolved;
+            }
+        }
+
+        return false;
     }
 
     static public function getFilePath($type, $filename, $ext = '', $atttn = 0)
@@ -421,6 +511,8 @@ class Media {
                     if (isset($_MG_USERPREFS['mp3_player']) && $_MG_USERPREFS['mp3_player'] != -1) {
                         $player = $_MG_USERPREFS['mp3_player'];
                     }
+                    $new_y = 360;
+                    $new_x = 580;
                     switch ($player) {
                         case 0 :    // WMP
                             $new_y = 260;
@@ -430,7 +522,7 @@ class Media {
                             $new_y = 25;
                             $new_x = 350;
                             break;
-                        case 2 :
+                        case 2:
                             $new_y = 360;
                             $new_x = 580;
                             break;
@@ -455,8 +547,8 @@ class Media {
                     $resolution_y = $new_y;
                 } else { // must be a video...
 
-                    $playback_options['height'] = $_MG_CONF['swf_height'];
-                    $playback_options['width']  = $_MG_CONF['swf_width'];
+                    $playback_options['height'] = isset($_MG_CONF['swf_height']) ? $_MG_CONF['swf_height'] : 320;
+                    $playback_options['width']  = isset($_MG_CONF['swf_width']) ? $_MG_CONF['swf_width'] : 480;
                     $poResult = DB_query("SELECT * FROM {$_TABLES['mg_playback_options']} "
                                        . "WHERE media_id='" . DB_escapeString($this->id) . "'");
                     while ($poRow = DB_fetchArray($poResult)) {
@@ -467,12 +559,12 @@ class Media {
                         $resolution_x = $this->resolution_x;
                         $resolution_y = $this->resolution_y;
                     } else {
-                        if ($this->resolution_x == 0 && $this->remote_media != 1) {
+                        if ($this->resolution_x == 0 && $this->remote != 1) {
                             $filepath = self::getFilePath('orig', $this->filename, $this->mime_ext);
                             $size = @filesize($filepath);
                             
                             // skip files over 8M in size..
-                            if ($size < 8388608) {
+                            if ($size !== false && $size < 8388608) {
                                 list($resolution_x, $resolution_y) = self::getResolutionID3($filepath);
                             }
                         } else {
@@ -490,7 +582,8 @@ class Media {
                         $resolution_x = $resolution_x + 40;
                         $resolution_y = $resolution_y + 40;
                     }
-                    if ($this->mime_type == 'video/x-flv' && $_MG_CONF['use_flowplayer'] != 1) {
+                    $use_flowplayer = isset($_MG_CONF['use_flowplayer']) ? $_MG_CONF['use_flowplayer'] : 0;
+                    if ($this->mime_type == 'video/x-flv' && $use_flowplayer != 1) {
                         $resolution_x = $resolution_x + 60;
                         if ($resolution_x < 590) {
                             $resolution_x = 590;
@@ -533,7 +626,9 @@ class Media {
 
         list($tn_width, $tn_height) = self::getTNSize($tn_size, $album->tnWidth, $album->tnHeight);
 
-        list($newwidth, $newheight) = self::getImageWH($this->media_size[0], $this->media_size[1], $tn_width, $tn_height);
+        $media_size = (is_array($this->media_size) && isset($this->media_size[0], $this->media_size[1]))
+                    ? $this->media_size : array($tn_width, $tn_height);
+        list($newwidth, $newheight) = self::getImageWH($media_size[0], $media_size[1], $tn_width, $tn_height);
         if (!isset($resolution_x)) {
             $resolution_x = $newwidth;
         }
@@ -551,10 +646,22 @@ class Media {
 
         $fileSize = MG_getSize($fs_bytes);
 
-        $direct_url = self::getFileUrl('disp', $this->filename, $this->mime_ext);
+        $direct_url = '';
+        $direct_preview_path = '';
         $direct_path = self::getFilePath('disp', $this->filename, $this->mime_ext);
-        if (!file_exists($direct_path)) {
-            $direct_url = self::getFileUrl('disp', $this->filename, 'jpg');
+        if (file_exists($direct_path)) {
+            $direct_url = self::getFileUrl('disp', $this->filename, $this->mime_ext);
+            $direct_preview_path = $direct_path;
+        } else {
+            $direct_jpg_path = self::getFilePath('disp', $this->filename, 'jpg');
+            if (file_exists($direct_jpg_path)) {
+                $direct_url = self::getFileUrl('disp', $this->filename, 'jpg');
+                $direct_preview_path = $direct_jpg_path;
+            } elseif (!empty($this->media_thumbnail)) {
+                // Existing installations may not have a display derivative for every image.
+                // Fall back to the proven historical thumbnail instead of emitting a broken URL.
+                $direct_url = $this->media_thumbnail;
+            }
         }
 
         $edit_item = '';
@@ -587,7 +694,7 @@ class Media {
                 $hrefdirect = $direct_url;
             }
         }
-        $caption = PLG_replaceTags(str_replace('$', '&#36;', $this->title));
+        $caption = MG_escapeHTML(strip_tags(PLG_replaceTags(str_replace('$', '&#36;', $this->title))));
 
         if ($searchmode == 1) {
             $templatePath = MG_getTemplatePath_byName($_MG_CONF['search_album_skin']);
@@ -597,8 +704,8 @@ class Media {
         $L = COM_newTemplate($templatePath);
         $L->set_file('media_link','medialink.thtml');
         $L->set_var(array(
-            'hrefdirect' => $hrefdirect,
-            'href'       => $url_media_item,
+            'hrefdirect' => MG_escapeHTML($hrefdirect),
+            'href'       => MG_escapeHTML($url_media_item),
             'caption'    => $caption,
             'id'         => 'id' . rand(),
         ));
@@ -624,6 +731,40 @@ class Media {
         $media_item_thumbnail = MG_getFramedImage($skin, $this->title, $url_media_item,
                                                   $media_thumbnail, $newwidth, $newheight, $media_start_link);
 
+        // MediaGallery 1.8: default album cards prefer the physical original.
+        // Passing an empty extension makes getFilePath()/getFileUrl() resolve the real
+        // extension through getMediaExt(), which is more robust for legacy libraries.
+        // CSS alone creates the square crop at rest and reveals the complete image on hover.
+        $media_card_preview = $media_item_thumbnail;
+        if ($searchmode == 0 && $this->type == 0 && $this->remote != 1) {
+            $card_cover_source = '';
+            $card_full_source = '';
+
+            $orig_preview_path = self::getFilePath('orig', $this->filename);
+            if (is_file($orig_preview_path)) {
+                $original_card_url = self::getFileUrl('orig', $this->filename);
+                $card_cover_source = $original_card_url;
+                $card_full_source = $original_card_url;
+            } elseif (!empty($direct_url)) {
+                // Legacy fallback: use the best existing display/thumbnail source only
+                // when no physical original can be resolved.
+                $card_cover_source = $direct_url;
+                $card_full_source = $direct_url;
+            }
+
+            if (!empty($card_cover_source)) {
+                $card_cover_url = MG_escapeHTML($card_cover_source);
+                $card_full_url = MG_escapeHTML($card_full_source);
+                $media_card_preview = $media_start_link
+                    . '<span class="mg-card-preview-stack">'
+                    . '<img class="mg-card-preview-image mg-card-preview-cover" src="' . $card_cover_url
+                    . '" alt="' . $caption . '" loading="lazy" decoding="async">'
+                    . '<img class="mg-card-preview-image mg-card-preview-full" src="' . $card_full_url
+                    . '" alt="" aria-hidden="true" loading="lazy" decoding="async">'
+                    . '</span></a>';
+            }
+        }
+
         if ($mode == 1) {
             return $media_item_thumbnail;
         }
@@ -645,6 +786,10 @@ class Media {
         } else {
             $media_time = MG_getUserDateTimeFormat($this->time);
         }
+        $media_date_format = isset($_CONF['shortdate']) ? $_CONF['shortdate'] : '%x';
+$media_date_short = function_exists('COM_strftime')
+    ? COM_strftime($media_date_format, $media_time[1])
+    : strftime($media_date_format, $media_time[1]);
 
         $media_title = (!empty($this->title)) ? PLG_replaceTags($this->title) : 'No Name';
 
@@ -673,10 +818,12 @@ class Media {
             'row_height'        => $tn_height,
             'media_title'       => $media_title,
             'media_description' => PLG_replaceTags(nl2br($this->description)),
-            'media_tag'         => strip_tags($this->title),
+            'media_tag'         => MG_escapeHTML(strip_tags($this->title)),
             'media_time'        => $media_time[0],
+            'media_date_short'  => $media_date_short,
             'media_owner'       => $username,
             'media_item_thumbnail' => $media_item_thumbnail,
+            'media_card_preview'    => $media_card_preview,
             'site_url'          => $_MG_CONF['site_url'],
             'lang_published'    => $LANG_MG03['published'],
             'lang_on'           => $LANG_MG03['on'],
@@ -762,7 +909,9 @@ class Media {
             return array($this->media_thumbnail, $this->media_thumbnail_file);
         }
 
-        list($newwidth, $newheight) = self::getImageWH($this->media_size[0], $this->media_size[1], 100, 100);
+        $media_size = (is_array($this->media_size) && isset($this->media_size[0], $this->media_size[1]))
+                    ? $this->media_size : array(100, 100);
+        list($newwidth, $newheight) = self::getImageWH($media_size[0], $media_size[1], 100, 100);
         $media_dim = 'width="' . $newwidth . '" height="' . $newheight . '"';
         $title = strip_tags($this->title);
         return '<img src="' .$this->media_thumbnail . '" ' . $media_dim
@@ -803,6 +952,15 @@ class Media {
 
     static public function getImageWH($imgwidth, $imgheight, $maxwidth, $maxheight, $stretch=true)
     {
+        $imgwidth = (int) $imgwidth;
+        $imgheight = (int) $imgheight;
+        $maxwidth = max(1, (int) $maxwidth);
+        $maxheight = max(1, (int) $maxheight);
+
+        if ($imgwidth < 1 || $imgheight < 1) {
+            return array($maxwidth, $maxheight);
+        }
+
         if ($imgwidth > $maxwidth || $imgheight > $maxheight) {
 
             $ratio_width  = $imgwidth / $maxwidth;
@@ -879,8 +1037,8 @@ class Media {
 
         $FileInfo = self::getID3($filepath);
 
-        $resolution_x = $FileInfo['video']['resolution_x'];
-        $resolution_y = $FileInfo['video']['resolution_y'];
+        $resolution_x = isset($FileInfo['video']['resolution_x']) ? $FileInfo['video']['resolution_x'] : 0;
+        $resolution_y = isset($FileInfo['video']['resolution_y']) ? $FileInfo['video']['resolution_y'] : 0;
         if ($resolution_x < 1 || $resolution_y < 1) {
             $resolution_x = -1;
             $resolution_y = -1;
@@ -890,14 +1048,6 @@ class Media {
                 $resolution_y = $FileInfo['meta']['onMetaData']['height'];
             }
         }
-        if ($resolution_x != 0) {
-            $sql = "UPDATE " . $_TABLES['mg_media']
-                 . " SET media_resolution_x=" . intval($resolution_x)
-                     . ",media_resolution_y=" . intval($resolution_y)
-                 . " WHERE media_id='" . DB_escapeString($I['media_id']) . "'";
-            DB_query($sql);
-        }
-
         return array($resolution_x, $resolution_y);
     }
 }

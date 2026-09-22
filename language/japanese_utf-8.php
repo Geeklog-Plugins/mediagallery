@@ -199,6 +199,24 @@ $LANG_MG01 = array (
     'recheck'                   => '再チェック',
     'mg_directories'            => 'メディアギャラリーのディレクトリ',
     'mg_dir_structure'          => 'メディアギャラリーのディレクトリ構造',
+    'media_storage'             => '永続メディアストレージ',
+    'active_media_path'         => '使用中のメディアパス',
+    'expected_media_path'       => '想定されるメディアパス',
+    'active_media_url'          => '使用中のメディアURL',
+    'media_storage_root'        => 'ストレージルート',
+    'plugin_media_assets'       => 'プラグイン画像リソース',
+    'valid_media_assets'        => '必須画像 %2$d 件中 %1$d 件が有効です',
+    'storage_unresolved'        => '永続ストレージの保存先を特定できません',
+    'storage_path_mismatch'     => '使用中のパスが想定パスと一致しません',
+    'storage_root_invalid'      => 'ディレクトリが存在しないか、読み書きできません',
+    'invalid_media_asset'       => '画像が存在しないか、読み込めないか、無効です',
+    'storage_operation'         => 'ストレージの同期',
+    'repair_media_storage'      => 'メディアストレージを同期',
+    'repair_media_storage_help' => '過去のユーザーメディア（オリジナル、表示画像、サムネイル、カバー）のみを永続画像ディレクトリへコピーして検証します。プラグイン画像とコピー元ファイルはそのまま保持されます。',
+    'repair_media_storage_success' => 'ユーザーメディアの同期が完了しました。',
+    'media_storage_current'      => '同期が必要な過去のユーザーメディアはありません。',
+    'repair_media_storage_failed' => '同期に失敗しました。対象パスはGeeklogのエラーログで確認してください。',
+    'invalid_security_token'    => 'セキュリティトークンが無効か期限切れです。ページを再読み込みして再試行してください。',
     'ok'                        => 'OK',
     'not_found'                 => '見つかりません。',
     'not_writable'              => '書き込み不可',
@@ -1619,3 +1637,69 @@ $LANG_configselects['mediagallery'] = array(
 if (isset($_MG_CONF, $_MG_CONF['custom_image_width'], $_MG_CONF['custom_image_height'])) {
     $LANG_configselects['mediagallery'][21][$LANG_MG01['size_custom'] . ' - ' . $_MG_CONF['custom_image_width'] . 'x' . $_MG_CONF['custom_image_height']] = 9;
 }
+
+$LANG_MG01['admin_help'] = 'MediaGallery administration gives you quick access to albums, member galleries, maintenance tasks, reports and plugin configuration.';
+
+
+$LANG_MG01['manage_albums'] = 'Manage Albums';
+$LANG_MG01['manage_albums_help'] = 'アルバム、メディア項目、ギャラリー構成を管理します。';
+$LANG_MG01['overview'] = 'Overview';
+$LANG_MG01['media_items'] = 'Media items';
+$LANG_MG01['pending_media'] = 'Pending media';
+$LANG_MG01['status_ok'] = 'OK';
+$LANG_MG01['status_check'] = 'Check';
+$LANG_MG01['media_storage'] = 'Media storage';
+$LANG_MG01['content'] = 'Content';
+$LANG_MG01['content_categories'] = 'Categories';
+$LANG_MG01['content_categories_help'] = 'Organize and maintain MediaGallery categories.';
+$LANG_MG01['member_albums_help'] = 'Manage member galleries, quotas and related album tools.';
+$LANG_MG01['manage'] = 'Manage';
+$LANG_MG01['maintenance_reports'] = 'Maintenance & reports';
+$LANG_MG01['maintenance_tools'] = 'Batch & maintenance';
+$LANG_MG01['maintenance_tools_help'] = 'Run thumbnail, resize, quota, sorting and batch maintenance tools.';
+$LANG_MG01['reports_tools'] = 'Reports & tools';
+$LANG_MG01['reports_tools_help'] = 'Open usage reports, EXIF tools, RSS rebuilds and environment checks.';
+$LANG_MG01['open_tools'] = 'Open tools';
+
+
+// MediaGallery 1.8 modern browser uploader
+$LANG_MG03['upload_drop_title'] = "ここにファイルをドロップしてアップロード";
+$LANG_MG03['upload_drop_help'] = "複数のファイルをここにドラッグ＆ドロップするか、コンピューターから選択できます。";
+$LANG_MG03['upload_choose_files'] = "ファイルを選択";
+$LANG_MG03['upload_queue'] = "アップロード一覧";
+$LANG_MG03['upload_remove'] = "削除";
+$LANG_MG03['upload_file_details'] = "ファイルの詳細";
+$LANG_MG03['upload_files_selected'] = "個のファイルを選択";
+$LANG_MG03['upload_noscript'] = "複数ファイルの選択は利用できます。ドラッグ＆ドロップと編集可能な一覧にはJavaScriptが必要です。";
+
+
+// MediaGallery 1.8 media manager labels
+$LANG_MG01['manager_select_media'] = "メディアを選択";
+$LANG_MG01['manager_album_cover'] = "アルバム表紙";
+$LANG_MG01['manager_slideshow'] = "スライドショー";
+
+
+// MediaGallery 1.8 non-image manager states
+$LANG_MG01['manager_cover_unavailable'] = "サムネイルがないため利用できません";
+$LANG_MG01['manager_slideshow_unavailable'] = "画像のみ";
+
+
+// MediaGallery 1.8 media access editor
+$LANG_MG01['media_access_ownership'] = "アクセスと所有権";
+$LANG_MG01['media_access_inherited'] = "このメディアのアクセス権はアルバム「%s」から継承されます。";
+$LANG_MG01['media_edit_album_rights'] = "アルバムのアクセス権を編集";
+
+
+// MediaGallery 1.8 storage diagnostics
+$LANG_MG01['core_path_images'] = "Geeklog path_images";
+$LANG_MG01['core_images_url'] = "Geeklog images_url";
+$LANG_MG01['persistent_storage_files'] = "永続ストレージのファイル";
+$LANG_MG01['legacy_storage_user_files'] = "旧ストレージのユーザーファイル";
+$LANG_MG01['legacy_storage_files_warning'] = "新規1.8インストールでは想定外です";
+$LANG_MG01['local_media_db_rows'] = "データベース内のローカルメディア";
+$LANG_MG01['image_original_files'] = "読み取り可能な元画像";
+$LANG_MG01['image_display_files'] = "読み取り可能な表示画像";
+$LANG_MG01['image_thumbnail_files'] = "読み取り可能なサムネイル";
+$LANG_MG01['missing_media_files'] = "欠落しているメディアID";
+
+?>

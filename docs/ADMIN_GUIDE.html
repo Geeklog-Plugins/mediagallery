@@ -1,0 +1,454 @@
+<article class="mediagallery-admin-guide">
+<h1>MediaGallery 1.8.0 — Administrator Guide</h1>
+<p>This guide is intended for site administrators who already have MediaGallery installed. It focuses on day-to-day configuration, album and media management, moderation, maintenance and Geeklog integration.</p>
+
+<nav aria-label="MediaGallery administrator guide contents">
+<h2>Contents</h2>
+<ul>
+<li><a href="#quick-start">Quick start</a></li>
+<li><a href="#configuration">General configuration</a></li>
+<li><a href="#albums">Albums</a></li>
+<li><a href="#album-permissions">Album permissions</a></li>
+<li><a href="#media">Media items</a></li>
+<li><a href="#upload">Uploading and importing media</a></li>
+<li><a href="#manage-media">Managing media</a></li>
+<li><a href="#moderation">Moderation</a></li>
+<li><a href="#member-albums">Member Albums and quotas</a></li>
+<li><a href="#categories">Categories</a></li>
+<li><a href="#exif">EXIF/IPTC</a></li>
+<li><a href="#rss">RSS and podcasts</a></li>
+<li><a href="#watermarks">Watermarking</a></li>
+<li><a href="#batch">Batch processing and maintenance</a></li>
+<li><a href="#reports">Reports and environment checks</a></li>
+<li><a href="#geeklog">Geeklog integration</a></li>
+<li><a href="#autotags">Autotags</a></li>
+<li><a href="#appearance">Themes and appearance</a></li>
+<li><a href="#troubleshooting">Troubleshooting</a></li>
+</ul>
+</nav>
+
+<section id="quick-start">
+<h2>1. Quick start</h2>
+<p>The functions used most often are available from the MediaGallery album and administration menus. A typical workflow is:</p>
+<ol>
+<li>Create an album.</li>
+<li>Set its title, description, owner/group and permissions.</li>
+<li>Choose which features are enabled: comments, ratings, RSS, slideshow, downloads, member uploads, moderation and so on.</li>
+<li>Add media with the browser upload form, Remote Media or an import method.</li>
+<li>Use <strong>Manage Media</strong> to edit titles, descriptions, categories, keywords, order and album cover.</li>
+<li>Use the MediaGallery administration area for global configuration, member albums, batch sessions, categories, EXIF/IPTC, reports and maintenance.</li>
+</ol>
+<p>The Root Album is the top of the gallery tree. Create real albums below it; direct media uploads to the synthetic Root Album are not allowed.</p>
+</section>
+
+<section id="configuration">
+<h2>2. General configuration</h2>
+<p>MediaGallery administrator-editable settings are managed through Geeklog's Configuration API. The exact options visible depend on the installed build, but the main groups control gallery behavior, display, uploads, image processing, member albums and integration with Geeklog.</p>
+
+<h3>Gallery access and integration</h3>
+<dl>
+<dt>Login required</dt>
+<dd>When enabled, only authenticated Geeklog users can browse MediaGallery regardless of anonymous album permissions.</dd>
+<dt>What's New integration</dt>
+<dd>Controls whether recent MediaGallery content is included in Geeklog's What's New output. New-comment processing can be disabled separately where available if it becomes too resource intensive.</dd>
+<dt>User profile integration</dt>
+<dd>When enabled, MediaGallery can add gallery information such as recent uploads or owned albums to Geeklog user profiles.</dd>
+<dt>Usage tracking</dt>
+<dd>When enabled, MediaGallery records gallery activity for the usage report. This produces additional database data, so enable it only when the report is useful.</dd>
+</dl>
+
+<h3>File and image behavior</h3>
+<dl>
+<dt>Preserve original filename</dt>
+<dd>Controls whether MediaGallery retains a recognizable version of the uploaded filename rather than using only its internal generated name.</dd>
+<dt>Discard original images</dt>
+<dd>If enabled, the original uploaded image can be removed after MediaGallery has created the display and thumbnail derivatives. This saves disk space but removes the highest-quality source.</dd>
+<dt>Image quality and display sizes</dt>
+<dd>JPG quality, display dimensions and thumbnail-related options affect generated derivatives. Changing a setting generally affects new processing; existing images may need a rebuild operation.</dd>
+<dt>Image-processing backend</dt>
+<dd>MediaGallery can use the Geeklog-configured GD, ImageMagick or NetPBM backend. Use the environment check if image processing unexpectedly fails.</dd>
+</dl>
+
+<h3>Batch options</h3>
+<p>Large operations are split into small cycles. Batch settings control how much work is attempted per cycle and how long MediaGallery pauses between cycles. Conservative values are preferable on shared hosting.</p>
+</section>
+
+<section id="albums">
+<h2>3. Albums</h2>
+<p>Albums are the main containers in MediaGallery. They can contain media and sub-albums, and each album can have its own display, upload, moderation and permission policy.</p>
+
+<h3>Creating and editing an album</h3>
+<p>Use <strong>Create Album</strong> from a gallery/album options menu. To modify an existing album, open it and choose the edit action. Editing also allows an authorized administrator to change its parent and therefore move it within the album tree.</p>
+
+<h3>Important album attributes</h3>
+<table>
+<thead><tr><th>Option</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td>Title and description</td><td>Primary descriptive information shown to visitors. Descriptions are also useful for MediaGallery search and SEO output.</td></tr>
+<tr><td>Album theme</td><td>Selects the presentation variant used by the album where multiple bundled/custom album themes are available.</td></tr>
+<tr><td>Comments</td><td>Allows Geeklog comments on media within the album.</td></tr>
+<tr><td>Ratings</td><td>Enables media ratings according to the available member/anonymous policy.</td></tr>
+<tr><td>EXIF/IPTC</td><td>Allows embedded image metadata to be displayed when available.</td></tr>
+<tr><td>RSS / podcast</td><td>Enables an album feed and, where configured, podcast-style feed metadata.</td></tr>
+<tr><td>Client-side sorting</td><td>Allows visitors to change the display order without modifying the stored album order.</td></tr>
+<tr><td>Album description display</td><td>Controls whether the description is visible in the album view.</td></tr>
+<tr><td>View counters</td><td>Controls display of album/media view counters.</td></tr>
+<tr><td>Keywords</td><td>Controls display/use of media keywords in the album presentation.</td></tr>
+<tr><td>Sub-album position</td><td>Determines whether sub-albums appear before or after media.</td></tr>
+<tr><td>Rows / columns</td><td>Controls pagination density in album views.</td></tr>
+<tr><td>Thumbnail size</td><td>Selects the visual size used by the album; current 1.8 templates preserve image proportions more cleanly than the historical square presentation.</td></tr>
+<tr><td>Slideshow</td><td>Enables the maintained slideshow/lightbox experience for album media.</td></tr>
+<tr><td>Downloads / original image access</td><td>Controls whether visitors can download media or view the original image when retained.</td></tr>
+<tr><td>Random Image Block</td><td>Determines whether eligible images from this album can appear in the MediaGallery random block.</td></tr>
+<tr><td>Maximum image dimensions</td><td>Images larger than the configured limits can be resized during processing.</td></tr>
+<tr><td>Maximum file size</td><td>Rejects uploads that exceed the album-specific limit.</td></tr>
+<tr><td>Allowed media types</td><td>Restricts which media formats may be added to the album.</td></tr>
+<tr><td>Member uploads</td><td>Allows registered users without album edit rights to submit media.</td></tr>
+<tr><td>Moderation</td><td>Routes eligible member uploads through the moderation queue.</td></tr>
+<tr><td>Moderator group</td><td>Geeklog group responsible for moderated submissions.</td></tr>
+</tbody>
+</table>
+
+<h3>Album cover</h3>
+<p>MediaGallery can use a media item as the album cover. Use <strong>Manage Media</strong> to select a specific cover. Resetting the cover returns the album to its normal automatic cover behavior. Albums may also support an attached cover image depending on the edit form and theme.</p>
+
+<h3>Featured albums</h3>
+<p>Where the feature is enabled, an album can be marked as featured and associated with a Geeklog topic/location. MediaGallery still applies album access rules before displaying featured content.</p>
+
+<h3>Sorting albums</h3>
+<p>Album ordering can be adjusted manually or through the administrative static-sort tool. The batch/static sort functions are useful when a large subtree needs a consistent order.</p>
+
+<h3>Global album attribute editor</h3>
+<p>The global attribute editor applies selected album settings to many albums at once. Only attributes explicitly marked for update are changed. A starting album can be used to limit the update to one branch of the tree.</p>
+
+<h3>Global album permission editor</h3>
+<p>The global permission editor performs the same kind of bulk operation for ownership and permissions. Use it carefully: a broad permission change can expose or hide a large portion of the gallery at once.</p>
+
+<h3>Deleting albums</h3>
+<p>Album deletion is permanent when content is deleted rather than moved. Review child albums and media before confirming a destructive operation. The administrative <strong>Batch Delete Albums</strong> tool is intended for experienced administrators and should be used with a current backup.</p>
+</section>
+
+<section id="album-permissions">
+<h2>4. Album permissions</h2>
+<p>MediaGallery uses Geeklog's owner/group/member/anonymous permission model at album level.</p>
+<table>
+<thead><tr><th>Audience</th><th>Typical rights</th></tr></thead>
+<tbody>
+<tr><td>Owner</td><td>Read and edit/manage the album.</td></tr>
+<tr><td>Geeklog group</td><td>Read and, if granted, edit/manage.</td></tr>
+<tr><td>Logged-in members</td><td>Normally read access; member-upload capability is configured separately.</td></tr>
+<tr><td>Anonymous visitors</td><td>Read access only when explicitly allowed.</td></tr>
+</tbody>
+</table>
+
+<h3>Hidden albums</h3>
+<p>A hidden album is omitted from normal gallery browsing for users without management access. Hidden albums can still be useful as repositories for media referenced through Geeklog content integrations such as autotags. Users with sufficient write/admin access can still see and manage them.</p>
+
+<h3>Force child permissions</h3>
+<p>When editing permissions on a parent album, MediaGallery can propagate the permission set to descendants where the interface offers that option. Use this only when all child albums are intended to share the same policy.</p>
+</section>
+
+<section id="media">
+<h2>5. Media items</h2>
+<p>MediaGallery supports images, audio, video and generic downloadable files. The exact processing depends on media type, configured image tools and album policy.</p>
+
+<h3>Image media</h3>
+<p>For supported images MediaGallery normally creates a display image and thumbnail and may retain the original. Maximum dimensions, conversion/original-file options and watermark settings can affect the result.</p>
+
+<h3>Audio and video</h3>
+<p>Maintained 1.8 playback uses native HTML5 audio/video where practical. Unsupported legacy formats such as FLV/SWF are not executed through Flash; they fall back to safe download/legacy handling. Attached thumbnails are useful for media that cannot generate a representative preview.</p>
+
+<h3>Metadata</h3>
+<p>Each media item can have a title, description, keywords, category, owner, capture/upload information and optional attached thumbnail. Some audio/image formats may provide metadata that MediaGallery can extract automatically.</p>
+</section>
+
+<section id="upload">
+<h2>6. Uploading and importing media</h2>
+
+<h3>Browser upload</h3>
+<p>The browser upload form is the normal way to add a small number of files. Each upload slot keeps its own title/caption, description, keywords, category, attached thumbnail and processing options.</p>
+<p>Browser uploads are still constrained by PHP/web-server upload limits. If a file fails before MediaGallery can process it, check <code>upload_max_filesize</code>, <code>post_max_size</code> and the server/PHP logs.</p>
+
+<h3>Remote Media</h3>
+<p>Remote Media is intended for supported public HTTP(S) resources. Current 1.8 security rejects localhost, private/reserved network targets, unsafe redirects and unbounded downloads. A local thumbnail may be attached when appropriate.</p>
+
+<h3>FTP import</h3>
+<p>FTP import is useful for large batches that have already been transferred to the server. Files must be placed inside the configured import area. MediaGallery confines imports to that directory and revalidates paths before processing.</p>
+<p>Recursive imports can map subdirectories to sub-albums. This is convenient when a directory tree already represents the desired gallery hierarchy.</p>
+
+<h3>ZIP import</h3>
+<p>When ZIP import is enabled, MediaGallery can process archives containing multiple media files. Current 1.8 handling rejects path traversal, unsafe temporary paths, symlink members, excessive entry counts and excessive declared uncompressed payloads.</p>
+
+<h3>Command-line import</h3>
+<p>For server-side bulk work, the command-line importer can process files recursively. Current 1.8 handling rejects symbolic links and preserves the intended directory-to-subalbum relationship.</p>
+
+<h3>What happens after an upload?</h3>
+<p>Depending on the media type and album settings MediaGallery may:</p>
+<ul>
+<li>validate the user's upload rights;</li>
+<li>validate the media type and file-size limit;</li>
+<li>validate filename and MIME information;</li>
+<li>create thumbnail and display derivatives for images;</li>
+<li>resize images that exceed album limits;</li>
+<li>apply an automatic watermark;</li>
+<li>extract selected metadata;</li>
+<li>place user submissions into moderation;</li>
+<li>notify moderators;</li>
+<li>update RSS/search/integration state.</li>
+</ul>
+</section>
+
+<section id="manage-media">
+<h2>7. Managing media</h2>
+<p><strong>Manage Media</strong> is the central interface for editing and performing bulk actions within an album.</p>
+<table>
+<thead><tr><th>Action</th><th>Use</th></tr></thead>
+<tbody>
+<tr><td>Edit title/description/keywords/category</td><td>Update metadata directly from the manager.</td></tr>
+<tr><td>Edit full media item</td><td>Open the detailed media editor for additional properties.</td></tr>
+<tr><td>Move</td><td>Move selected media to another writable album.</td></tr>
+<tr><td>Delete</td><td>Permanently remove selected media.</td></tr>
+<tr><td>Rotate</td><td>Rotate supported images.</td></tr>
+<tr><td>Watermark</td><td>Apply the selected album watermark to eligible images.</td></tr>
+<tr><td>Set album cover</td><td>Choose the media item used as the album cover.</td></tr>
+<tr><td>Reset album cover</td><td>Return to automatic/default cover selection.</td></tr>
+<tr><td>Order</td><td>Change stored media order; larger/smaller values are interpreted according to the current sort mode.</td></tr>
+<tr><td>Slideshow inclusion</td><td>Where available, choose which media are included by slideshow/autotag behavior.</td></tr>
+</tbody>
+</table>
+
+<h3>Detailed media edit</h3>
+<p>The detailed editor can expose fields such as title, description, keywords, category, capture time, owner, attached thumbnail and file replacement depending on media type and permissions. It also provides reset operations such as view/rating resets where supported.</p>
+<p>Always save the form after replacing a file or attached thumbnail; choosing a local file alone does not update the media item.</p>
+
+<h3>Static media sorting</h3>
+<p>The administrative static-sort tool can reorder media across one album or an album subtree using properties such as capture time, upload time, title or original filename, depending on the available choices in the current build.</p>
+</section>
+
+<section id="moderation">
+<h2>8. Moderation</h2>
+<p>Moderation allows registered users to submit media without publishing it immediately.</p>
+<ol>
+<li>Enable member uploads on the album.</li>
+<li>Enable moderation for that album.</li>
+<li>Select the Geeklog moderator group.</li>
+<li>Optionally enable moderator email notification.</li>
+</ol>
+<p>Queued items remain pending until an authorized moderator approves or rejects them. Approval promotes the queued media into the active MediaGallery data/files. Rejection removes the queued item and associated queued files.</p>
+<p>MediaGallery 1.8 revalidates the queued media/album relationship during moderation rather than trusting posted IDs.</p>
+</section>
+
+<section id="member-albums">
+<h2>9. Member Albums and quotas</h2>
+<p>Member Albums give selected site users their own gallery area. They can be created automatically, by self-enrollment or administratively, depending on configuration.</p>
+
+<h3>Main Member Album settings</h3>
+<ul>
+<li>enable/disable Member Albums;</li>
+<li>choose the Member Album root;</li>
+<li>set a default per-user quota;</li>
+<li>choose whether new accounts receive an album automatically;</li>
+<li>control whether members may create additional child albums;</li>
+<li>define default file-size and image-dimension limits;</li>
+<li>set default permissions and moderation policy;</li>
+<li>decide what happens to member albums when a Geeklog account is removed.</li>
+</ul>
+
+<h3>Self-enrollment</h3>
+<p>When self-enrollment is enabled, the MediaGallery member-album block can offer eligible users a link to create their own member gallery. The 1.8 block explicitly loads the MediaGallery helpers it requires, including on Geeklog 2.1.1.</p>
+
+<h3>User list and quotas</h3>
+<p>The Member Album user list shows MediaGallery-specific member information such as active status, quota and quota usage. Use it to suspend a user's member-gallery administration or adjust an individual quota.</p>
+
+<h3>Batch create member albums</h3>
+<p>This administrative function is useful when Member Albums are enabled after the site already has users, or when albums are created only on request.</p>
+
+<h3>Purge empty member albums</h3>
+<p>The purge utility helps identify empty Member Albums and their owners so unused galleries can be cleaned up.</p>
+
+<h3>Reset member flags</h3>
+<p>The reset utility reconciles MediaGallery's internal member-gallery state with the actual albums. It is mainly a repair/maintenance tool rather than a routine operation.</p>
+
+<h3>Rebuild quotas</h3>
+<p>If quota accounting becomes inconsistent after file/database maintenance, use the quota rebuild function to recalculate usage.</p>
+</section>
+
+<section id="categories">
+<h2>10. Categories</h2>
+<p>MediaGallery categories provide an additional classification layer for media. They are especially useful in MediaGallery search.</p>
+<p>Use <strong>Category Maintenance</strong> to add, edit or delete categories. Media items can then be assigned to a category through upload/edit/manage forms.</p>
+<p>Categories complement albums rather than replace them: albums define hierarchy and permissions, while categories provide cross-album classification.</p>
+</section>
+
+<section id="exif">
+<h2>11. EXIF/IPTC administration</h2>
+<p>Supported image files may contain camera and editorial metadata. MediaGallery can display selected EXIF/IPTC fields when album EXIF support is enabled.</p>
+<p>The EXIF/IPTC administration screen determines which recognized metadata fields are eligible for display. Actual values depend on what is embedded in each image.</p>
+<p>If privacy is important, review the fields you expose. Camera metadata can sometimes include timestamps, device details and location-related information.</p>
+</section>
+
+<section id="rss">
+<h2>12. RSS and podcasts</h2>
+<p>MediaGallery can provide overall and per-album feeds where those features are enabled.</p>
+
+<h3>Album RSS</h3>
+<p>Enable RSS in the album attributes when visitors should be able to subscribe to changes in that album. Sub-albums may be included depending on album options.</p>
+
+<h3>Podcast feeds</h3>
+<p>Podcast mode affects feed metadata for suitable audio/video content. Playback presentation itself is handled separately by the current HTML5 templates.</p>
+
+<h3>Rebuild feeds</h3>
+<p>The administration menu provides RSS rebuild operations. Normally feeds are updated as content changes, but a rebuild is useful after bulk metadata edits or when feed files/state need to be regenerated.</p>
+<p>Before enabling a feed for restricted content, verify that the generated feed behavior matches the privacy expectations of the site.</p>
+</section>
+
+<section id="watermarks">
+<h2>13. Watermarking</h2>
+<p>MediaGallery can apply watermark images to eligible image media automatically during upload or manually through media management.</p>
+<ul>
+<li>Select/upload a watermark image.</li>
+<li>Configure its position and opacity where those options are exposed.</li>
+<li>Enable automatic watermarking on the album if desired.</li>
+<li>Use the Manage Media batch action for selective watermarking.</li>
+</ul>
+<p>Watermarking changes image files. Keep originals/backups if you may need an unwatermarked source later.</p>
+</section>
+
+<section id="batch">
+<h2>14. Batch processing and maintenance</h2>
+<p>MediaGallery's batch system breaks expensive operations into smaller cycles to avoid long-running requests and excessive resource use.</p>
+
+<h3>Batch sessions</h3>
+<p>The administrator menu exposes paused/active batch-session management. On Geeklog 2.1.1, internal continuation is protected by POST plus the server-generated MediaGallery session identifier and ownership validation, avoiding false failures caused by Geeklog 2.1.1's referer-bound one-time token.</p>
+
+<h3>Rebuild thumbnails</h3>
+<p>Use this after changing thumbnail-related processing or when derivative files need to be recreated. A per-album rebuild may also be available from album administration.</p>
+
+<h3>Resize display images</h3>
+<p>Use this when display-image dimensions have changed and existing derivatives need to be regenerated.</p>
+
+<h3>Discard originals</h3>
+<p>This maintenance operation removes retained original images when the corresponding MediaGallery policy is enabled. This is destructive; do not run it unless you are certain the originals are no longer required.</p>
+
+<h3>Rebuild quotas</h3>
+<p>Recalculates Member Album disk usage.</p>
+
+<h3>Static sort albums / media</h3>
+<p>Applies a consistent sorting rule across selected albums or media sets.</p>
+
+<h3>Batch delete albums</h3>
+<p>Permanently deletes multiple selected albums and their content. Use with exceptional care.</p>
+</section>
+
+<section id="reports">
+<h2>15. Reports and environment checks</h2>
+
+<h3>Usage report</h3>
+<p>When usage tracking is enabled, the report shows recorded MediaGallery activity. Disable usage tracking if the report is not needed and database growth is a concern.</p>
+
+<h3>Environment check</h3>
+<p>The environment check is the first administrative tool to use when uploads or image operations fail. It can help identify unavailable GD/ImageMagick/NetPBM support and other host-environment problems.</p>
+
+<h3>Geeklog logs</h3>
+<p>For unexplained failures inspect Geeklog's <code>error.log</code> and, when appropriate, the web server/PHP error log. MediaGallery errors are generally more actionable there than in a blank/partial browser response.</p>
+</section>
+
+<section id="geeklog">
+<h2>16. Geeklog integration</h2>
+
+<h3>Comments</h3>
+<p>MediaGallery uses Geeklog's comment system when comments are enabled for an album. Geeklog comment protections and moderation behavior therefore apply.</p>
+
+<h3>Search</h3>
+<p>MediaGallery integrates with Geeklog search and also has gallery-oriented searching/filtering. Good titles, descriptions, keywords and categories improve discoverability.</p>
+
+<h3>What's New</h3>
+<p>Recent media and, depending on configuration, comments can appear in Geeklog's What's New output.</p>
+
+<h3>Featured albums</h3>
+<p>Featured albums can be surfaced in Geeklog pages/topics according to their configuration and permissions.</p>
+
+<h3>Random Image Block</h3>
+<p>The MediaGallery random-media PHP block can display an image selected from eligible albums. Enable/configure the block through Geeklog's Blocks administration. Albums can individually opt in/out of random-media selection.</p>
+
+<h3>User profiles</h3>
+<p>When MediaGallery profile integration is enabled, relevant MediaGallery information can be added to Geeklog user profiles.</p>
+</section>
+
+<section id="autotags">
+<h2>17. Autotags</h2>
+<p>MediaGallery supports Geeklog autotags so albums and media can be embedded in stories, static pages and other Geeklog content that processes autotags. Autotags honor MediaGallery access rules.</p>
+
+<h3>Finding IDs</h3>
+<p>The album ID is the <code>aid</code> value in an album URL and may also be shown to administrators in MediaGallery. Media IDs are visible in the media detail/administration interfaces where enabled.</p>
+
+<h3>Common autotags</h3>
+<table>
+<thead><tr><th>Autotag</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><code>[album:ID ...]</code></td><td>Display/link an album cover.</td></tr>
+<tr><td><code>[media:ID ...]</code></td><td>General-purpose media thumbnail/display integration.</td></tr>
+<tr><td><code>[img:ID ...]</code></td><td>Render an image-oriented media reference.</td></tr>
+<tr><td><code>[slideshow:ID ...]</code></td><td>Embed a slideshow for an album/media set.</td></tr>
+<tr><td><code>[fslideshow:ID ...]</code></td><td>Legacy slideshow entry point retained for compatibility; current rendering is routed to maintained slideshow behavior rather than Flash.</td></tr>
+<tr><td><code>[video:ID ...]</code></td><td>Embed supported video media using maintained playback behavior.</td></tr>
+<tr><td><code>[audio:ID ...]</code></td><td>Embed supported audio media.</td></tr>
+<tr><td><code>[download:ID ...]</code></td><td>Provide a download link to a media item where access allows it.</td></tr>
+<tr><td><code>[mlink:ID ...]</code></td><td>Provide a text link to a media item.</td></tr>
+</tbody>
+</table>
+<p>Common optional parameters historically include width, height, alignment and caption text. Exact behavior varies by autotag and maintained template. Use the simplest form first and add presentation parameters only when needed.</p>
+
+<h3>Permissions and hidden albums</h3>
+<p>Autotags are useful for hidden albums used as editorial media repositories. The embedded output still follows MediaGallery permission checks; hiding an album from navigation is not a substitute for access control.</p>
+</section>
+
+<section id="appearance">
+<h2>18. Themes and appearance</h2>
+<p>MediaGallery's public rendering is template-driven and 1.8 includes responsive modernization of the maintained album/media/search views.</p>
+<p>Album themes can alter presentation for specific albums. When maintaining custom themes, copy/override only the files that need customization where the current theme structure permits it; minimizing overrides makes future upgrades easier.</p>
+<p>After upgrading MediaGallery, review custom album themes against the maintained 1.8 templates because older overrides may retain obsolete markup or playback assumptions.</p>
+</section>
+
+<section id="troubleshooting">
+<h2>19. Troubleshooting</h2>
+
+<h3>Image upload fails but a ZIP/PDF or generic file works</h3>
+<p>Image uploads require an operational image-processing backend. Check the MediaGallery environment page and verify GD is loaded or the configured ImageMagick/NetPBM binaries are executable.</p>
+
+<h3>Large browser upload fails before MediaGallery reports an error</h3>
+<p>Check PHP/web-server limits such as <code>upload_max_filesize</code>, <code>post_max_size</code>, memory limits and request timeouts.</p>
+
+<h3>Thumbnails/display images are not created</h3>
+<p>Check the configured image backend, writable MediaGallery storage directories and Geeklog/PHP error logs. Rebuild thumbnails only after the underlying processing problem has been fixed.</p>
+
+<h3>Batch operation reports an expired security token on Geeklog 2.1.1</h3>
+<p>Use a current 1.8.0 build. Current batch continuation no longer depends on Geeklog 2.1.1's referer-bound one-time token for each continuation request.</p>
+
+<h3>Member Album block reports a missing helper/function</h3>
+<p>Use the current 1.8.0 block implementation. The member-enrollment block explicitly loads the shared MediaGallery helper file it requires.</p>
+
+<h3>Portrait thumbnails look soft or square</h3>
+<p>Current 1.8 album cards prefer the local original as the visual source when available and use CSS cropping rather than enlarging old square thumbnail derivatives. Clear browser/theme caches after updating templates/CSS.</p>
+
+<h3>Moderated item cannot be approved</h3>
+<p>Confirm that the queued media still belongs to a valid target album and that the current account has the relevant MediaGallery administration/moderation rights. Review Geeklog's error log for rejected relationship or permission checks.</p>
+
+<h3>RSS output is stale</h3>
+<p>Use the MediaGallery RSS rebuild actions after bulk metadata/content changes if normal incremental updates did not refresh the expected feed.</p>
+
+<h3>General diagnostic procedure</h3>
+<ol>
+<li>Reproduce the issue once.</li>
+<li>Check Geeklog's <code>error.log</code>.</li>
+<li>Check the web server/PHP error log.</li>
+<li>Use MediaGallery's environment check for backend/path problems.</li>
+<li>Verify album permissions and the exact account performing the action.</li>
+<li>For a batch action, check the MediaGallery batch-session state.</li>
+</ol>
+</section>
+
+<footer>
+<p><strong>Scope of this guide:</strong> administrator usage after installation. Developer architecture, release planning, upgrade migration and interoperability contracts are documented separately in the repository.</p>
+</footer>
+</article>

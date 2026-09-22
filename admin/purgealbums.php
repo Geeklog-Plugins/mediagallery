@@ -59,9 +59,8 @@ function MG_selectAlbums()
 
     if (COM_versionCompare(VERSION, '2.2.2', '>=')) {
         $result = DB_query(
-            "SELECT u.uid, ua.lastlogin, u.username, u.fullname FROM $_TABLES['users'] AS u "
-            . "LEFT JOIN $_TABLES['user_attributes] AS ua "
-            . "ON u.uid = ua.uid"
+            "SELECT u.uid, ua.lastlogin, u.username, u.fullname FROM {$_TABLES['users']} AS u "
+            . "LEFT JOIN {$_TABLES['user_attributes']} AS ua ON u.uid = ua.uid"
         );
     } else {
         if (isset($glversion[1]) && ($glversion[1] < 4)) {
@@ -71,6 +70,7 @@ function MG_selectAlbums()
         }
     }
 
+    $siteUsers = array();
     while ($U = DB_fetchArray($result)) {
         $siteUsers[$U['uid']]['lastlogin'] = $U['lastlogin'];
         $siteUsers[$U['uid']]['username']  = $U['username'];
@@ -197,7 +197,7 @@ $display = COM_startBlock($LANG_MG00['admin'], '', COM_getBlockTemplate('_admin_
 $display .= MG_showAdminMenu('member_albums');
 $display .= $T->finish($T->parse('output', 'admin'));
 $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
-$display = COM_createHTMLDocument($display);
+$display = MG_adminCreateHTMLDocument($display);
 
 COM_output($display);
 ?>

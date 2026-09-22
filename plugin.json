@@ -1,9 +1,10 @@
 {
   "schema": 1,
   "id": "mediagallery",
-  "name": "mediagallery",
+  "name": "MediaGallery",
   "icon": "public_html/images/mediagallery.png",
   "requires": {
-    "geeklog": "2.0.0"
+    "geeklog": "2.1.1",
+    "php": "5.6.0"
   }
 }

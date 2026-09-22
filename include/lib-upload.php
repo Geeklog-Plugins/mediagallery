@@ -40,18 +40,10 @@ require_once $_CONF['path'] . 'plugins/mediagallery/include/lib-exif.php';
 require_once $_CONF['path'] . 'plugins/mediagallery/include/lib-watermark.php';
 require_once $_CONF['path'] . 'plugins/mediagallery/include/common.php';
 require_once $_CONF['path'] . 'plugins/mediagallery/include/lib/imglib/lib-image.php';
+require_once $_CONF['path'] . 'plugins/mediagallery/include/upload_security_180.php';
 
 global $_SPECIAL_IMAGES_MIMETYPE;
-$_SPECIAL_IMAGES_MIMETYPE = array(
-    'image/x-targa',
-    'image/tga',
-    'image/photoshop',
-    'image/x-photoshop',
-    'image/psd',
-    'application/photoshop',
-    'application/psd',
-    'image/tiff'
-);
+$_SPECIAL_IMAGES_MIMETYPE = MG_getSpecialImageMimeTypes180();
 
 function MG_videoThumbnail($aid, $srcImage, $media_filename)
 {
@@ -84,9 +76,9 @@ function MG_processOriginal($srcImage, $mimeExt, $mimeType, $aid, $dnc)
     if ($_MG_CONF['verbose'] ) {
         COM_errorLog("MG Upload: Entering MG_processOriginal()");
     }
-    $imgsize = @getimagesize($srcImage);
-    $imgwidth = $imgsize[0];
-    $imgheight = $imgsize[1];
+    $imgsize = MG_getImageInfo180($srcImage);
+    $imgwidth = (is_array($imgsize) && isset($imgsize[0])) ? (int) $imgsize[0] : 0;
+    $imgheight = (is_array($imgsize) && isset($imgsize[1])) ? (int) $imgsize[1] : 0;
 
     if ($imgwidth == 0 || $imgheight == 0) {
         $imgwidth = 620;
@@ -161,8 +153,15 @@ function MG_createThumbnail($srcImage, $imageThumb, $mimeType, $aid)
         if ($rc == false) {
             COM_errorLog("MG_createThumbnail: Error resizing uploaded image to thumbnail size.");
             @unlink($srcImage);
+            if ($tmpImage != '') {
+                @unlink($tmpImage);
+            }
             return array(false, $msg);
         }
+    }
+
+    if ($tmpImage != '') {
+        @unlink($tmpImage);
     }
 
     return array(true, '');
@@ -172,17 +171,17 @@ function MG_createThumbnail($srcImage, $imageThumb, $mimeType, $aid)
 // --
 // Create the display image
 // --
-function MG_createDisplayImage($srcImage, $imageDisplay, $mimeExt, $mimeType, $aid, $dnc=1)
+function MG_createDisplayImage($srcImage, $imageDisplay, $mimeExt, $mimeType, $aid, $dnc=1, $processOriginal=true)
 {
     global $_CONF, $_TABLES, $_MG_CONF, $_SPECIAL_IMAGES_MIMETYPE;
 
-    $imgsize = @getimagesize($srcImage);
+    $imgsize = MG_getImageInfo180($srcImage);
 
     if ($imgsize == false && !in_array($mimeType, $_SPECIAL_IMAGES_MIMETYPE)) {
         return array(false, 'Unable to determine src image dimensions');
     }
-    $imgwidth  = $imgsize[0];
-    $imgheight = $imgsize[1];
+    $imgwidth = (is_array($imgsize) && isset($imgsize[0])) ? (int) $imgsize[0] : 0;
+    $imgheight = (is_array($imgsize) && isset($imgsize[1])) ? (int) $imgsize[1] : 0;
 
     $sql = "SELECT display_image_size "
          . "FROM {$_TABLES['mg_albums']} WHERE album_id = " . intval($aid);
@@ -214,7 +213,9 @@ function MG_createDisplayImage($srcImage, $imageDisplay, $mimeExt, $mimeType, $a
         list($rc, $msg) = MG_convertImageFormat($srcImage, $tmpImage, 'image/jpeg', 0);
         if ($rc == false) {
             COM_errorLog("MG_createDisplayImage: Error converting uploaded image to jpeg format.");
-            @unlink($srcImage);
+            if ($processOriginal) {
+                @unlink($srcImage);
+            }
             return array(false, $msg);
         }
     }
@@ -226,7 +227,9 @@ function MG_createDisplayImage($srcImage, $imageDisplay, $mimeExt, $mimeType, $a
 //      list($rc,$msg) = MG_resizeImage($srcImage, $imageDisplay, $imgheight,    $imgwidth,    $mimeType, 0, $_MG_CONF['jpg_quality']);
     }
     if ($rc == false) {
-        @unlink($srcImage);
+        if ($processOriginal) {
+            @unlink($srcImage);
+        }
         @unlink($tmpImage);
         return array(false, $msg);
     }
@@ -234,7 +237,7 @@ function MG_createDisplayImage($srcImage, $imageDisplay, $mimeExt, $mimeType, $a
         @unlink($tmpImage);
     }
 
-    if ($_MG_CONF['discard_original'] != 1) { // discard original image file
+    if ($processOriginal && $_MG_CONF['discard_original'] != 1) { // process original image file
         list($rc, $msg) = MG_processOriginal($srcImage, $mimeExt, $mimeType, $aid, $dnc);
         if ($rc == false) {
             @unlink($srcImage);
@@ -283,20 +286,145 @@ function MG_convertImage($srcImage, $imageThumb, $imageDisplay, $mimeExt, $mimeT
 
 
 
-function MG_processZip($filename, $album_id, $purgefiles, $tmpdir)
+function MG_isSafeZipEntryName($entry)
 {
-    global $_CONF, $_MG_CONF, $LANG_MG02;
+    $entry = str_replace('\\', '/', (string) $entry);
 
-    $rc = @mkdir($_MG_CONF['tmp_path'] . $tmpdir);
-    if ($rc == FALSE) {
-        $status = $LANG_MG02['error_create_tmp'];
-        return $status;
+    if ($entry === '' || strlen($entry) > 1024 || strpos($entry, "\0") !== false) {
+        return false;
+    }
+    if ($entry[0] === '/' || preg_match('/^[A-Za-z]:\//', $entry)) {
+        return false;
     }
 
-    $rc = MG_execWrapper('"' . $_MG_CONF['zip_path'] . "/unzip" . '"' . " -d " . $_MG_CONF['tmp_path'] . $tmpdir . " " . $filename);
+    foreach (explode('/', $entry) as $segment) {
+        if ($segment === '..') {
+            return false;
+        }
+    }
 
-    $status = MG_processDir($_MG_CONF['tmp_path'] . $tmpdir, $album_id, $purgefiles, 1);
-    MG_deleteDir($_MG_CONF['tmp_path'] . $tmpdir);
+    return true;
+}
+
+function MG_pathIsInside($path, $root)
+{
+    $path = realpath($path);
+    $root = realpath($root);
+    if ($path === false || $root === false) {
+        return false;
+    }
+
+    $root = rtrim($root, '/\\');
+    if (PHP_OS === 'WINNT') {
+        $path = strtolower($path);
+        $root = strtolower($root);
+    }
+
+    return $path === $root || strpos($path, $root . DIRECTORY_SEPARATOR) === 0;
+}
+
+function MG_validateExtractedZipTree($root)
+{
+    if (!is_dir($root) || is_link($root)) {
+        return false;
+    }
+
+    $handle = @opendir($root);
+    if ($handle === false) {
+        return false;
+    }
+
+    while (($entry = readdir($handle)) !== false) {
+        if ($entry === '.' || $entry === '..') {
+            continue;
+        }
+
+        $path = $root . DIRECTORY_SEPARATOR . $entry;
+        if (is_link($path) || !MG_pathIsInside($path, $root)) {
+            closedir($handle);
+            return false;
+        }
+
+        if (is_dir($path) && !MG_validateExtractedZipTree($path)) {
+            closedir($handle);
+            return false;
+        }
+    }
+
+    closedir($handle);
+    return true;
+}
+
+function MG_processZip($filename, $album_id, $purgefiles, $tmpdir)
+{
+    global $_MG_CONF, $LANG_MG02;
+
+    $zipBinary = rtrim($_MG_CONF['zip_path'], '/\\') . DIRECTORY_SEPARATOR . 'unzip';
+    $tmpBase = rtrim($_MG_CONF['tmp_path'], '/\\') . DIRECTORY_SEPARATOR;
+    $tmpLeaf = basename((string) $tmpdir);
+
+    if ($tmpLeaf === '' || $tmpLeaf === '.' || $tmpLeaf === '..' || $tmpLeaf !== (string) $tmpdir) {
+        COM_errorLog('MediaGallery: rejected unsafe ZIP temporary directory name.', 1);
+        return $LANG_MG02['generic_error'];
+    }
+
+    // Inspect member names before extraction to prevent Zip Slip while
+    // preserving the configured external unzip backend.
+    $listCmd = escapeshellarg($zipBinary) . ' -Z1 ' . escapeshellarg($filename);
+    list($entries, $listStatus) = MG_exec($listCmd);
+    if ($listStatus != 0 || empty($entries) || count($entries) > 1000) {
+        COM_errorLog('MediaGallery: rejected ZIP archive because its member list is invalid or too large.', 1);
+        return $LANG_MG02['generic_error'];
+    }
+
+    foreach ($entries as $entry) {
+        if (!MG_isSafeZipEntryName($entry)) {
+            COM_errorLog('MediaGallery: rejected unsafe ZIP member: ' . $entry, 1);
+            return $LANG_MG02['generic_error'];
+        }
+    }
+
+    // Bound declared uncompressed content before extraction to reduce ZIP-bomb
+    // risk. Info-ZIP's listing contains numeric length rows and a final total;
+    // taking the largest first-column value is therefore a conservative total.
+    $sizeCmd = escapeshellarg($zipBinary) . ' -l ' . escapeshellarg($filename);
+    list($sizeLines, $sizeStatus) = MG_exec($sizeCmd);
+    $declaredUncompressed = 0;
+    if ($sizeStatus != 0) {
+        COM_errorLog('MediaGallery: unable to inspect ZIP uncompressed size.', 1);
+        return $LANG_MG02['generic_error'];
+    }
+    foreach ($sizeLines as $line) {
+        if (preg_match('/^\s*(\d+)\s+/', $line, $match)) {
+            $declaredUncompressed = max($declaredUncompressed, (float) $match[1]);
+        }
+    }
+    if ($declaredUncompressed <= 0 || $declaredUncompressed > 1073741824) {
+        COM_errorLog('MediaGallery: rejected ZIP archive with invalid or excessive uncompressed size.', 1);
+        return $LANG_MG02['generic_error'];
+    }
+
+    if (!is_dir($tmpBase) || !is_writable($tmpBase)) {
+        return $LANG_MG02['error_create_tmp'];
+    }
+
+    $extractDir = $tmpBase . $tmpLeaf;
+    if (file_exists($extractDir) || !@mkdir($extractDir, 0700)) {
+        return $LANG_MG02['error_create_tmp'];
+    }
+
+    $extractCmd = escapeshellarg($zipBinary)
+                . ' -qq -o ' . escapeshellarg($filename)
+                . ' -d ' . escapeshellarg($extractDir);
+    $rc = MG_execWrapper($extractCmd);
+    if (!$rc || !MG_validateExtractedZipTree($extractDir)) {
+        COM_errorLog('MediaGallery: ZIP extraction failed validation; extracted data was discarded.', 1);
+        MG_deleteDir($extractDir);
+        return $LANG_MG02['generic_error'];
+    }
+
+    $status = MG_processDir($extractDir, $album_id, $purgefiles, 1);
+    MG_deleteDir($extractDir);
     return $status;
 }
 
@@ -304,7 +432,9 @@ function MG_processDir($dir, $album_id, $purgefiles, $recurse)
 {
     global $_TABLES, $LANG_MG02;
 
-    if (!@is_dir($dir)) {
+    $statusMsg = '';
+
+    if (!@is_dir($dir) || is_link($dir)) {
         $display = COM_showMessageText($LANG_MG02['invalid_directory']
                . '  [ <a href=\'javascript:history.go(-1)\'>' . $LANG_MG02['go_back'] . '</a> ]');
         $display = MG_createHTMLDocument($display);
@@ -330,6 +460,10 @@ function MG_processDir($dir, $album_id, $purgefiles, $recurse)
             $filetmp  = $dir . '/' . $file;
         }
 
+        if (is_link($filetmp)) {
+            COM_errorLog('MediaGallery: skipped symbolic link while importing directory: ' . $filetmp, 1);
+            continue;
+        }
         if (is_dir($filetmp)) {
             if ($recurse) {
                 $statusMsg .= MG_processDir($filetmp, $album_id, $purgefiles, $recurse);
@@ -366,11 +500,15 @@ function MG_deleteDir($dir)
     if ($handle = opendir($dir)) {
        while ($obj = readdir($handle)) {
            if ($obj != '.' && $obj != '..') {
-               if (is_dir($dir.$obj)) {
-                   if (!MG_deleteDir($dir.$obj))
+               $path = $dir . $obj;
+               if (is_link($path)) {
+                   if (!@unlink($path))
                        return false;
-               } elseif (is_file($dir.$obj)) {
-                   if (!unlink($dir.$obj))
+               } elseif (is_dir($path)) {
+                   if (!MG_deleteDir($path))
+                       return false;
+               } elseif (is_file($path)) {
+                   if (!@unlink($path))
                        return false;
                }
            }
@@ -431,9 +569,6 @@ function MG_getFileTypeFromExt($file_ext, $default='')
 {
     //This will set the Content-Type to the appropriate setting for the file
     switch ($file_ext) {
-        case 'exe':
-            return 'application/octet-stream';
-            break;
         case 'zip':
             return 'application/zip';
             break;
@@ -475,18 +610,30 @@ function MG_getFile($filename, $file, $album_id, $opt = array())
     $dnc         = isset($opt['dnc'])         ? $opt['dnc']         : 0;
     $replace     = isset($opt['replace'])     ? $opt['replace']     : 0;
 
+    if (!MG_validateUploadFilename180($file)) {
+        COM_errorLog('MediaGallery 1.8: rejected unsafe filename in MG_getFile(): ' . basename($file), 1);
+        return array(false, $LANG_MG02['format_not_allowed']);
+    }
+
     $artist                     = '';
     $musicAlbum                 = '';
     $genre                      = '';
     $video_attached_thumbnail   = 0;
     $successfulWatermark        = 0;
-    $dnc                        = 1; // What is this?
+    $dnc                        = ((int) $dnc === 1) ? 1 : 0;
     $errors                     = 0;
     $errMsg                     = '';
 
     require_once $_CONF['path'] . 'plugins/mediagallery/include/classAlbum.php';
     $album = new mgAlbum($album_id);
     $root_album = new mgAlbum(0);
+
+    // Album 0 is MediaGallery's virtual root container. It can contain albums,
+    // but it is not a persistent mg_albums row and must never receive media.
+    if ((int) $album_id <= 0 || !isset($album->id) || !$album->valid) {
+        COM_errorLog('MediaGallery: refused media upload to invalid/root album id ' . intval($album_id), 1);
+        return array(false, $LANG_MG02['album_nonexist']);
+    }
 
     if ($_MG_CONF['verbose']) {
         COM_errorLog("MG Upload: *********** Beginning media upload process...");
@@ -568,11 +715,24 @@ function MG_getFile($filename, $file, $album_id, $opt = array())
     $mimeExt = strtolower(substr(strrchr($file, '.'), 1));
     $mimeInfo['type'] = $mimeExt;
 
+    // Prefer content-derived MIME information. If getID3 cannot identify the
+    // file, use PHP fileinfo before falling back to browser/import metadata.
+    $localMime = MG_detectLocalMime180($filename);
+    $detectedMime = isset($mimeInfo['mime_type']) ? strtolower(trim($mimeInfo['mime_type'])) : '';
+    if (($detectedMime === '' || $detectedMime === 'application/octet-stream')
+        && $localMime !== '' && $localMime !== 'application/octet-stream') {
+        $mimeInfo['mime_type'] = $localMime;
+        $detectedMime = $localMime;
+        if ($_MG_CONF['verbose']) {
+            COM_errorLog('MG Upload: fileinfo detected mime type: ' . $localMime);
+        }
+    }
+
     // override the determination for some filetypes
     $filetype = MG_getFileTypeFromExt($mimeExt, $filetype);
 
     if (empty($mimeInfo['mime_type'])) {
-        COM_errorLog("MG Upload: getID3 was unable to detect mime type - using PHP detection");
+        COM_errorLog("MG Upload: content MIME detection was inconclusive - using upload/import metadata");
         $mimeInfo['mime_type'] = $filetype;
     }
 
@@ -686,6 +846,16 @@ function MG_getFile($filename, $file, $album_id, $opt = array())
         }
     }
 
+    if (!MG_validateMimeExtension180($file, $mimeInfo['mime_type'])) {
+        COM_errorLog(
+            'MediaGallery 1.8: rejected MIME/extension mismatch for ' . basename($file)
+            . ' (detected ' . $mimeInfo['mime_type'] . ', extension .' . $mimeExt . ')',
+            1
+        );
+        @unlink($tmpPath);
+        return array(false, $LANG_MG02['format_not_allowed']);
+    }
+
     switch ($mimeInfo['mime_type']) {
         case 'audio/mpeg' :
             $format_type = MG_MP3;
@@ -761,6 +931,7 @@ function MG_getFile($filename, $file, $album_id, $opt = array())
     }
 
     if (!($album->valid_formats & $format_type)) {
+        @unlink($tmpPath);
         return array(false, $LANG_MG02['format_not_allowed']);
     }
 
@@ -844,14 +1015,7 @@ function MG_getFile($filename, $file, $album_id, $opt = array())
         case 'image/jpg' :
         case 'image/png' :
         case 'image/bmp' :
-            $dispExt = $mimeExt;
-
-            if (in_array($mimeType, $_SPECIAL_IMAGES_MIMETYPE)) {
-                $dispExt = 'jpg';
-            }
             $media_orig = MG_getFilePath('orig', $media_filename, $mimeExt);
-            $media_disp = MG_getFilePath('disp', $media_filename, $dispExt);
-            $media_tn   = MG_getFilePath('tn',   $media_filename, $dispExt);
 
             $mimeType = $mimeInfo['mime_type'];
             // process image file
@@ -875,6 +1039,40 @@ function MG_getFile($filename, $file, $album_id, $opt = array())
                     @unlink($importSource);
                 }
                 @chmod($media_orig, 0644);
+
+                // When DNC is disabled, normalize the retained original to JPEG
+                // before creating display/thumbnail derivatives. This keeps the
+                // physical derivative extensions aligned with the final database
+                // MIME/extension values used by public rendering.
+                if ($dnc != 1 && $_MG_CONF['discard_original'] != 1
+                    && !in_array($mimeType, $_SPECIAL_IMAGES_MIMETYPE)
+                    && $mimeType != 'image/jpeg' && $mimeType != 'image/jpg') {
+                    $jpegOriginal = MG_getFilePath('orig', $media_filename, 'jpg');
+                    list($convertRc, $convertMsg) = MG_convertImageFormat(
+                        $media_orig,
+                        $jpegOriginal,
+                        'image/jpeg',
+                        0
+                    );
+
+                    if ($convertRc == false) {
+                        @unlink($jpegOriginal);
+                        $errors++;
+                        $errMsg .= $convertMsg;
+                    } else {
+                        @chmod($jpegOriginal, 0644);
+                        if ($jpegOriginal != $media_orig) {
+                            @unlink($media_orig);
+                        }
+                        $media_orig = $jpegOriginal;
+                        $mimeExt = 'jpg';
+                        $mimeType = 'image/jpeg';
+                    }
+                }
+
+                $dispExt = MG_getDisplayExtension180($mimeType, $mimeExt);
+                $media_disp = MG_getFilePath('disp', $media_filename, $dispExt);
+                $media_tn   = MG_getFilePath('tn',   $media_filename, $dispExt);
 
                 list($rc, $msg) = MG_convertImage($media_orig, $media_tn, $media_disp, $mimeExt, $mimeType, $album_id, $media_filename, $dnc);
                 if ($rc == false) {
@@ -906,12 +1104,7 @@ function MG_getFile($filename, $file, $album_id, $opt = array())
                             }
                         }
                     }
-                    if ($dnc != 1) {
-                        if (!in_array($mimeType, $_SPECIAL_IMAGES_MIMETYPE)) {
-                            $mimeExt = 'jpg';
-                            $mimeType = 'image/jpeg';
-                        }
-                    }
+
                 }
             }
             break;
@@ -1236,6 +1429,7 @@ function MG_getFile($filename, $file, $album_id, $opt = array())
             if ($queue == 0) {
                 $album->media_count++;
                 DB_change($_TABLES['mg_albums'], 'media_count', $album->media_count, 'album_id', $album->id);
+                MG_notifyAlbumSaved180($album->id);
 
                 MG_updateAlbumLastUpdate($album->id);
 
@@ -1306,124 +1500,9 @@ function MG_attachThumbnail($aid, $thumbnail, $mediaFilename)
     }
     $attach_tn = $mediaFilename . $tnExt;
     list($rc,$msg) = MG_resizeImage($thumbnail, $attach_tn, $tnHeight, $tnWidth, $tn_mime_type['mime_type'], 1, $_MG_CONF['tn_jpg_quality']);
-    return true;
-}
-
-function MG_notifyModerators($aid)
-{
-    global $LANG_DIRECTION, $_USER, $_MG_CONF, $_CONF, $_TABLES, $LANG_MG01;
-
-    $sql = "SELECT moderate, album_title, mod_group_id "
-         . "FROM {$_TABLES['mg_albums']} WHERE album_id = " . intval($aid);
-    $result = DB_query($sql);
-    $A = DB_fetchArray($result);
-    
-    if ($A['moderate'] != 1 || SEC_hasRights('mediagallery.admin')) {
-        return true;
-    }
-
-    require_once $_CONF['path'] . 'plugins/mediagallery/include/lib/phpmailer/class.phpmailer.php';
-
-    $media_user_id = $_USER['uid'];
-
-    if( empty( $LANG_DIRECTION )) {
-        // default to left-to-right
-        $direction = 'ltr';
-    } else {
-        $direction = $LANG_DIRECTION;
-    }
-
-    $charset = COM_getCharset();
-
-    COM_clearSpeedlimit(600,'mgnotify');
-    $last = COM_checkSpeedlimit ('mgnotify');
-    if ( $last == 0 ) {
-        $mail = new PHPMailer();
-        $mail->CharSet = $charset;
-        if ($_CONF['mail_settings']['backend'] == 'smtp' ) {
-            $mail->Host     = $_CONF['mail_settings']['host'] . ':' . $_CONF['mail_settings']['port'];
-            $mail->SMTPAuth = $_CONF['mail_settings']['auth'];
-            $mail->Username = $_CONF['mail_settings']['username'];
-            $mail->Password = $_CONF['mail_settings']['password'];
-            $mail->Mailer = "smtp";
-        } elseif ($_CONF['mail_settings']['backend'] == 'sendmail') {
-            $mail->Mailer = "sendmail";
-            $mail->Sendmail = $_CONF['mail_settings']['sendmail_path'];
-        } else {
-            $mail->Mailer = "mail";
-        }
-        $mail->WordWrap = 76;
-        $mail->IsHTML(true);
-        $mail->Subject = $LANG_MG01['new_upload_subject'] . $_CONF['site_name'];
-
-        if (!isset($_USER['uid']) || $_USER['uid'] < 2  ) {
-            $uname = 'Anonymous';
-        } else {
-            $uname = DB_getItem($_TABLES['users'], 'username', 'uid=' . intval($media_user_id));
-        }
-        // build the template...
-        $T = COM_newTemplate( MG_getTemplatePath($aid) );
-        $T->set_file('email', 'modemail.thtml');
-        $T->set_var(array(
-            'direction'         =>  $direction,
-            'charset'           =>  $charset,
-            'lang_new_upload'   =>  $LANG_MG01['new_upload_body'],
-            'lang_details'      =>  $LANG_MG01['details'],
-            'lang_album_title'  =>  'Album',
-            'lang_uploaded_by'  =>  $LANG_MG01['uploaded_by'],
-            'username'          =>  $uname,
-            'album_title'       =>  strip_tags($A['title']),
-            'url_moderate'      =>  '<a href="' . $_MG_CONF['site_url'] . '/admin.php?album_id=' . $aid . '&mode=moderate">Click here to view</a>',
-            'site_name'         =>  $_CONF['site_name'] . ' - ' . $_CONF['site_slogan'],
-            'site_url'          =>  $_CONF['site_url'],
-        ));
-        $body .= $T->finish($T->parse('output','email'));
-        $mail->Body = $body;
-
-        $altbody  = $LANG_MG01['new_upload_body'] . $A['title'];
-        $altbody .= "\n\r\n\r";
-        $altbody .= $LANG_MG01['details'];
-        $altbody .= "\n\r";
-        $altbody .= $LANG_MG01['uploaded_by'] . ' ' . $uname . "\n\r";
-        $altbody .= "\n\r\n\r";
-        $altbody .= $_CONF['site_name'] . "\n\r";
-        $altbody .= $_CONF['site_url'] . "\n\r";
-
-        $mail->AltBody = $altbody;
-
-        $mail->From = $_CONF['site_mail'];
-        $mail->FromName = $_CONF['site_name'];
-
-        $groups = MG_getGroupList($A['mod_group_id']);
-        $groupList = implode(',',$groups);
-
-        $sql = "SELECT DISTINCT {$_TABLES['users']}.uid,username,fullname,email "
-              ."FROM {$_TABLES['group_assignments']},{$_TABLES['users']} "
-              ."WHERE {$_TABLES['users']}.uid > 1 "
-              ."AND {$_TABLES['users']}.uid = {$_TABLES['group_assignments']}.ug_uid "
-              ."AND ({$_TABLES['group_assignments']}.ug_main_grp_id IN ({$groupList}))";
-
-        $result = DB_query($sql);
-        $nRows = DB_numRows($result);
-        $toCount = 0;
-        for ($i=0;$i < $nRows; $i++ ) {
-            $row = DB_fetchArray($result);
-            if ( $row['email'] != '' ) {
-                if ($_MG_CONF['verbose'] ) {
-                    COM_errorLog("MG Upload: Sending notification email to: " . $row['email'] . " - " . $row['username']);
-                }
-                $toCount++;
-                $mail->AddAddress($row['email'], $row['username']);
-            }
-        }
-        if ( $toCount > 0 ) {
-            if(!$mail->Send()) {
-                COM_errorLog("MG Upload: Unable to send moderation email - error:" . $mail->ErrorInfo);
-            }
-        } else {
-            COM_errorLog("MG Upload: Error - Did not find any moderators to email");
-        }
-        COM_updateSpeedlimit ('mgnotify');
+    if ($rc === false) {
+        COM_errorLog('MG_attachThumbnail: ' . $msg);
+        return false;
     }
     return true;
 }

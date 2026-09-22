@@ -152,8 +152,17 @@ function MG_continueSession($session_id, $item_limit, $refresh_rate)
 
         $function = 'mg_batch_session_' . $session['session_action'];
         if (function_exists($function)) {
-            $function($row);
-            DB_change($_TABLES['mg_session_items'], 'status', 1, 'id', $row['id']);
+            $batchResult = $function($row);
+            // 1 = completed successfully, 2 = attempted but failed.
+            // Failed items must not remain pending forever, but they also
+            // must not be reported as successful work.
+            DB_change(
+                $_TABLES['mg_session_items'],
+                'status',
+                ($batchResult === false) ? 2 : 1,
+                'id',
+                $row['id']
+            );
         }
 
         // calculate time for each loop iteration
@@ -183,21 +192,35 @@ function MG_continueSession($session_id, $item_limit, $refresh_rate)
         $processing_messages = '<p>' . sprintf($LANG_MG01['timer_expired'], $timer_expired_secs) . '</p>';
     }
 
+    $escapedSessionId = DB_escapeString($session_id);
+
     $sql = "SELECT COUNT(*) AS processed "
          . "FROM {$_TABLES['mg_session_items']} "
-         . "WHERE session_id='" . DB_escapeString($session_id) . "' AND status=1";
+         . "WHERE session_id='" . $escapedSessionId . "' AND status=1";
     $result = DB_query($sql);
     $row = DB_fetchArray($result);
-    $session_items_processed = $row['processed'];
+    $session_items_processed = (int) $row['processed'];
+
+    $sql = "SELECT COUNT(*) AS failed "
+         . "FROM {$_TABLES['mg_session_items']} "
+         . "WHERE session_id='" . $escapedSessionId . "' AND status=2";
+    $result = DB_query($sql);
+    $row = DB_fetchArray($result);
+    $session_items_failed = (int) $row['failed'];
 
     $sql = "SELECT COUNT(*) AS processing "
          . "FROM {$_TABLES['mg_session_items']} "
-         . "WHERE session_id='" . DB_escapeString($session_id) . "'";
+         . "WHERE session_id='" . $escapedSessionId . "'";
     $result = DB_query($sql);
     $row = DB_fetchArray($result);
-    $session_items_processing = $row['processing'];
+    $session_items_processing = (int) $row['processing'];
 
-    $items_remaining = $session_items_processing - $session_items_processed;
+    $sql = "SELECT COUNT(*) AS remaining "
+         . "FROM {$_TABLES['mg_session_items']} "
+         . "WHERE session_id='" . $escapedSessionId . "' AND status=0";
+    $result = DB_query($sql);
+    $row = DB_fetchArray($result);
+    $items_remaining = (int) $row['remaining'];
 
     if ($items_remaining > 0) {
         if ($item_limit == 0) {
@@ -206,11 +229,11 @@ function MG_continueSession($session_id, $item_limit, $refresh_rate)
         } else {
             $processing_messages .= '<p>' . sprintf($LANG_MG01['processing_next_items'], $item_limit) . '</p>';
         }
-        $form_action = $_MG_CONF['site_url'] . '/batch.php?mode=continue&amp;sid=' . $session_id
-                     . '&amp;refresh=' . $refresh_rate . '&amp;limit=' . $item_limit;
+        $form_action = $_MG_CONF['site_url'] . '/batch.php';
         $next_button = $LANG_MG01['next'];
-        // create the meta tag for refresh
-        $T->set_var("META", '<meta http-equiv="refresh" content="' . $refresh_rate . ';url=' . $form_action . '"' . XHTML . '>');
+        // Continuation is a state-changing operation. Keep auto-progress, but submit
+        // the protected POST form instead of mutating state through a GET refresh.
+        $T->set_var("META", '');
     } else {
         if ($item_limit == 0) {
             COM_redirect($session['session_origin']);
@@ -228,7 +251,10 @@ function MG_continueSession($session_id, $item_limit, $refresh_rate)
         MG_endSession($session_id);
     }
 
-    $session_percent = ($session_items_processed / $session_items_processing) * 100;
+    $session_items_attempted = $session_items_processed + $session_items_failed;
+    $session_percent = ($session_items_processing > 0)
+        ? (($session_items_attempted / $session_items_processing) * 100)
+        : 100;
     $session_time    = $cycle_end_time - $session['session_start_time'];
 
     $T->set_var(array(
@@ -250,7 +276,7 @@ function MG_continueSession($session_id, $item_limit, $refresh_rate)
         'L_ITEMS_PER_CYCLE'    => $LANG_MG01['items_per_cycle'],
         'TOTAL_ITEMS'          => $session_items_processing,
         'ITEMS_PROCESSED'      => $session_items_processed,
-        'ITEMS_REMAINING'      => $session_items_processing - $session_items_processed,
+        'ITEMS_REMAINING'      => $items_remaining,
         'ITEM_RATE'            => sprintf($LANG_MG01['seconds_per_item'],round(($last_cycle_time / max($num_rows, 1)))),
         'PROCESSING_MESSAGES'  => $processing_messages,
         'SESSION_PERCENT'      => round($session_percent, 2) . ' %',
@@ -258,7 +284,11 @@ function MG_continueSession($session_id, $item_limit, $refresh_rate)
         'ITEM_LIMIT'           => $item_limit,
         'TIME_LIMIT'           => $time_limit,
         'REFRESH_RATE'         => $refresh_rate,
-        'S_BATCH_ACTION'       => $form_action
+        'S_BATCH_ACTION'       => $form_action,
+        'BATCH_MODE'           => 'continue',
+        'SESSION_ID'           => $session_id,
+        'gltoken_name'         => CSRF_TOKEN,
+        'gltoken'              => SEC_createToken()
     ));
     $retval .= $T->finish($T->parse('output', 'batch'));
     return $retval;
@@ -284,12 +314,27 @@ function MG_registerSession($info=array())
 
 function MG_endSession($session_id)
 {
-    global $_TABLES;
+    global $_TABLES, $_USER;
 
-    $session_id = DB_escapeString($session_id);
-    DB_delete($_TABLES['mg_sessions'],      'session_id', $session_id);
-    DB_delete($_TABLES['mg_session_items'], 'session_id', $session_id);
-    DB_delete($_TABLES['mg_session_log'],   'session_id', $session_id);
+    $session_id = COM_applyFilter($session_id);
+    if ($session_id === '') {
+        return false;
+    }
+
+    $escapedSessionId = DB_escapeString($session_id);
+    $owner = DB_getItem($_TABLES['mg_sessions'], 'session_uid',
+                        "session_id='" . $escapedSessionId . "'");
+    if ($owner === '' || $owner === null) {
+        return false;
+    }
+    if ((int) $owner !== (int) $_USER['uid'] && !SEC_hasRights('mediagallery.admin')) {
+        COM_errorLog('MediaGallery: refused deletion of a batch session owned by another user.', 1);
+        return false;
+    }
+
+    DB_delete($_TABLES['mg_sessions'],      'session_id', $escapedSessionId);
+    DB_delete($_TABLES['mg_session_items'], 'session_id', $escapedSessionId);
+    DB_delete($_TABLES['mg_session_log'],   'session_id', $escapedSessionId);
 
     return true;
 }
@@ -332,14 +377,44 @@ function mg_batch_session_rebuildthumb($row)
 function mg_batch_session_rebuilddisplay($row)
 {
     global $_CONF;
+
     require_once $_CONF['path'] . 'plugins/mediagallery/include/lib-upload.php';
+
     $srcImage = $row['data'];
     $imageDisplay = $row['data2'];
     $mimeExt = $row['data3'];
     $mimeType = $row['mid'];
     $aid = $row['aid'];
-    list($rc, $msg) = MG_createDisplayImage($srcImage, $imageDisplay, $mimeExt, $mimeType, $aid);
-    return;
+
+    list($rc, $msg) = MG_createDisplayImage(
+        $srcImage,
+        $imageDisplay,
+        $mimeExt,
+        $mimeType,
+        $aid,
+        1,
+        false
+    );
+
+    if ($rc === false) {
+        $detail = 'Resize Images: unable to rebuild ' . $imageDisplay;
+        if ($msg !== '') {
+            $detail .= ' - ' . $msg;
+        }
+        MG_setSessionLog($row['session_id'], $detail);
+        COM_errorLog('MediaGallery: ' . $detail, 1);
+        return false;
+    }
+
+    clearstatcache(true, $imageDisplay);
+    if (!is_file($imageDisplay) || !is_readable($imageDisplay) || filesize($imageDisplay) < 1) {
+        $detail = 'Resize Images: rebuilt display image is missing or unreadable: ' . $imageDisplay;
+        MG_setSessionLog($row['session_id'], $detail);
+        COM_errorLog('MediaGallery: ' . $detail, 1);
+        return false;
+    }
+
+    return true;
 }
 
 function mg_batch_session_droporiginal($row)

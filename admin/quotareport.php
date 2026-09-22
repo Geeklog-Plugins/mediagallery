@@ -187,7 +187,7 @@ $display = COM_startBlock($LANG_MG00['admin'], '', COM_getBlockTemplate('_admin_
 $display .= MG_showAdminMenu('member_albums');
 $display .= $T->finish($T->get_var('output'));
 $display .= COM_endBlock(COM_getBlockTemplate ('_admin_block', 'footer'));
-$display = COM_createHTMLDocument($display, array('pagetitle' => $LANG_MG01['quota_report']));
+$display = MG_adminCreateHTMLDocument($display, array('pagetitle' => $LANG_MG01['quota_report']));
 
 COM_output($display);
 ?>

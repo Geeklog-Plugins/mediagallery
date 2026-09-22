@@ -126,7 +126,7 @@ class mgAlbum {
         }
 
         if ($album_id > 0) {
-            $this->loadFromDB($album_id, $groups);
+            $this->loadFromDB($album_id);
         }
     }
 
@@ -648,7 +648,7 @@ class mgAlbum {
             $retval = DB_fetchArray($result);
         }
 
-        if ($check_access == true) {
+        if ($check_access == true && !empty($retval)) {
             $access = self::hasAccess($retval['owner_id'],$retval['group_id'],
                                       $retval['perm_owner'],$retval['perm_group'],
                                       $retval['perm_members'],$retval['perm_anon']);

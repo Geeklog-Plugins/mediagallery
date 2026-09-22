@@ -48,6 +48,171 @@ function px($var)
     exit;
 }
 
+function MG_escapeHTML($value)
+{
+    return htmlspecialchars((string) $value, ENT_QUOTES, COM_getCharset(), false);
+}
+
+function MG_getImageInfo180($path)
+{
+    if (!is_string($path) || $path === '' || !is_file($path) || !is_readable($path)) {
+        return false;
+    }
+
+    $info = @getimagesize($path);
+    if (!is_array($info) || !isset($info[0], $info[1]) || (int) $info[0] < 1 || (int) $info[1] < 1) {
+        return false;
+    }
+
+    return $info;
+}
+
+function MG_getImageDimensions180($path, $fallbackWidth = 0, $fallbackHeight = 0)
+{
+    $info = MG_getImageInfo180($path);
+    if ($info !== false) {
+        return array((int) $info[0], (int) $info[1]);
+    }
+
+    return array((int) $fallbackWidth, (int) $fallbackHeight);
+}
+
+function MG_prepareMetaDescription($value, $maxLength = 160)
+{
+    $value = html_entity_decode(strip_tags((string) $value), ENT_QUOTES, COM_getCharset());
+    $normalized = preg_replace('/\s+/u', ' ', $value);
+    if ($normalized === null) {
+        $normalized = preg_replace('/\s+/', ' ', $value);
+    }
+    $value = trim($normalized);
+    $maxLength = (int) $maxLength;
+
+    if ($value === '' || $maxLength < 1) {
+        return '';
+    }
+
+    if (function_exists('mb_strlen') && function_exists('mb_substr')) {
+        if (mb_strlen($value, COM_getCharset()) > $maxLength) {
+            $value = rtrim(mb_substr($value, 0, max(1, $maxLength - 1), COM_getCharset()), " \t\n\r\0\x0B,.;:-") . '…';
+        }
+    } elseif (strlen($value) > $maxLength) {
+        $value = rtrim(substr($value, 0, max(1, $maxLength - 3)), " \t\n\r\0\x0B,.;:-") . '...';
+    }
+
+    return $value;
+}
+
+function MG_renderJsonLd($data)
+{
+    if (!is_array($data) || empty($data)) {
+        return '';
+    }
+
+    $json = json_encode(
+        $data,
+        JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES
+    );
+    if ($json === false || $json === '') {
+        return '';
+    }
+
+    return '<script type="application/ld+json">' . $json . '</script>' . LB;
+}
+
+function MG_buildMediaStructuredData($media, $canonicalUrl)
+{
+    if (!is_array($media) || empty($canonicalUrl)) {
+        return array();
+    }
+
+    $type = isset($media['media_type']) ? (int) $media['media_type'] : -1;
+    $isRemote = !empty($media['remote_media']);
+
+    // Remote and embedded media can point at third-party resources whose
+    // content URL, thumbnail and publication metadata MediaGallery does not own.
+    if ($isRemote || $type === 5) {
+        return array();
+    }
+
+    $schemaType = '';
+    if ($type === 0) {
+        $schemaType = 'ImageObject';
+    } elseif ($type === 1) {
+        $schemaType = 'VideoObject';
+    } elseif ($type === 2) {
+        $schemaType = 'AudioObject';
+    } else {
+        return array();
+    }
+
+    $title = isset($media['media_title']) ? trim(strip_tags(PLG_replaceTags($media['media_title']))) : '';
+    if ($title === '' && isset($media['media_original_filename'])) {
+        $title = trim((string) $media['media_original_filename']);
+    }
+    if ($title === '') {
+        return array();
+    }
+
+    $filename = isset($media['media_filename']) ? trim((string) $media['media_filename']) : '';
+    $extension = isset($media['media_mime_ext']) ? trim((string) $media['media_mime_ext']) : '';
+    if ($filename === '' || $extension === '') {
+        return array();
+    }
+
+    $uploadTime = isset($media['media_upload_time']) ? (int) $media['media_upload_time'] : 0;
+
+    // Google requires a real thumbnail and upload date for VideoObject. MediaGallery's
+    // generated fallback for videos may only be a generic file-type icon, so only an
+    // explicitly attached thumbnail is reliable enough for video structured data.
+    if ($type === 1 && ($uploadTime <= 0 || empty($media['media_tn_attached']))) {
+        return array();
+    }
+
+    $data = array(
+        '@context' => 'https://schema.org',
+        '@type'    => $schemaType,
+        '@id'      => $canonicalUrl . '#media',
+        'url'      => $canonicalUrl,
+        'name'     => $title,
+        'contentUrl' => Media::getFileUrl('orig', $filename, $extension),
+    );
+
+    $description = isset($media['media_desc'])
+        ? MG_prepareMetaDescription(PLG_replaceTags($media['media_desc']), 500)
+        : '';
+    if ($description !== '') {
+        $data['description'] = $description;
+    }
+
+    if ($uploadTime > 0) {
+        $data['uploadDate'] = date('c', $uploadTime);
+    }
+
+    if (!empty($media['mime_type'])) {
+        $data['encodingFormat'] = (string) $media['mime_type'];
+    }
+
+    $width = isset($media['media_resolution_x']) ? (int) $media['media_resolution_x'] : 0;
+    $height = isset($media['media_resolution_y']) ? (int) $media['media_resolution_y'] : 0;
+    if ($width > 0) {
+        $data['width'] = $width;
+    }
+    if ($height > 0) {
+        $data['height'] = $height;
+    }
+
+    if ($type === 1) {
+        $data['thumbnailUrl'] = Media::getFileUrl('tn', $filename, 'jpg', 1);
+    }
+
+    return $data;
+}
+
+function MG_getRemoteAddress()
+{
+    return isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
+}
+
 // read user prefs
 function MG_getUserPrefs()
 {
@@ -250,7 +415,7 @@ function MG_updateUsage($application, $album_title, $media_title, $media_id)
 
     $log_time    = $now;
     $user_id     = intval($_USER['uid']);
-    $user_ip     = DB_escapeString($REMOTE_ADDR);
+    $user_ip     = DB_escapeString(isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '');
     $user_name   = DB_escapeString($_USER['username']);
     $application = DB_escapeString($application);
     $title       = DB_escapeString($album_title);
@@ -639,6 +804,31 @@ function MG_getTNSize($val, $custom_height=0, $custom_width=0)
     return array($tn_width, $tn_height);
 }
 
+function MG_getSpecialImageMimeTypes180()
+{
+    return array(
+        'image/x-targa',
+        'image/tga',
+        'image/photoshop',
+        'image/x-photoshop',
+        'image/psd',
+        'application/photoshop',
+        'application/psd',
+        'image/tiff'
+    );
+}
+
+function MG_getDisplayExtension180($mimeType, $mimeExt)
+{
+    $mimeExt = ltrim((string) $mimeExt, '.');
+
+    if (in_array((string) $mimeType, MG_getSpecialImageMimeTypes180(), true)) {
+        return 'jpg';
+    }
+
+    return $mimeExt;
+}
+
 function MG_getMediaExt($path_and_filename)
 {
     global $_MG_CONF;
@@ -660,10 +850,12 @@ function MG_getImageUrl($name)
     $size = false;
     clearstatcache();
     foreach ($_MG_CONF['validExtensions'] as $ext) {
-        if (file_exists($_MG_CONF['path_mediaobjects'] . $name . $ext)) {
+        $imagePath = $_MG_CONF['path_mediaobjects'] . $name . $ext;
+        $imageSize = MG_getImageInfo180($imagePath);
+        if ($imageSize !== false) {
             return array(
                 $_MG_CONF['mediaobjects_url'] . '/' . $name . $ext,
-                getimagesize($_MG_CONF['path_mediaobjects'] . $name . $ext)
+                $imageSize
             );
         }
     }
@@ -754,7 +946,11 @@ function MG_getFramedImage($skin, $title, $u_pic, $u_image, $imageWidth, $imageH
 {
     global $_MG_CONF;
 
-    if ($media_link_start === null) $media_link_start = '<a href="' . $u_pic . '">';
+    $u_pic_attr = MG_escapeHTML($u_pic);
+    $u_image_attr = MG_escapeHTML($u_image);
+    $media_tag = (isset($title) && $title != ' ') ? MG_escapeHTML(strip_tags($title)) : '';
+
+    if ($media_link_start === null) $media_link_start = '<a href="' . $u_pic_attr . '">';
     if ($media_link_end   === null) $media_link_end   = '</a>';
 
     $F = COM_newTemplate($_MG_CONF['path_html'] . 'frames/' . $skin . '/');
@@ -762,14 +958,14 @@ function MG_getFramedImage($skin, $title, $u_pic, $u_image, $imageWidth, $imageH
     $F->set_var(array(
         'media_link_start' => $media_link_start,
         'media_link_end'   => $media_link_end,
-        'url_media_item'   => $u_pic,
-        'url_display_item' => $u_pic,
-        'media_thumbnail'  => $u_image,
+        'url_media_item'   => $u_pic_attr,
+        'url_display_item' => $u_pic_attr,
+        'media_thumbnail'  => $u_image_attr,
         'media_size'       => 'width="' . '100%' . '" height="' . '100%' . '"',
         'media_height'     => $imageHeight,
         'media_width'      => $imageWidth,
         'media_title'      => (isset($title) && $title != ' ') ? PLG_replaceTags($title) : '',
-        'media_tag'        => (isset($title) && $title != ' ') ? strip_tags($title) : '',
+        'media_tag'        => $media_tag,
         'xhtml'            => XHTML,
     ));
     return $F->finish($F->parse('media', 'media_frame'));
@@ -867,6 +1063,51 @@ function MG_getAlbumChildCount($album_id)
         }
     }
     return $numChildren;
+}
+
+function MG_getAlbumPreviewImage180($album_id, $prefer_attached = true)
+{
+    global $_MG_CONF;
+
+    $album_id = (int) $album_id;
+    if ($album_id <= 0) {
+        return array('', false);
+    }
+
+    if ($prefer_attached) {
+        list($url, $size) = MG_getImageUrl('covers/cover_' . $album_id);
+        if ($size !== false && is_array($size) && !empty($size[0]) && !empty($size[1])) {
+            return array($url, $size);
+        }
+    }
+
+    $filename = MG_getAlbumCover($album_id);
+    if ($filename != '') {
+        foreach (array('disp', 'tn', 'orig') as $variant) {
+            list($url, $size) = MG_getImageUrl(
+                $variant . '/' . $filename[0] . '/' . $filename
+            );
+            if ($size !== false && is_array($size) && !empty($size[0]) && !empty($size[1])) {
+                return array($url, $size);
+            }
+        }
+    }
+
+    $emptyPath = isset($_MG_CONF['path_mediaassets'])
+        ? rtrim($_MG_CONF['path_mediaassets'], '/\\') . '/empty.png'
+        : '';
+    $emptyUrl = isset($_MG_CONF['mediaassets_url'])
+        ? rtrim($_MG_CONF['mediaassets_url'], '/') . '/empty.png'
+        : '';
+
+    if ($emptyPath !== '' && $emptyUrl !== '' && is_file($emptyPath)) {
+        $size = @getimagesize($emptyPath);
+        if ($size !== false && is_array($size) && !empty($size[0]) && !empty($size[1])) {
+            return array($emptyUrl, $size);
+        }
+    }
+
+    return array('', false);
 }
 
 function MG_getAlbumCover($album_id)
@@ -1026,21 +1267,11 @@ function MG_albumThumbnail($album_id)
 
             $album_last_update  = MG_getUserDateTimeFormat($album_data['last_update']);
             if ($mediasize == false) {
-                $album_last_image = $_MG_CONF['mediaobjects_url'] . '/empty.png';
-                $mediasize = @getimagesize($_MG_CONF['path_mediaobjects'] . 'empty.png');
+                $album_last_image = $_MG_CONF['site_url'] . '/mediaobjects/empty.png';
+                $mediasize = @getimagesize($_MG_CONF['path_html'] . 'mediaobjects/empty.png');
             }
         } else {
-            $filename = MG_getAlbumCover($album_id);
-            if ($filename == '' || $filename == NULL || $filename == " ") {
-                $album_last_image = $_MG_CONF['mediaobjects_url'] . '/empty.png';
-                $mediasize = @getimagesize($_MG_CONF['path_mediaobjects'] . 'empty.png');
-            } else {
-                list($album_last_image, $mediasize) = MG_getImageUrl('tn/' . $filename[0] . '/' . $filename);
-                if ($mediasize == false) {
-                    $album_last_image = $_MG_CONF['mediaobjects_url'] . '/missing.png';
-                    $mediasize = @getimagesize($_MG_CONF['path_mediaobjects'] . 'missing.png');
-                }
-            }
+            list($album_last_image, $mediasize) = MG_getAlbumPreviewImage180($album_id, false);
         }
         $album_media_count = $album_data['media_count'];
         if ($album_data['last_update'] > 0) {
@@ -1063,26 +1294,43 @@ function MG_albumThumbnail($album_id)
             }
         }
     } else {  // nothing in the album yet...
-        $filename = MG_getAlbumCover($album_id);
-        if ($filename == '') {
-            $album_last_image = $_MG_CONF['mediaobjects_url'] . '/empty.png';
-            $mediasize = @getimagesize($_MG_CONF['path_mediaobjects'] . 'empty.png');
-        } else {
-            list($album_last_image, $mediasize) = MG_getImageUrl('tn/' . $filename[0] . '/' . $filename);
-            if ($mediasize == false) {
-                $album_last_image = $_MG_CONF['mediaobjects_url'] . '/missing.png';
-                $mediasize = @getimagesize($_MG_CONF['path_mediaobjects'] . 'missing.png');
-            }
-        }
+        list($album_last_image, $mediasize) = MG_getAlbumPreviewImage180($album_id, false);
         $album_last_update[0] = '';
         $lang_updated = '';
     }
 
     if ($album_data['tn_attached'] == 1) {
-        list($album_last_image, $mediasize) = MG_getImageUrl('covers/cover_' . $album_id);
-        if ($mediasize == false) {
-            $album_last_image = $_MG_CONF['mediaobjects_url'] . '/missing.png';
-            $mediasize = @getimagesize($_MG_CONF['path_mediaobjects'] . 'missing.png');
+        list($album_last_image, $mediasize) = MG_getAlbumPreviewImage180($album_id, true);
+    } else {
+        // MediaGallery 1.8: prefer the larger display derivative for album cards.
+        // Fall back to the historical thumbnail when no display image exists.
+        $display_cover_filename = '';
+        if ($cover_filename != '' && $cover_filename != '0' && strpos($cover_filename, 'tn_') !== 0) {
+            $display_cover_filename = $cover_filename;
+        } elseif (isset($filename) && $filename != '' && $filename != ' ') {
+            $display_cover_filename = $filename;
+        }
+        if ($display_cover_filename != '') {
+            list($display_cover_image, $display_cover_size) = MG_getImageUrl(
+                'disp/' . $display_cover_filename[0] . '/' . $display_cover_filename
+            );
+            if ($display_cover_size !== false) {
+                $album_last_image = $display_cover_image;
+                $mediasize = $display_cover_size;
+            }
+        }
+    }
+
+
+    // Keep the display derivative for the square card, but always use the
+    // uncropped original in the mini-lightbox when that source is available.
+    $album_full_image = $album_last_image;
+    if ($album_data['tn_attached'] != 1 && isset($display_cover_filename) && $display_cover_filename != '') {
+        list($original_cover_image, $original_cover_size) = MG_getImageUrl(
+            'orig/' . $display_cover_filename[0] . '/' . $display_cover_filename
+        );
+        if ($original_cover_size !== false && $original_cover_size[0] > 0 && $original_cover_size[1] > 0) {
+            $album_full_image = $original_cover_image;
         }
     }
 
@@ -1113,6 +1361,7 @@ function MG_albumThumbnail($album_id)
         'media_item_thumbnail' => $media_item_thumbnail,
         'u_viewalbum'          => $_MG_CONF['site_url'] . '/album.php?aid=' . $album_id .'&amp;page=1',
         'album_last_image'     => $album_last_image,
+        'album_full_image'     => $album_full_image,
         'album_title'          => $album_data['album_title'],
         'album_media_count'    => $album_data['media_count'],
         'subalbum_media_count' => $total_images_subalbums,
@@ -1216,6 +1465,7 @@ function MG_buildSlideshow(&$album, &$T, $sortOrder)
 
     $lbSlideShow = '';
     $url_slideshow = '';
+    $slideshow_onclick = '';
     $lang_slideshow = '';
     $mgLightBox = 0; // global variable
     switch ($enable_slideshow) {
@@ -1237,7 +1487,8 @@ function MG_buildSlideshow(&$album, &$T, $sortOrder)
             list($lbss_count) = DB_fetchArray($result);
             if ($lbss_count != 0) {
                 $mgLightBox = 1; // global variable
-                $url_slideshow  = '#" onclick="return openGallery1()';
+                $url_slideshow = '#';
+                $slideshow_onclick = ' onclick="return openGallery1()"';
                 $lang_slideshow = $LANG_MG03['slide_show'];
             }
             break;
@@ -1257,8 +1508,9 @@ function MG_buildSlideshow(&$album, &$T, $sortOrder)
 
     $T->set_var(array(
         'lbslideshow'    => $lbSlideShow,
-        'lang_slideshow' => $lang_slideshow,
-        'url_slideshow'  => $url_slideshow,
+        'lang_slideshow'    => $lang_slideshow,
+        'url_slideshow'     => MG_escapeHTML($url_slideshow),
+        'slideshow_onclick' => $slideshow_onclick,
     ));
 }
 
@@ -1426,7 +1678,9 @@ function MG_options($info)
 function MG_optionlist($info)
 {
     $disabled = isset($info['disabled']) ? $info['disabled'] : '';
+    $id = isset($info['id']) ? trim($info['id']) : '';
     $retval = '<select name="' . $info['name'] . '"'
+            . ($id !== '' ? ' id="' . htmlspecialchars($id, ENT_QUOTES, COM_getCharset()) . '"' : '')
             . ($disabled ? ' disabled="disabled"' : '') . '>' . LB;
     foreach ($info['values'] as $key => $val) {
         $retval .= '<option value="' . $key . '"'

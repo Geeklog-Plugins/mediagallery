@@ -1,83 +1,110 @@
 <script type="text/javascript">
-<!--
 function doCheckAll_mediaitems() {
-  with (document.media) {
-    for (var i=0; i < elements.length; i++) {
-      if (elements[i].type == 'checkbox' && elements[i].name == 'sel[]')
-        elements[i].checked = true;
+  var form = document.media;
+  if (!form) return;
+  for (var i = 0; i < form.elements.length; i++) {
+    if (form.elements[i].type === 'checkbox' && form.elements[i].name === 'sel[]') {
+      form.elements[i].checked = true;
     }
   }
 }
-
 function doUnCheckAll_mediaitems() {
-  with (document.media) {
-    for (var i=0; i < elements.length; i++) {
-      if (elements[i].type == 'checkbox' && elements[i].name == 'sel[]')
-        elements[i].checked = false;
+  var form = document.media;
+  if (!form) return;
+  for (var i = 0; i < form.elements.length; i++) {
+    if (form.elements[i].type === 'checkbox' && form.elements[i].name === 'sel[]') {
+      form.elements[i].checked = false;
     }
   }
 }
-// End script --></script>
+</script>
 
-<table class="mg_mediaitems_table">
-  <tr>
-    <th>{lang_select}</th>
-    <th>{lang_item}</th>
-    <th>{lang_watermarked}</th>
-    <th>{lang_order}</th>
-    <th>{lang_cover}</th>
-    <th>{lang_include_ss}</th>
-    <th style="text-align:left;">{lang_title}/{lang_description}/{lang_keywords}</th>
-  </tr>
-  <tr>
-    <td colspan="7" style="text-align:center;">
-      <input type="radio" name="cover" value="-2"{val_reset_cover}{xhtml}>&nbsp;&nbsp;{lang_reset_cover}
-    </td>
-  </tr>
+<div class="mg-manager-toolbar">
+  <div class="mg-manager-select-actions">
+    <button type="button" class="uk-button uk-button-small mg-button-quiet" onclick="doCheckAll_mediaitems()">{lang_checkall}</button>
+    <button type="button" class="uk-button uk-button-small mg-button-quiet" onclick="doUnCheckAll_mediaitems()">{lang_uncheckall}</button>
+  </div>
+
+  <label class="mg-manager-default-cover" for="mg-reset-cover">
+    <input type="radio" id="mg-reset-cover" name="cover" value="-2"{val_reset_cover}{xhtml}>
+    <span>{lang_reset_cover}</span>
+  </label>
+</div>
+
+<div class="mg-manager-grid">
   <!-- BEGIN ImageRow -->
   <!-- BEGIN ImageColumn -->
-  <tr>
-    <td style="vertical-align:middle;text-align:center;">
-      <input type="checkbox" name="sel[]" value="{mid}"{xhtml}>
+  <article class="mg-manager-card">
+    <div class="mg-manager-card__top">
+      <label class="mg-manager-select">
+        <input type="checkbox" id="mg-media-select-{counter}" name="sel[]" value="{mid}" aria-label="{lang_select}"{xhtml}>
+        <span>{lang_select}</span>
+      </label>
       <input type="hidden" name="mid[]" value="{mid}"{xhtml}>
-    </td>
-    <td style="vertical-align:middle;text-align:center;">
-      {media_zoom}<img src="{u_thumbnail}" height="{height}" width="{width}" alt=""{xhtml}></a>
-      <br{xhtml}><a href="{media_edit}">{lang_edit}</a>
-    </td>
-    <td style="vertical-align:middle;text-align:center;">
-      {watermarked}
-    </td>
-    <td style="vertical-align:middle;text-align:center;">
-      <input type="text" name="seq[]" value="{order}" size="3"{xhtml}>
-      <input type="hidden" name="oldseq[]" value="{order}"{xhtml}>
-    </td>
-    <td style="vertical-align:middle;text-align:center;">
-      {radio_box}
-    </td>
-    <td style="vertical-align:middle;text-align:center;">
-      {include_ss}
-    </td>
-    <td style="vertical-align:middle;">
-      <div style="margin:4px 2px 0"><input type="text" name="mtitle[]" value="{media_title}" size="30" style="width:80%;"{xhtml}></div>
-      <textarea name="mdesc[]" cols="40" rows="2" style="width:96%;">{media_desc}</textarea><br{xhtml}>
-      <div style="margin:4px 2px 0"><input type="text" name="mkeywords[]" value="{media_keywords}" size="30" style="width:80%;"{xhtml}></div>
-      <div style="margin:4px 2px;">{lang_category}:&nbsp;{cat_select}</div>
-    </td>
-  </tr>
+      <span class="mg-manager-watermark" title="{lang_watermarked}">{watermarked}</span>
+    </div>
+
+    <div class="mg-manager-card__body">
+      <div class="mg-manager-preview">
+        {media_zoom}<img src="{u_thumbnail}" height="{height}" width="{width}" alt="{media_title}" loading="lazy" decoding="async"{xhtml}></a>
+        <a class="uk-button uk-button-small mg-manager-edit mg-button-quiet" href="{media_edit}">{lang_edit}</a>
+      </div>
+
+      <div class="mg-manager-controls">
+        <label>
+          <span>{lang_order}</span>
+          <input type="number" id="mg-media-order-{counter}" name="seq[]" value="{order}" inputmode="numeric" aria-label="{lang_order}"{xhtml}>
+          <input type="hidden" name="oldseq[]" value="{order}"{xhtml}>
+        </label>
+
+        <label class="mg-manager-choice">
+          <span>{lang_cover}</span>
+          {radio_box}
+        </label>
+
+        <label class="mg-manager-choice">
+          <span>{lang_include_ss}</span>
+          {include_ss}
+        </label>
+      </div>
+    </div>
+
+    <div class="mg-manager-fields">
+      <label for="mg-media-title-{counter}">
+        <span>{lang_title}</span>
+        <input type="text" id="mg-media-title-{counter}" name="mtitle[]" value="{media_title}" class="mg-media-manager-input"{xhtml}>
+      </label>
+
+      <label for="mg-media-desc-{counter}">
+        <span>{lang_description}</span>
+        <textarea id="mg-media-desc-{counter}" name="mdesc[]" rows="3" class="mg-media-manager-textarea">{media_desc}</textarea>
+      </label>
+
+      <label for="mg-media-keywords-{counter}">
+        <span>{lang_keywords}</span>
+        <input type="text" id="mg-media-keywords-{counter}" name="mkeywords[]" value="{media_keywords}" class="mg-media-manager-input"{xhtml}>
+      </label>
+
+      <label for="mg-media-category-{counter}">
+        <span>{lang_category}</span>
+        {cat_select}
+      </label>
+    </div>
+  </article>
   <!-- END ImageColumn -->
   <!-- END ImageRow -->
-</table>
-
-<div style="margin-top:5px">
-  <input onclick="javascript:doCheckAll_mediaitems()" type="button" value="{lang_checkall}"{xhtml}>
-  <input onclick="javascript:doUnCheckAll_mediaitems()" type="button" value="{lang_uncheckall}"{xhtml}>
 </div>
 
-<div style="margin-top:5px">
-  {lang_albumsel}&nbsp;&nbsp;{albumselect}&nbsp;<input type="submit" name="mode" value="{lang_move}"{xhtml}>
-</div>
+<div class="mg-manager-batch">
+  <div class="mg-manager-batch__section">
+    <label for="mg-media-destination-album">{lang_albumsel}</label>
+    <div>{albumselect}</div>
+    <input type="submit" name="mode" value="{lang_move}" class="uk-button"{xhtml}>
+  </div>
 
-<div style="margin-top:5px">
-  {lang_batch_options}&nbsp;&nbsp;{batchoptionselect}&nbsp;<input type="submit" name="mode" value="{lang_batch}"{xhtml}>
+  <div class="mg-manager-batch__section">
+    <label for="mg-media-batch-option">{lang_batch_options}</label>
+    <div>{batchoptionselect}</div>
+    <input type="submit" name="mode" value="{lang_batch}" class="uk-button"{xhtml}>
+  </div>
 </div>

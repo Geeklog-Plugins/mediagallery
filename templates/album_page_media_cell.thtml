@@ -1,40 +1,34 @@
-<div class="mg_thumbnail" style="height:{row_height}px">
-  <div class="mg_thumbnail_wrapper">{media_item_thumbnail}{mp3_podcast}</div>
-</div>
+<article class="mg_media_item mg-card mg-card-compact mg-card-square">
+  <div class="mg-card-media">
+    <div class="mg_thumbnail">
+      <div class="mg_thumbnail_wrapper">{media_card_preview}{mp3_podcast}</div>
+    </div>
+  </div>
 
-<div class="mg_title">
-{media_title}
-{!if musicalbum}
-&nbsp;/&nbsp;{musicalbum}
-{!endif}
-</div>
+  <div class="mg-card-body">
+    <h2 class="mg_title mg-card-title">
+      {media_link_start}{media_title}</a>
+      {!if musicalbum}
+      <span class="mg-card-subtitle">/ {musicalbum}</span>
+      {!endif}
+    </h2>
 
-{!if artist}
-<div class="mg_artist">{artist}</div>
-{!endif}
+    {!if artist}
+    <div class="mg_artist mg-card-artist">{artist}</div>
+    {!endif}
 
-{!if search_album}
-<div class="mg_search_album">{search_album}</div>
-{!endif}
+    {!if search_album}
+    <div class="mg_search_album">{search_album}</div>
+    {!endif}
 
-<div class="mg_time">{media_time}</div>
+    <div class="mg-card-meta mg-card-meta-compact">
+      <span class="mg_time">{media_date_short}</span>
+      {!if media_views}<span class="mg_views">{media_views_count} {lang_views}</span>{!endif}
+      {!if media_comments}<span class="mg_comments">{media_comments_count} {lang_comments}</span>{!endif}
+    </div>
 
-{!if media_comments}
-<div class="mg_comments">{lang_comments} {media_comments_count}</div>
-{!endif}
-
-{!if media_views}
-<div class="mg_views">{lang_views} {media_views_count}</div>
-{!endif}
-
-{!if rating_box}
-{rating_box}
-{!endif}
-
-{!if edit_link}
-<div class="mgMediaEdit">{edit_link}</div>
-{!endif}
-
-{!if enable_keywords}
-<div class="mgMediaKeywords"><span class="pluginSmallText"><span style="font-weight:bold;">{lang_keywords}</span> {media_keywords}</span></div>
-{!endif}
+    {!if edit_link}
+    <div class="mgMediaEdit mg-card-edit">{edit_link}</div>
+    {!endif}
+  </div>
+</article>

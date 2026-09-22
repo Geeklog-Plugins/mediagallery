@@ -49,7 +49,7 @@ else{
 jkpopwin.resizeTo(popwidth, popheight+30)
 }
 jkpopwin.document.open()
-jkpopwin.document.write('<html><title>'+windowtitle+'</title><body '+bodyattribute+'><img src="'+imgpath+'" style="margin-bottom: 0.5em"><br{xhtml}>'+textdescription+'</body></html>')
+jkpopwin.document.write('<html><title>'+windowtitle+'</title><body '+bodyattribute+'><img src="'+imgpath+'" alt="" class="mg-mb-half-em"><br{xhtml}>'+textdescription+'</body></html>')
 jkpopwin.document.close()
 jkpopwin.focus()
 }
@@ -61,6 +61,7 @@ jkpopwin.focus()
 <form name="watermark" method="post" action="{s_form_action}" class="uk-form">
   <div>
     <input type="hidden" name="album_id" value="0"{xhtml}>
+    <input type="hidden" name="{gltoken_name}" value="{gltoken}"{xhtml}>
     {!if lang_no_image}<div class="noitems">{lang_no_image}</div>{!endif}
     {mediaitems}
   </div>

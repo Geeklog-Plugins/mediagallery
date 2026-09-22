@@ -55,7 +55,8 @@ require_once $_CONF['path'] . 'plugins/mediagallery/include/common.php';
 
 COM_setArgNames(array('aid', 'f', 'sort'));
 $album_id  = COM_applyFilter(COM_getArgument('aid'),  true);
-$full      = COM_applyFilter(COM_getArgument('f'),    true);
+$fullArg   = COM_getArgument('f');
+$full      = ($fullArg === '') ? 1 : COM_applyFilter($fullArg, true);
 $sortOrder = COM_applyFilter(COM_getArgument('sort'), true);
 
 $album_data = MG_getAlbumData($album_id, array('skin', 'album_title', 'album_desc', 'album_parent', 'full_display', 'display_image_size'), true);
@@ -145,24 +146,26 @@ if ($total_media > 0) {
             }
         }
 
-        $PhotoCaption = $mediaObject[$i]['media_title'];
-        $PhotoCaption = str_replace(";",  " ", $PhotoCaption);
-        $PhotoCaption = str_replace("\"", " ", $PhotoCaption);
-        $PhotoCaption = str_replace("\n", " ", $PhotoCaption);
-        $PhotoCaption = str_replace("\r", " ", $PhotoCaption);
+        $PhotoCaption = trim(strip_tags($mediaObject[$i]['media_title']));
 
         $T->set_var(array(
-            'URL'     => 'photo_urls[' . $y . '] = "' . $PhotoURL . '";',
-            'CAPTION' => 'photo_captions[' . $y . '] = "' . $PhotoCaption . '";',
+            'URL'     => 'photo_urls[' . $y . '] = ' . json_encode($PhotoURL) . ';',
+            'CAPTION' => 'photo_captions[' . $y . '] = ' . json_encode($PhotoCaption) . ';',
         ));
         $T->parse('photo_info', 'photo_url', true);
         $y++;
         $photoCount++;
     }
-    $T->set_var('photo_count', $total_media);
+    $T->set_var('photo_count', $photoCount);
 } else {
     $T->set_var('no_images', '<br' . XHTML . '>' . $LANG_MG03['no_media_objects']);
 }
+
+$returnToAlbumUrl = $_MG_CONF['site_url'] . '/album.php?aid=' . $album_id . '&amp;page=1&amp;sort=' . $sortOrder;
+$returnToAlbumUrlJs = $_MG_CONF['site_url'] . '/album.php?aid=' . $album_id . '&page=1&sort=' . $sortOrder;
+$langPrevious = isset($LANG_MG03['previous']) ? $LANG_MG03['previous'] : (isset($LANG_MG03['prev']) ? $LANG_MG03['prev'] : 'Previous');
+$langNext = isset($LANG_MG03['next']) ? $LANG_MG03['next'] : 'Next';
+$langClose = isset($LANG_MG03['return_to_album']) ? $LANG_MG03['return_to_album'] : 'Return to album';
 
 $full_toggle = '';
 if ($noFullOption == 0) {
@@ -171,11 +174,16 @@ if ($noFullOption == 0) {
 }
 
 $T->set_var(array(
-    'pagination'        => '<a href="' . $_MG_CONF['site_url'] . '/album.php?aid=' . $album_id . '&amp;page=1&amp;sort=' . $sortOrder . '">' . $LANG_MG03['return_to_album'] .'</a>',
+    'pagination'        => '<a href="' . $returnToAlbumUrl . '">' . $LANG_MG03['return_to_album'] . '</a>',
     'slideshow'         => $_MG_CONF['site_url'] . '/slideshow.php?aid=' . $album_id . '&amp;f=' . ($full ? '0' : '1') . '&amp;sort=' . $sortOrder ,
     'slideshow_size'    => ($full ? $LANG_MG03['normal_size'] : $LANG_MG03['full_size']),
     'full_toggle'       => $full_toggle,
     'album_title'       => $album_title,
+    'return_to_album_url' => $returnToAlbumUrl,
+    'return_to_album_url_js' => json_encode($returnToAlbumUrlJs),
+    'lang_previous'     => $langPrevious,
+    'lang_next'         => $langNext,
+    'lang_close'        => $langClose,
     'max_image_height'  => $dImageHeight,
     'max_image_width'   => $dImageWidth,
     'home'              => $LANG_MG03['home'],
@@ -222,7 +230,8 @@ if ($total_media > 0) {
 $T->parse('output','page');
 $display = $T->finish($T->get_var('output'));
 $title = strip_tags($album_title);
-$display = MG_createHTMLDocument($display, $title);
+$robots = '<meta name="robots" content="noindex,follow"' . XHTML . '>';
+$display = MG_createHTMLDocument($display, $title, $robots);
 
 COM_output($display);
 ?>

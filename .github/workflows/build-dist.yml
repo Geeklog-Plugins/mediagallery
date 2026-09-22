@@ -1,0 +1,164 @@
+name: Build MediaGallery installable archive
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: mediagallery-test-archive
+  cancel-in-progress: true
+
+jobs:
+  build-dist:
+    name: Build and commit installable ZIP
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout validated source
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Build dist archive
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          SOURCE_SHA="$(git rev-parse HEAD)"
+          ARCHIVE="mediagallery_1.8.0_2.1.1.zip"
+
+          rm -rf package
+          mkdir -p package/mediagallery dist
+
+          find dist -maxdepth 1 -type f \( -name 'mediagallery-*.zip' -o -name 'mediagallery_*.zip' -o -name '*.zip.sha256' \) -delete
+
+          rsync -a ./ package/mediagallery/ \
+            --exclude='.git/' \
+            --exclude='.gitignore' \
+            --exclude='.github/' \
+            --exclude='.build-request' \
+            --exclude='dist/' \
+            --exclude='package/' \
+            --exclude='.idea/' \
+            --exclude='tmp/'
+
+          cat > package/mediagallery/BUILD_INFO.txt <<EOF
+          MediaGallery 1.8.0 test archive
+          Geeklog target: 2.1.1+
+          Source branch: modernize-1.8.0
+          Source commit: ${SOURCE_SHA}
+          EOF
+
+          (
+            cd package
+            zip -qr "../dist/${ARCHIVE}" mediagallery
+          )
+
+          CHECKSUM="$(sha256sum "dist/${ARCHIVE}" | awk '{print $1}')"
+          echo "Archive SHA-256: ${CHECKSUM}"
+
+          echo "SOURCE_SHA=${SOURCE_SHA}" >> "$GITHUB_ENV"
+          echo "ARCHIVE=${ARCHIVE}" >> "$GITHUB_ENV"
+
+      - name: Verify installable archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          unzip -t "dist/${ARCHIVE}" >/dev/null
+          unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/functions.inc'
+          unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/autoinstall.php'
+          unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/BUILD_INFO.txt'
+          unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/admin/navigation.php'
+          unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/templates/admin_index.thtml'
+          unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/templates/admin_help.thtml'
+          unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/templates/admin_navigation.thtml'
+          unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/public_html/admin.css'
+          unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/public_html/js/upload.js'
+          unzip -p "dist/${ARCHIVE}" mediagallery/templates/userupload.thtml \
+            | grep -q 'name="newmedia\[\]" multiple{upload_accept}'
+          unzip -p "dist/${ARCHIVE}" mediagallery/templates/mediaitems.thtml \
+            | grep -q 'class="mg-manager-grid"'
+          unzip -p "dist/${ARCHIVE}" mediagallery/templates/mediamanage.thtml \
+            | grep -q 'class="mg-manager-header"'
+          unzip -p "dist/${ARCHIVE}" mediagallery/admin/navigation.php \
+            | grep -q 'function MG_adminCreateHTMLDocument'
+          unzip -p "dist/${ARCHIVE}" mediagallery/templates/admin_index.thtml \
+            | grep -q '{stats_content}'
+          unzip -p "dist/${ARCHIVE}" mediagallery/templates/admin_navigation.thtml \
+            | grep -q 'name="conf_group" value="mediagallery"'
+          unzip -p "dist/${ARCHIVE}" mediagallery/templates/admin_navigation.thtml \
+            | grep -q '{configuration_url}'
+          unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/include/storage_180.php'
+          unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/tools/migrate-media-storage.php'
+          unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/public_html/mediaobjects/generic.png'
+          unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/public_html/mediaobjects/missing.png'
+          ! unzip -Z1 "dist/${ARCHIVE}" | grep -q '^mediagallery/.github/'
+          ! unzip -Z1 "dist/${ARCHIVE}" | grep -q '^mediagallery/.build-request$'
+          ! unzip -Z1 "dist/${ARCHIVE}" | grep -q '^mediagallery/dist/'
+          ! unzip -Z1 "dist/${ARCHIVE}" | grep -q '^mediagallery/.gitignore$'
+
+          unzip -p "dist/${ARCHIVE}" mediagallery/include/config_180.php \
+            | grep -q "isset(\$_MG_CONF\['installed_version'\])"
+
+          python3 - <<'PY'
+          import os
+          import re
+          import sys
+          import zipfile
+
+          archive = os.path.join('dist', os.environ['ARCHIVE'])
+          invalid = []
+
+          with zipfile.ZipFile(archive) as zf:
+              for path in zf.namelist():
+                  name = path.rstrip('/').rsplit('/', 1)[-1]
+                  if not name:
+                      continue
+                  valid = (
+                      not name.startswith('.')
+                      and not name.endswith('.')
+                      and '..' not in name
+                      and re.fullmatch(r'[0-9A-Za-z_.-]+', name) is not None
+                  )
+                  if not valid:
+                      invalid.append(path)
+
+          if invalid:
+              print('Unsafe archive filenames for Geeklog 2.2.2:')
+              for path in invalid:
+                  print(' - ' + path)
+              sys.exit(1)
+          PY
+
+      - name: Skip stale validated source
+        id: freshness
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin modernize-1.8.0
+          BRANCH_SHA="$(git rev-parse origin/modernize-1.8.0)"
+          if [ "$BRANCH_SHA" != "$SOURCE_SHA" ]; then
+            echo "A newer branch commit exists; this archive is stale and will not be committed."
+            echo "commit_archive=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "commit_archive=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit archive to modernize-1.8.0
+        if: steps.freshness.outputs.commit_archive == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -f dist/
+          if git diff --cached --quiet; then
+            echo 'No dist changes to commit.'
+            exit 0
+          fi
+          git commit -m "Build mediagallery_1.8.0_2.1.1.zip for ${SOURCE_SHA} [skip ci]"
+          git push origin HEAD:modernize-1.8.0

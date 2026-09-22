@@ -1,112 +1,131 @@
-
-<table class="mg_mediaitems_table">
-  <tr>
-    <th class="pluginCellTitle" style="width:50%;text-align:center;" >{lang_media_item}</th>
-    <th class="pluginCellTitle" style="width:50%;text-align:center;">{lang_attached_thumbnail}</th>
-  </tr>
-  <tr>
-    <td align="center" style="padding:10px;">
-      {preview}
-      <img src="{media_thumbnail}" alt=""{xhtml}>{preview_end}&nbsp;
-      <div style="width:200px;height:25px;margin:0px auto;">
-        <div style="float:left;">{s_rotate_left}</div>
-        <div style="float:right;">{s_rotate_right}</div>
+<div class="mg-media-editor mg-media-type-{media_type}">
+  <form id="mg-media-edit-form" name="media" enctype="multipart/form-data" method="post" action="{s_form_action}" class="MG_editform compact uk-form">
+    <section class="mg-edit-card mg-primary-card">
+      <div class="mg-primary-title">
+        <label for="media_title">{lang_title}</label>
+        <input type="text" name="media_title" id="media_title" value="{media_title}" class="size6"{xhtml}>
       </div>
-    </td>
-    <td align="center" style="padding:10px;">
-      &nbsp;{attached_thumbnail}
-    </td>
-  </tr>
-</table>
+      <div class="mg-primary-description">
+        <label for="media_desc">{description}</label>
+        <textarea name="media_desc" id="media_desc" cols="60" rows="5" class="size6">{media_desc}</textarea>
+      </div>
+      <div class="mg-primary-meta">
+        <div class="mg-primary-meta-item">
+          <label for="media_keywords">{lang_keywords}</label>
+          <input type="text" name="media_keywords" id="media_keywords" value="{media_keywords}" class="size6"{xhtml}>
+        </div>
+        <div class="mg-primary-meta-item">
+          <label>{lang_category}</label>
+          {cat_select}
+        </div>
+      </div>
+    </section>
 
-<form method="post" action="{site_url}/admin.php" class="compact uk-form">
-  <div class="admin_basic">
-    <fieldset>
-      <legend>{lang_media_attributes}</legend>
-      <dl class="form_block">
-        <dt><label>{lang_comments}</label></dt>
-        <dd>{media_comments}</dd>
+    <div class="mg-editor-columns">
+      <section class="mg-edit-card mg-preview-pane">
+        <h3 class="mg-card-title">{lang_media_item}</h3>
+        <div class="mg-preview-content">
+          {preview}<img src="{media_thumbnail}" alt=""{xhtml}>{preview_end}
+        </div>
+        <div class="mg-media-rotate-controls">
+          <div>{s_rotate_left}</div>
+          <div>{s_rotate_right}</div>
+        </div>
+      </section>
 
-        <dt><label>{views}</label></dt>
-        <dd>{media_views}&nbsp;&nbsp;
-            <input type="submit" name="mode" value="{lang_reset_views}"{xhtml}>
-            <input type="hidden" name="action" value="resetviews"{xhtml}></dd>
+      <fieldset class="mg-edit-card mg-admin-details">
+        <legend>{lang_mediaattributes}</legend>
+        <dl class="form_block">
+          <dt><label>{uploaded_by}</label></dt>
+          <dd>{username}</dd>
+          <dt><label for="original_filename">{lang_original_filename}</label></dt>
+          <dd><input type="text" name="original_filename" id="original_filename" value="{original_filename}" class="size6"{xhtml}></dd>
+          <dt><label>{capture_time}</label></dt>
+          <dd class="mg-capture-time">{media_time}<div class="mg-date-controls">{month_select}{day_select}{year_select}{hour_select}<span>:</span>{minute_select}</div></dd>
+        </dl>
+      </fieldset>
 
-        <dt><label>{lang_rating}</label></dt>
-        <dd>{media_rating}&nbsp;/&nbsp;{media_rating_max}&nbsp;({media_votes} {lang_votes})&nbsp;&nbsp;
-            <input type="submit" name="mode" value="{lang_reset_rating}"{xhtml}>
-            <input type="hidden" name="action" value="resetrating"{xhtml}></dd>
+      <fieldset class="mg-edit-card mg-access-card">
+        <legend>{lang_access_ownership}</legend>
+        <p>{access_inherited_text}</p>
+        <a class="uk-button uk-button-small" href="{album_access_url}">{lang_edit_album_rights}</a>
+      </fieldset>
 
-      </dl>
-    </fieldset>
+      <fieldset class="mg-edit-card mg-thumbnail-card">
+        <legend>{lang_attached_thumbnail}</legend>
+{!if attached_thumbnail}
+        <div class="mg-current-thumbnail">{attached_thumbnail}</div>
+{!endif}
+        <dl class="form_block">
+          <dt><label for="attachtn">{lang_attached_thumbnail}</label></dt>
+          <dd>
+            <label class="mg-inline-check" for="attachtn">
+              <input type="checkbox" name="attachtn" id="attachtn" value="1" {at_tn_checked}{xhtml}>
+              <span>{lang_attached_thumbnail}</span>
+            </label>
+            <input type="file" name="attthumb" id="attthumb"{xhtml}>
+          </dd>
+          <dt><label for="replacefile">{lang_replacefile}</label></dt>
+          <dd>
+            <label class="mg-inline-check" for="replacefile">
+              <input type="checkbox" name="replacefile" id="replacefile" value="1"{xhtml}>
+              <span>{lang_replacefile}</span>
+            </label>
+            <input type="file" name="repfilename" id="repfilename"{xhtml}>
+          </dd>
+          <dt><label for="remoteurl">{lang_remote_url}</label></dt>
+          <dd><input type="text" name="remoteurl" id="remoteurl" value="{remoteurl}" class="size6"{xhtml}></dd>
+        </dl>
+      </fieldset>
+
+      <fieldset class="mg-edit-card mg-audio-card">
+        <legend>{lang_artist}</legend>
+        <dl class="form_block">
+          <dt><label for="artist">{lang_artist}</label></dt>
+          <dd><input type="text" name="artist" id="artist" value="{artist}" class="size6"{xhtml}></dd>
+          <dt><label for="musicalbum">{lang_music_album}</label></dt>
+          <dd><input type="text" name="musicalbum" id="musicalbum" value="{musicalbum}" class="size6"{xhtml}></dd>
+          <dt><label for="genre">{lang_genre}</label></dt>
+          <dd><input type="text" name="genre" id="genre" value="{genre}" class="size6"{xhtml}></dd>
+        </dl>
+      </fieldset>
+    </div>
+
+    <div class="mg-extra-options">
+      {playback_options}
+      {media_exif_info}
+    </div>
+
+    <input type="hidden" name="rpath" value="{rpath}"{xhtml}>
     <input type="hidden" value="{album_id}" name="album_id"{xhtml}>
     <input type="hidden" value="{media_id}" name="mid"{xhtml}>
     <input type="hidden" value="{queue}" name="queue"{xhtml}>
-  </div>
-</form>
+    <input type="hidden" name="action" value="savemedia"{xhtml}>
+    <input type="hidden" name="{gltoken_name}" value="{gltoken}"{xhtml}>
+  </form>
 
-<form name="media" enctype="multipart/form-data" method="post" action="{s_form_action}" class="MG_editform compact uk-form">
-  <div class="admin_basic">
-    <fieldset>
-      <legend>{lang_mediaattributes}</legend>
-      <dl class="form_block">
-        <dt><label>{uploaded_by}</label></dt>
-        <dd>{username}</dd>
+  {rotation_forms}
 
-        <dt><label>{lang_original_filename}</label></dt>
-        <dd><input type="text" name="original_filename" id="original_filename" value="{original_filename}" class="size6"{xhtml}></dd>
-
-        <dt><label>{lang_attached_thumbnail}</label></dt>
-        <dd><input type="checkbox" name="attachtn" id="attachtn" value="1" {at_tn_checked}{xhtml}>
-            <input type="file" name="attthumb" id="attthumb"{xhtml}></dd>
-
-        <dt><label>{lang_replacefile}</label></dt>
-        <dd><input type="checkbox" name="replacefile" id="replacefile" value="1"{xhtml}>
-            <input type="file" name="repfilename" id="repfilename"{xhtml}></dd>
-
-        <dt><label>{lang_remote_url}</label></dt>
-        <dd><input type="text" name="remoteurl" id="remoteurl" value="{remoteurl}" class="size6"{xhtml}></dd>
-
-        <dt><label>{lang_title}</label></dt>
-        <dd><input type="text" name="media_title" id="media_title" value="{media_title}" class="size6"{xhtml}></dd>
-
-        <dt><label>{description}</label></dt>
-        <dd><textarea name="media_desc" id="media_desc" cols="60" rows="2" class="size6">{media_desc}</textarea></dd>
-
-        <dt><label>{lang_keywords}</label></dt>
-        <dd><input type="text" name="media_keywords" id="media_keywords" value="{media_keywords}" class="size6"{xhtml}></dd>
-
-        <dt><label>{lang_artist}</label></dt>
-        <dd><input type="text" name="artist" id="artist" value="{artist}" class="size6"{xhtml}></dd>
-
-        <dt><label>{lang_music_album}</label></dt>
-        <dd><input type="text" name="musicalbum" id="musicalbum" value="{musicalbum}" class="size6"{xhtml}></dd>
-
-        <dt><label>{lang_genre}</label></dt>
-        <dd><input type="text" name="genre" id="genre" value="{genre}" class="size6"{xhtml}></dd>
-
-        <dt><label>{lang_category}</label></dt>
-        <dd>{cat_select}</dd>
-
-        <dt><label>{capture_time}</label></dt>
-        <dd>{media_time}<br{xhtml}>
-          {month_select} / {day_select} / {year_select}&nbsp;&nbsp;&nbsp;{hour_select}&nbsp;:&nbsp;{minute_select}</dd>
-      </dl>
+  <form method="post" action="{site_url}/admin.php" class="compact uk-form mg-admin-metrics">
+    <fieldset class="mg-edit-card">
+      <legend>{lang_media_attributes}</legend>
+      <div class="mg-metrics-grid">
+        <div class="mg-metric"><span class="mg-metric-label">{lang_comments}</span><span class="mg-metric-value">{media_comments}</span></div>
+        <div class="mg-metric"><span class="mg-metric-label">{views}</span><span class="mg-metric-value">{media_views}</span><input type="submit" name="mode" value="{lang_reset_views}" class="mg-maintenance-action uk-button uk-button-small"{xhtml}></div>
+        <div class="mg-metric"><span class="mg-metric-label">{lang_rating}</span><span class="mg-metric-value">{media_rating}&nbsp;/&nbsp;{media_rating_max}&nbsp;({media_votes} {lang_votes})</span><input type="submit" name="mode" value="{lang_reset_rating}" class="mg-maintenance-action uk-button uk-button-small"{xhtml}></div>
+      </div>
     </fieldset>
-    <div class="mg_submit">
-      <input type="submit" name="mode" value="{lang_save}"{xhtml}>
-      <input type="submit" name="mode" value="{lang_cancel}"{xhtml}>
-      <input type="submit" name="mode" value="{lang_delete}" onclick="return confirm('{lang_delete_confirm}');"{xhtml}>
-      <input type="reset"  value="{lang_reset}"{xhtml}>
-      <input type="hidden" name="rpath" value="{rpath}"{xhtml}>
-      <input type="hidden" value="{album_id}" name="album_id"{xhtml}>
-      <input type="hidden" value="{media_id}" name="mid"{xhtml}>
-      <input type="hidden" value="{queue}" name="queue"{xhtml}>
-      <input type="hidden" name="action" value="savemedia"{xhtml}>
-    </div>
+    <input type="hidden" name="action" value="resetviews"{xhtml}>
+    <input type="hidden" value="{album_id}" name="album_id"{xhtml}>
+    <input type="hidden" value="{media_id}" name="mid"{xhtml}>
+    <input type="hidden" value="{queue}" name="queue"{xhtml}>
+    <input type="hidden" name="{gltoken_name}" value="{gltoken}"{xhtml}>
+  </form>
+
+  <div class="mg_submit mg-edit-actions">
+    <input type="submit" form="mg-media-edit-form" name="mode" value="{lang_save}" class="mg-action-save uk-button uk-button-primary"{xhtml}>
+    <button type="button" class="mg-action-cancel uk-button" onclick="window.location.href='{cancel_url}';">{lang_cancel}</button>
+    <input type="reset" form="mg-media-edit-form" value="{lang_reset}" class="mg-action-reset uk-button uk-button-small"{xhtml}>
+    <input type="submit" form="mg-media-edit-form" name="mode" value="{lang_delete}" class="mg-action-delete uk-button" data-confirm="{lang_delete_confirm}" onclick="return confirm(this.getAttribute('data-confirm'));"{xhtml}>
   </div>
-
-  {playback_options}
-  {media_exif_info}
-
-</form>
+</div>

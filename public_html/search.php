@@ -53,7 +53,7 @@ function MG_buildSearchBox(&$T, $searchinfo=array())
 {
     global $_CONF, $_MG_CONF, $_TABLES, $LANG_MG01, $LANG_MG03;
 
-    $cat_select = '<select name="cat_id">';
+    $cat_select = '<select id="mg-search-category" name="cat_id">';
     $select_cat_id = ($searchinfo['cat_id'] == '') ? UC_SELECTED : '';
     $cat_select .= '<option value="" ' . $select_cat_id . '>'
                  . $LANG_MG03['all_categories'] . '</option>';
@@ -61,12 +61,13 @@ function MG_buildSearchBox(&$T, $searchinfo=array())
     while ($row = DB_fetchArray($result)) {
         $select_cat_id = ($searchinfo['cat_id'] == $row['cat_id']) ? UC_SELECTED : '';
         $cat_select .= '<option value="' . $row['cat_id'] . '" ' . $select_cat_id . '>'
-                     . $row['cat_name'] . '</option>';
+                     . MG_escapeHTML($row['cat_name']) . '</option>';
     }
     $cat_select .= '</select>';
 
     $keytype = MG_optionlist(array(
         'name'    => 'keyType',
+        'id'      => 'mg-search-keytype',
         'current' => $searchinfo['keytype'],
         'values'  => array(
             'phrase' => $LANG_MG03['exact_phrase'],
@@ -77,6 +78,7 @@ function MG_buildSearchBox(&$T, $searchinfo=array())
 
     $swhere = MG_optionlist(array(
         'name'    => 'swhere',
+        'id'      => 'mg-search-swhere',
         'current' => $searchinfo['swhere'],
         'values'  => array(
             '0' => $LANG_MG03['title_desc_keywords'],
@@ -90,6 +92,7 @@ function MG_buildSearchBox(&$T, $searchinfo=array())
 
     $nresults = MG_optionlist(array(
         'name'    => 'numresults',
+        'id'      => 'mg-search-numresults',
         'current' => $searchinfo['numresults'],
         'values'  => array(
             '10' => '10',
@@ -100,7 +103,7 @@ function MG_buildSearchBox(&$T, $searchinfo=array())
         ),
     ));
 
-    $userselect = '<select name="uid">';
+    $userselect = '<select id="mg-search-user" name="uid">';
     $select_uid = ($searchinfo['uid'] == '0') ? UC_SELECTED : '';
     $userselect .= '<option value="0" ' . $select_uid . '>'
                  . $LANG_MG01['all_users'] . '</option>';
@@ -108,7 +111,7 @@ function MG_buildSearchBox(&$T, $searchinfo=array())
     while ($U = DB_fetchArray($result)) {
         $select_uid = ($searchinfo['uid'] == $U['uid']) ? UC_SELECTED : '';
         $userselect .= '<option value="' . $U['uid'] . '" ' . $select_uid . '>'
-                     . COM_getDisplayName($U['uid']) . '</option>';
+                     . MG_escapeHTML(COM_getDisplayName($U['uid'])) . '</option>';
     }
     $userselect .= '</select>';
 
@@ -153,6 +156,37 @@ function MG_buildSearchBox(&$T, $searchinfo=array())
 * @author           string          Get all results by this author
 *
 */
+function MG_getStoredSearch180($id)
+{
+    global $_TABLES;
+
+    $id = trim((string) $id);
+    if ($id === '') {
+        return false;
+    }
+
+    $result = DB_query(
+        "SELECT sort_id, sort_user, sort_query, sort_results, sort_datetime, referer, keywords "
+        . "FROM {$_TABLES['mg_sort']} WHERE sort_id='" . DB_escapeString($id) . "'"
+    );
+
+    if (DB_numRows($result) !== 1) {
+        return false;
+    }
+
+    $search = DB_fetchArray($result);
+    if (!is_array($search)) {
+        return false;
+    }
+
+    $query = ltrim((string) $search['sort_query']);
+    if ($query === '' || stripos($query, 'WHERE ') !== 0) {
+        return false;
+    }
+
+    return $search;
+}
+
 function MG_search($id, $page, $searchinfo='')
 {
     global $_USER, $_TABLES, $_CONF, $_MG_CONF, $LANG_MG00, $LANG_MG01, $LANG_MG03;
@@ -168,14 +202,11 @@ function MG_search($id, $page, $searchinfo='')
 
 //    $alertmsg = '<div class="pluginAlert">' . $LANG_MG03['no_search_found'] . '</div>';
 
-    // pull the query from the search database...
-
-    $result = DB_query("SELECT * FROM {$_TABLES['mg_sort']} WHERE sort_id='" . DB_escapeString($id) . "'");
-//    $nrows  = DB_numRows($result);
-//    if ($nrows < 1) {
-//        return $alertmsg;
-//    }
-    $S = DB_fetchArray($result);
+    // Pull and validate the stored search before composing SQL.
+    $S = MG_getStoredSearch180($id);
+    if ($S === false) {
+        return MG_showSearchForm($searchinfo);
+    }
 
     if (!isset($_USER['uid']) || $_USER['uid'] < 2) {
         $sort_user = 1;
@@ -203,7 +234,7 @@ function MG_search($id, $page, $searchinfo='')
          . $permsql;
     $result = DB_query($sql);
     $row = DB_fetchArray($result);
-    $total_media = $row['c'];
+    $total_media = (is_array($row) && isset($row['c'])) ? (int) $row['c'] : 0;
 
 //    if ($total_media < 1) {
 //        return $alertmsg;
@@ -217,7 +248,7 @@ function MG_search($id, $page, $searchinfo='')
          . $hiddensql
          . $permsql
          . " ORDER BY m.media_time DESC"
-         . " LIMIT " . $begin . "," . intval($begin + $end);
+         . " LIMIT " . intval($begin) . "," . intval($end);
     $result = DB_query($sql);
 
     $media_array = array();
@@ -239,6 +270,7 @@ function MG_search($id, $page, $searchinfo='')
     $T->set_var(array(
         'site_url'             => $_MG_CONF['site_url'],
         'table_columns'        => $columns_per_page,
+        'grid_class'           => 'mg-cols-' . max(1, min(10, (int) $columns_per_page)),
         'table_column_width'   => intval(100 / $columns_per_page) . '%',
         'top_pagination'       => $pagination,
         'bottom_pagination'    => $pagination,
@@ -246,8 +278,9 @@ function MG_search($id, $page, $searchinfo='')
         'lang_search_results'  => $LANG_MG03['search_results'],
         'lang_return_to_index' => $LANG_MG03['return_to_index'],
         'return_url'           => $return_url,
-        'search_keywords'      => ($searchinfo['keywords'] == '*') ? '*' : $S['keywords'],
+        'search_keywords'      => ($searchinfo['keywords'] == '*') ? '*' : MG_escapeHTML($S['keywords']),
         'lang_search'          => $LANG_MG01['search'],
+        'lang_aria_search_results_navigation' => $LANG_MG03['aria_search_results_navigation'],
     ));
 
     MG_buildSearchBox($T, $searchinfo);
@@ -315,6 +348,7 @@ function MG_showSearchForm($searchinfo)
     $T->set_var(array(
         'site_url'             => $_MG_CONF['site_url'],
         'table_columns'        => $columns_per_page,
+        'grid_class'           => 'mg-cols-' . max(1, min(10, (int) $columns_per_page)),
         'table_column_width'   => intval(100 / $columns_per_page) . '%',
         'top_pagination'       => '',
         'bottom_pagination'    => '',
@@ -324,6 +358,7 @@ function MG_showSearchForm($searchinfo)
         'return_url'           => $_MG_CONF['site_url'],
         'search_keywords'      => '',
         'lang_search'          => $LANG_MG01['search'],
+        'lang_aria_search_results_navigation' => $LANG_MG03['aria_search_results_navigation'],
     ));
     MG_buildSearchBox($T, $searchinfo);
     $T->set_var('lang_no_image', '');
@@ -378,13 +413,13 @@ if ($mode == $LANG_MG01['search'] || $mode == 'search') {
     if ($stype == 'phrase') { // search phrase
         switch ($skeywords) {
             case 0 :
-                $sqltmp .= "AND (m.media_title LIKE '%$keywords_db%' OR m.media_desc LIKE '%$keywords%' OR m.media_keywords LIKE '%$keywords%' OR m.artist LIKE '%$keywords%' OR m.album LIKE '%$keywords%' OR m.genre LIKE '%$keywords%')";
+                $sqltmp .= "AND (m.media_title LIKE '%$keywords_db%' OR m.media_desc LIKE '%$keywords_db%' OR m.media_keywords LIKE '%$keywords_db%' OR m.artist LIKE '%$keywords_db%' OR m.album LIKE '%$keywords_db%' OR m.genre LIKE '%$keywords_db%')";
                 break;
             case 1 :
                 $sqltmp .= "AND (m.media_keywords LIKE '%$keywords_db%')";
                 break;
             case 2 :
-                $sqltmp .= "AND (m.media_title LIKE '%$keywords_db%' OR m.media_desc LIKE '%$keywords%')";
+                $sqltmp .= "AND (m.media_title LIKE '%$keywords_db%' OR m.media_desc LIKE '%$keywords_db%')";
                 break;
             case 3 :
                 $sqltmp .= "AND (m.artist LIKE '%$keywords_db%')";
@@ -404,7 +439,7 @@ if ($mode == $LANG_MG01['search'] || $mode == 'search') {
             $mysearchitem = DB_escapeString($mysearchitem);
             switch ($skeywords) {
                 case 0 :
-                    $tmp .= "(m.media_title LIKE '%$mysearchitem%' OR m.media_desc LIKE '%$mysearchitem%' OR m.media_keywords LIKE '%$mysearchitem%' OR m.artist LIKE '%$keywords%' OR m.album LIKE '%$keywords%' OR m.genre LIKE '%$keywords%') OR ";
+                    $tmp .= "(m.media_title LIKE '%$mysearchitem%' OR m.media_desc LIKE '%$mysearchitem%' OR m.media_keywords LIKE '%$mysearchitem%' OR m.artist LIKE '%$keywords_db%' OR m.album LIKE '%$keywords_db%' OR m.genre LIKE '%$keywords_db%') OR ";
                     break;
                 case 1 :
                     $tmp .= "(m.media_keywords LIKE '%$mysearchitem%') OR ";
@@ -419,7 +454,7 @@ if ($mode == $LANG_MG01['search'] || $mode == 'search') {
                     $tmp .= "(m.album LIKE '%$mysearchitem%') OR ";
                     break;
                 case 5 :
-                    $tmp .= "(m.genre LIKE '%$keywords%') OR ";
+                    $tmp .= "(m.genre LIKE '%$keywords_db%') OR ";
                     break;
             }
         }
@@ -433,7 +468,7 @@ if ($mode == $LANG_MG01['search'] || $mode == 'search') {
             $mysearchitem = DB_escapeString($mysearchitem);
             switch ($skeywords) {
                 case 0 :
-                    $tmp .= "(m.media_title LIKE '%$mysearchitem%' OR m.media_desc LIKE '%$mysearchitem%' OR m.media_keywords LIKE '%$mysearchitem%' OR m.artist LIKE '%$keywords%' OR m.album LIKE '%$keywords%' OR m.genre LIKE '%$keywords%') AND ";
+                    $tmp .= "(m.media_title LIKE '%$mysearchitem%' OR m.media_desc LIKE '%$mysearchitem%' OR m.media_keywords LIKE '%$mysearchitem%' OR m.artist LIKE '%$keywords_db%' OR m.album LIKE '%$keywords_db%' OR m.genre LIKE '%$keywords_db%') AND ";
                     break;
                 case 1 :
                     $tmp .= "(m.media_keywords LIKE '%$mysearchitem%') AND ";
@@ -448,7 +483,7 @@ if ($mode == $LANG_MG01['search'] || $mode == 'search') {
                     $tmp .= "(m.album LIKE '%$mysearchitem%') AND ";
                     break;
                 case 5 :
-                    $tmp .= "(m.genre LIKE '%$keywords%') AND ";
+                    $tmp .= "(m.genre LIKE '%$keywords_db%') AND ";
                     break;
             }
         }
@@ -459,10 +494,10 @@ if ($mode == $LANG_MG01['search'] || $mode == 'search') {
     }
 
     if ($category != 0) {
-        $sqltmp .= " AND m.media_category=" . $category;
+        $sqltmp .= " AND m.media_category=" . (int) $category;
     }
     if ($users > 0) {
-        $sqltmp .= " AND m.media_user_id=" . $users;
+        $sqltmp .= " AND m.media_user_id=" . (int) $users;
     }
 
     $sqltmp = DB_escapeString($sqltmp);

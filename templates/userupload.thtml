@@ -1,123 +1,98 @@
 {start_block}
 {navbar}
-<p>{lang_upload_help}</p>
-<p>{lang_upload_size}</p>
-<form method="post" enctype="multipart/form-data" name="mediaupload" action="{s_form_action}" class="compact uk-form">
-<div>
-  <p>
+
+<div class="mg-upload-modern">
+  <p class="mg-upload-intro">{lang_upload_help}</p>
+
+  <form id="mg-upload-form" data-selected-label="{lang_upload_files_selected}" method="post" enctype="multipart/form-data" name="mediaupload" action="{s_form_action}" class="compact uk-form">
     {max_file_size}
     <input type="hidden" name="action" value="{action}"{xhtml}>
-    <span style="font-weight:bold;">{lang_destination_album}</span>&nbsp;{album_select}
-  </p>
+    <input type="hidden" name="{gltoken_name}" value="{gltoken}"{xhtml}>
 
-  <fieldset>
-    <legend>{lang_file_number}1</legend>
-    <dl class="form_block">
-      <dt><label>{lang_file}</label></dt>
-      <dd><input type="file" name="newmedia[]"{xhtml}></dd>
+    <div class="mg-upload-destination">
+      <label class="mg-fw-bold" for="mg-upload-album">{lang_destination_album}</label>
+      <div id="mg-upload-album">{album_select}</div>
+    </div>
 
-      <dt><label>{lang_do_not_convert_orig}</label></dt>
-      <dd><input type="checkbox" name="dnc[]" value="1"{xhtml}></dd>
+    <div class="mg-upload-dropzone" id="mg-upload-dropzone" tabindex="0" role="button" aria-controls="mg-upload-files">
+      <input type="file" id="mg-upload-files" name="newmedia[]" multiple{upload_accept}{xhtml}>
+      <strong class="mg-upload-dropzone__title">{lang_upload_drop_title}</strong>
+      <span class="mg-upload-dropzone__help">{lang_upload_drop_help}</span>
+      <span class="uk-button mg-upload-dropzone__button">{lang_upload_choose_files}</span>
+    </div>
 
-      <dt><label>{lang_attached_tn}</label></dt>
-      <dd><input type="checkbox" name="attachtn[]"{xhtml}> <input type="file" name="thumbnail[]"{xhtml}></dd>
+    <div class="mg-upload-limits">
+      <span>{lang_upload_size}</span>
+      <span>{lang_quota}</span>
+      <span>{lang_zip_help}</span>
+    </div>
 
-      <dt><label>{lang_caption}</label></dt>
-      <dd><input type="text" name="caption[]" class="size6" value=""{xhtml}></dd>
+    <section id="mg-upload-queue" class="mg-upload-queue" hidden>
+      <div class="mg-upload-queue__header">
+        <strong>{lang_upload_queue}</strong>
+        <span id="mg-upload-count"></span>
+      </div>
+      <div id="mg-upload-list"></div>
+    </section>
 
-      <dt><label>{lang_description}</label></dt>
-      <dd><textarea name="description[]" cols="60" rows="2" class="size6"></textarea></dd>
+    <noscript>
+      <p class="mg-upload-noscript">{lang_upload_noscript}</p>
+    </noscript>
 
-      <dt><label>{lang_keywords}</label></dt>
-      <dd><input type="text" name="keywords[]" class="size6" value=""{xhtml}></dd>
+    <template id="mg-upload-item-template">
+      <article class="mg-upload-item" data-upload-item>
+        <div class="mg-upload-item__summary">
+          <div>
+            <strong data-file-name></strong>
+            <span class="mg-upload-item__size" data-file-size></span>
+          </div>
+          <button type="button" class="uk-button mg-upload-remove" data-remove-file>{lang_upload_remove}</button>
+        </div>
 
-      <dt><label>{lang_category}</label></dt>
-      <dd>{cat_select}</dd>
-    </dl>
-  </fieldset>
+        <details class="mg-upload-item__details">
+          <summary>{lang_upload_file_details}</summary>
+          <div class="mg-upload-fields">
+            <label>
+              <span>{lang_caption}</span>
+              <input type="text" name="caption[__INDEX__]" class="size6" value="" data-field="caption"{xhtml}>
+            </label>
 
-  <fieldset>
-    <legend>{lang_file_number}2</legend>
-    <dl class="form_block">
-      <dt><label>{lang_file}</label></dt>
-      <dd><input type="file" name="newmedia[]"{xhtml}></dd>
+            <label>
+              <span>{lang_description}</span>
+              <textarea name="description[__INDEX__]" cols="60" rows="2" class="size6" data-field="description"></textarea>
+            </label>
 
-      <dt><label>{lang_do_not_convert_orig}</label></dt>
-      <dd><input type="checkbox" name="dnc[]" value="1"{xhtml}></dd>
+            <label>
+              <span>{lang_keywords}</span>
+              <input type="text" name="keywords[__INDEX__]" class="size6" value="" data-field="keywords"{xhtml}>
+            </label>
 
-      <dt><label>{lang_attached_tn}</label></dt>
-      <dd><input type="checkbox" name="attachtn[]"{xhtml}> <input type="file" name="thumbnail[]"{xhtml}></dd>
+            <label class="mg-upload-category-field">
+              <span>{lang_category}</span>
+              <select name="cat_id[__INDEX__]" data-field="category">
+                {category_options}
+              </select>
+            </label>
 
-      <dt><label>{lang_caption}</label></dt>
-      <dd><input type="text" name="caption[]" class="size6" value=""{xhtml}></dd>
+            <label class="mg-upload-check">
+              <input type="checkbox" name="dnc[__INDEX__]" value="1" data-field="dnc"{xhtml}>
+              <span>{lang_do_not_convert_orig}</span>
+            </label>
 
-      <dt><label>{lang_description}</label></dt>
-      <dd><textarea name="description[]" cols="60" rows="2" class="size6"></textarea></dd>
+            <label class="mg-upload-thumbnail-field">
+              <span>{lang_attached_tn}</span>
+              <input type="file" name="thumbnail[__INDEX__]" data-field="thumbnail"{xhtml}>
+            </label>
+          </div>
+        </details>
+      </article>
+    </template>
 
-      <dt><label>{lang_keywords}</label></dt>
-      <dd><input type="text" name="keywords[]" class="size6" value=""{xhtml}></dd>
-
-      <dt><label>{lang_category}</label></dt>
-      <dd>{cat_select}</dd>
-    </dl>
-  </fieldset>
-
-  <fieldset>
-    <legend>{lang_file_number}3</legend>
-    <dl class="form_block">
-      <dt><label>{lang_file}</label></dt>
-      <dd><input type="file" name="newmedia[]"{xhtml}></dd>
-
-      <dt><label>{lang_do_not_convert_orig}</label></dt>
-      <dd><input type="checkbox" name="dnc[]" value="1"{xhtml}></dd>
-
-      <dt><label>{lang_attached_tn}</label></dt>
-      <dd><input type="checkbox" name="attachtn[]"{xhtml}> <input type="file" name="thumbnail[]"{xhtml}></dd>
-
-      <dt><label>{lang_caption}</label></dt>
-      <dd><input type="text" name="caption[]" class="size6" value=""{xhtml}></dd>
-
-      <dt><label>{lang_description}</label></dt>
-      <dd><textarea name="description[]" cols="60" rows="2" class="size6"></textarea></dd>
-
-      <dt><label>{lang_keywords}</label></dt>
-      <dd><input type="text" name="keywords[]" class="size6" value=""{xhtml}></dd>
-
-      <dt><label>{lang_category}</label></dt>
-      <dd>{cat_select}</dd>
-    </dl>
-  </fieldset>
-
-  <fieldset>
-    <legend>{lang_file_number}4</legend>
-    <dl class="form_block">
-      <dt><label>{lang_file}</label></dt>
-      <dd><input type="file" name="newmedia[]"{xhtml}></dd>
-
-      <dt><label>{lang_do_not_convert_orig}</label></dt>
-      <dd><input type="checkbox" name="dnc[]" value="1"{xhtml}></dd>
-
-      <dt><label>{lang_attached_tn}</label></dt>
-      <dd><input type="checkbox" name="attachtn[]"{xhtml}> <input type="file" name="thumbnail[]"{xhtml}></dd>
-
-      <dt><label>{lang_caption}</label></dt>
-      <dd><input type="text" name="caption[]" class="size6" value=""{xhtml}></dd>
-
-      <dt><label>{lang_description}</label></dt>
-      <dd><textarea name="description[]" cols="60" rows="2" class="size6"></textarea></dd>
-
-      <dt><label>{lang_keywords}</label></dt>
-      <dd><input type="text" name="keywords[]" class="size6" value=""{xhtml}></dd>
-
-      <dt><label>{lang_category}</label></dt>
-      <dd>{cat_select}</dd>
-    </dl>
-  </fieldset>
-
-  <div class="mg_submit">
-    <input type="submit" value="{lang_save}" name="mode" class="submit"{xhtml}>
-    <input type="submit" value="{lang_cancel}" name="mode" class="submit"{xhtml}>
-  </div>
+    <div class="mg_submit mg-upload-actions">
+      <input type="submit" value="{lang_save}" name="mode" class="submit uk-button uk-button-primary"{xhtml}>
+      <input type="submit" value="{lang_cancel}" name="mode" class="submit uk-button"{xhtml}>
+    </div>
+  </form>
 </div>
-</form>
+
 {end_block}

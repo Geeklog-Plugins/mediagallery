@@ -118,7 +118,7 @@ function MG_editAlbum($mode ='', $actionURL='', $oldaid = 0)
         // If edit, pull up the existing album information...
         if ($album->access != 3) {
             COM_errorLog("MediaGallery: Someone has tried to illegally edit a Media Gallery Album. "
-                       . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: $REMOTE_ADDR",1);
+                       . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: " . MG_getRemoteAddress(),1);
             return COM_showMessageText($LANG_MG00['access_denied_msg']);
         }
     }
@@ -134,7 +134,7 @@ function MG_editAlbum($mode ='', $actionURL='', $oldaid = 0)
     $album_selectbox .= '</select>';
     if ($valid_albums == 0) {
         COM_errorLog("MediaGallery: Someone has tried to illegally create a Media Gallery Album. "
-                   . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: $REMOTE_ADDR",1);
+                   . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: " . MG_getRemoteAddress(),1);
         return COM_showMessageText($LANG_MG00['access_denied_msg']);
     }
 
@@ -365,7 +365,7 @@ function MG_editAlbum($mode ='', $actionURL='', $oldaid = 0)
     for ($i = 0; $i < count($themes); $i++) {
         $album_theme_select .= '<option value="' . $themes[$i] . '"'
             . ($album->skin == $themes[$i] ? ' selected="selected"' : '')
-            . '>' . $themes[$i] . '</option>';
+            . '>' . MG_escapeHTML($themes[$i]) . '</option>';
     }
     $album_theme_select .= '</select>';
 
@@ -383,7 +383,7 @@ function MG_editAlbum($mode ='', $actionURL='', $oldaid = 0)
         if ($row['uid'] == 1) continue;
         $owner_select .= '<option value="' . $row['uid'] . '"'
             . ($album->owner_id == $row['uid'] ? ' selected="selected"' : '')
-            . '>' . COM_getDisplayName($row['uid']) . '</option>';
+            . '>' . MG_escapeHTML(COM_getDisplayName($row['uid'])) . '</option>';
     }
     $owner_select .= '</select>';
 
@@ -573,11 +573,11 @@ function MG_editAlbum($mode ='', $actionURL='', $oldaid = 0)
     $wm_current = '<img src="' . $_MG_CONF['site_url'] . '/watermarks/blank.png" name="myImage" alt=""' . XHTML . '>';
     for ($i=0; $i<$nRows; $i++) {
         $row = DB_fetchArray($result);
-        $wm_select .= '<option value="' . $row['filename'] . '"'
+        $wm_select .= '<option value="' . MG_escapeHTML($row['filename']) . '"'
                     . ($album->wm_id==$row['wm_id'] ? ' selected="selected"' : '')
-                    . '>' . $row['filename'] . '</option>';
+                    . '>' . MG_escapeHTML($row['filename']) . '</option>';
         if ($album->wm_id == $row['wm_id']) {
-            $wm_current = '<img src="' . $_MG_CONF['site_url'] . '/watermarks/' . $row['filename'] . '" name="myImage" alt=""' . XHTML . '>';
+            $wm_current = '<img src="' . MG_escapeHTML($_MG_CONF['site_url'] . '/watermarks/' . $row['filename']) . '" name="myImage" alt=""' . XHTML . '>';
         }
     }
     $wm_select .= '</select>';
@@ -618,8 +618,8 @@ function MG_editAlbum($mode ='', $actionURL='', $oldaid = 0)
             if ($album->mod_group_id == $usergroups[key($usergroups)]) {
                 $moddd   .= ' selected="selected"';
             }
-            $groupdd .= '>' . key($usergroups) . '</option>';
-            $moddd   .= '>' . key($usergroups) . '</option>';
+            $groupdd .= '>' . MG_escapeHTML(key($usergroups)) . '</option>';
+            $moddd   .= '>' . MG_escapeHTML(key($usergroups)) . '</option>';
         }
         next($usergroups);
     }
@@ -705,8 +705,8 @@ function MG_editAlbum($mode ='', $actionURL='', $oldaid = 0)
         'rows_input'              => $rows_input,
         'columns_input'           => $columns_input,
         'playback_type'           => $playback_type,
-        'album_title'             => $album->title,
-        'album_desc'              => $album->description,
+        'album_title'             => MG_escapeHTML($album->title),
+        'album_desc'              => MG_escapeHTML($album->description),
         'album_id'                => $album_id,
         'parent_select'           => $album_selectbox,
         'album_cover'             => $album->cover,
@@ -857,13 +857,13 @@ function MG_quickCreate($parent, $title, $desc='')
         // see if we are mediagallery.admin
         if (!SEC_hasRights('mediagallery.admin')) {
             COM_errorLog("MediaGallery: Someone has tried to illegally save a Media Gallery Album in Root. "
-                       . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: $REMOTE_ADDR",1);
+                       . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: " . MG_getRemoteAddress(),1);
             return COM_showMessageText($LANG_MG00['access_denied_msg']);
         }
     } elseif ($parent != 0) {
         if (!isset($parent_album->id)) {    // does not exist...
             COM_errorLog("MediaGallery: Someone has tried to save a album to non-existent parent album. "
-                       . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: $REMOTE_ADDR",1);
+                       . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: " . MG_getRemoteAddress(),1);
             return COM_showMessageText($LANG_MG00['access_denied_msg']);
         } else {
             if ($parent_album->access != 3 &&
@@ -871,7 +871,7 @@ function MG_quickCreate($parent, $title, $desc='')
                 !$_MG_CONF['member_albums'] &&
                 !$_MG_CONF['member_album_root'] == $parent_album->id) {
                 COM_errorLog("MediaGallery: Someone has tried to illegally save a Media Gallery Album. "
-                           . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: $REMOTE_ADDR",1);
+                           . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: " . MG_getRemoteAddress(),1);
                 return COM_showMessageText($LANG_MG00['access_denied_msg']);
             }
         }
@@ -896,6 +896,11 @@ function MG_quickCreate($parent, $title, $desc='')
     $album->order = $album->getNextSortOrder();
     $album->saveAlbum();
     $aid = $album->id;
+
+    MG_notifyAlbumSaved180($aid);
+    if ($album->parent > 0) {
+        MG_notifyAlbumSaved180($album->parent);
+    }
 
     require_once $_CONF['path'] . 'plugins/mediagallery/include/rssfeed.php';
     MG_buildFullRSS();
@@ -935,6 +940,7 @@ function MG_saveAlbum($album_id)
         $update          = 0;
     }
 
+    $old_parent = ($update == 1) ? intval($album->parent) : 0;
     $album->parent = COM_applyFilter($_POST['parentaid'], true);
     $parent_album = new mgAlbum($album->parent);
 
@@ -1092,13 +1098,13 @@ function MG_saveAlbum($album_id)
         // see if we are mediagallery.admin
         if (!SEC_hasRights('mediagallery.admin')) {
             COM_errorLog("MediaGallery: Someone has tried to illegally save a Media Gallery Album in Root. "
-                       . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: $REMOTE_ADDR",1);
+                       . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: " . MG_getRemoteAddress(),1);
             return COM_showMessageText($LANG_MG00['access_denied_msg']);
         }
     } elseif ($album->parent != 0) {
         if (!isset($parent_album->id)) {    // does not exist...
             COM_errorLog("MediaGallery: Someone has tried to save a album to non-existent parent album. "
-                       . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: $REMOTE_ADDR",1);
+                       . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: " . MG_getRemoteAddress(),1);
             return COM_showMessageText($LANG_MG00['access_denied_msg']);
         } else {
             if ($parent_album->access != 3 &&
@@ -1106,7 +1112,7 @@ function MG_saveAlbum($album_id)
                 !$_MG_CONF['member_albums'] &&
                 !($_MG_CONF['member_album_root'] == $parent_album->id)) {
                 COM_errorLog("MediaGallery: Someone has tried to illegally save a Media Gallery Album. "
-                           . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: $REMOTE_ADDR",1);
+                           . "User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: " . MG_getRemoteAddress(),1);
                 return COM_showMessageText($LANG_MG00['access_denied_msg']);
             }
         }
@@ -1290,6 +1296,14 @@ function MG_saveAlbum($album_id)
     require_once $_CONF['path'] . 'plugins/mediagallery/include/rssfeed.php';
     MG_buildFullRSS();
     MG_buildAlbumRSS($album->id);
+
+    MG_notifyAlbumSaved180($album->id);
+    if ($album->parent > 0) {
+        MG_notifyAlbumSaved180($album->parent);
+    }
+    if ($old_parent > 0 && $old_parent != $album->parent) {
+        MG_notifyAlbumSaved180($old_parent);
+    }
 
     $actionURL = $_MG_CONF['site_url'] . '/album.php?aid=' . $album->id;
     COM_redirect($actionURL);

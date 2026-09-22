@@ -50,13 +50,12 @@ if (!SEC_hasRights('mediagallery.config')) {
 require_once $_CONF['path'] . 'plugins/mediagallery/include/common.php';
 require_once $_CONF['path'] . 'plugins/mediagallery/include/lib-batch.php';
 require_once $_CONF['path'] . 'plugins/mediagallery/include/classAlbum.php';
+require_once $_CONF['path'] . 'plugins/mediagallery/include/classMedia.php';
 require_once $_MG_CONF['path_admin'] . 'navigation.php';
 
-function MG_rebuildThumbConfirm()
+function MG_renderMaintenanceConfirm180($title, $help, $details, $formAction, $helpUrl)
 {
     global $_CONF, $_MG_CONF, $LANG_MG00, $LANG_MG01;
-
-    $retval = '';
 
     $B = new Template($_MG_CONF['template_path']);
     $B->set_file('admin', 'thumbs.thtml');
@@ -64,12 +63,13 @@ function MG_rebuildThumbConfirm()
         'site_admin_url' => $_CONF['site_admin_url'],
         'site_url'       => $_CONF['site_url'],
         'xhtml'          => XHTML,
-        'lang_title'     => $LANG_MG01['rebuild_thumb'],
-        's_form_action'  => $_MG_CONF['admin_url'] . 'maint.php?mode=thumbs&amp;step=two',
+        'lang_title'     => $title,
+        's_form_action'  => $formAction,
         'lang_next'      => $LANG_MG01['next'],
         'lang_cancel'    => $LANG_MG01['cancel'],
-        'lang_help'      => $LANG_MG01['rebuild_thumb_help'],
-        'lang_details'   => $LANG_MG01['rebuild_thumb_details'],
+        'lang_help'      => $help,
+        'lang_details'   => $details,
+        'action_label'   => $title,
     ));
 
     $T = new Template($_MG_CONF['template_path']);
@@ -79,14 +79,26 @@ function MG_rebuildThumbConfirm()
         'site_url'       => $_MG_CONF['site_url'],
         'xhtml'          => XHTML,
         'admin_body'     => $B->finish($B->parse('output', 'admin')),
-        'title'          => $LANG_MG01['rebuild_thumb'],
+        'title'          => $title,
         'lang_admin'     => $LANG_MG00['admin'],
         'lang_help'      => '<img src="' . MG_getImageFile('button_help.png') . '" style="border:none;" alt="?"' . XHTML . '>',
-        'help_url'       => $_MG_CONF['site_url'] . '/docs/usage.html#Rebuild_Thumbs',
+        'help_url'       => $helpUrl,
     ));
-    $retval .= $T->finish($T->parse('output', 'admin'));
 
-    return $retval;
+    return $T->finish($T->parse('output', 'admin'));
+}
+
+function MG_rebuildThumbConfirm()
+{
+    global $_MG_CONF, $LANG_MG01;
+
+    return MG_renderMaintenanceConfirm180(
+        $LANG_MG01['rebuild_thumb'],
+        $LANG_MG01['rebuild_thumb_help'],
+        $LANG_MG01['rebuild_thumb_details'],
+        $_MG_CONF['admin_url'] . 'maint.php?mode=thumbs&amp;step=two',
+        $_MG_CONF['site_url'] . '/docs/usage.html#Rebuild_Thumbs'
+    );
 }
 
 function MG_rebuildThumb()
@@ -141,7 +153,7 @@ function MG_rebuildThumb()
                 'data3'      => $row['media_mime_ext']
             ));
         }
-        $display = MG_continueSession($session_id, 0, $_MG_CONF['def_refresh_rate']);
+        $display = MG_continueSession($session_id, max(1, (int) $_MG_CONF['def_item_limit']), $_MG_CONF['def_refresh_rate']);
         $display = COM_createHTMLDocument($display);
         COM_output($display);
         exit;
@@ -168,7 +180,7 @@ if ($mode == 'thumbs') {
             $display .= MG_showAdminMenu('batch_sessions');
             $display .= MG_rebuildThumbConfirm();
             $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
-            $display = COM_createHTMLDocument($display);
+            $display = MG_adminCreateHTMLDocument($display);
             COM_output($display);
             exit;
             break;
@@ -183,39 +195,17 @@ if ($mode == 'thumbs') {
     $step = COM_applyFilter($_GET['step']);
     switch ($step) {
         case 'one' :
-            $B = new Template($_MG_CONF['template_path']);
-            $B->set_file('admin', 'thumbs.thtml');
-            $B->set_var(array(
-                'lang_title'     => $LANG_MG01['resize_display'],
-                's_form_action'  => $_MG_CONF['admin_url'] . 'maint.php?mode=resize&amp;step=two',
-                'lang_next'      => $LANG_MG01['next'],
-                'lang_cancel'    => $LANG_MG01['cancel'],
-                'lang_help'      => $LANG_MG01['resize_help'],
-                'lang_details'   => $LANG_MG01['resize_details'],
-                'site_url'       => $_CONF['site_url'],
-                'site_admin_url' => $_CONF['site_admin_url'],
-                'xhtml'          => XHTML,
-            ));
-            $B->parse('output', 'admin');
-
-            $T = new Template($_MG_CONF['template_path']);
-            $T->set_file('admin', 'administration.thtml');
-            $T->set_var(array(
-                'site_admin_url' => $_CONF['site_admin_url'],
-                'site_url'       => $_MG_CONF['site_url'],
-                'xhtml'          => XHTML,
-                'admin_body'     => $B->finish($B->get_var('output')),
-                'title'          => $LANG_MG01['resize_display'],
-                'lang_admin'     => $LANG_MG00['admin'],
-                'lang_help'      => '<img src="' . MG_getImageFile('button_help.png') . '" style="border:none;" alt="?"' . XHTML . '>',
-                'help_url'       => $_MG_CONF['site_url'] . '/docs/usage.html#Resize_Images',
-            ));
-            $T->parse('output', 'admin');
             $display = COM_startBlock($LANG_MG00['admin'], '', COM_getBlockTemplate('_admin_block', 'header'));
             $display .= MG_showAdminMenu('batch_sessions');
-            $display .= $T->finish($T->get_var('output'));
+            $display .= MG_renderMaintenanceConfirm180(
+                $LANG_MG01['resize_display'],
+                $LANG_MG01['resize_help'],
+                $LANG_MG01['resize_details'],
+                $_MG_CONF['admin_url'] . 'maint.php?mode=resize&amp;step=two',
+                $_MG_CONF['site_url'] . '/docs/usage.html#Resize_Images'
+            );
             $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
-            $display = COM_createHTMLDocument($display);
+            $display = MG_adminCreateHTMLDocument($display);
             COM_output($display);
             exit;
             break;
@@ -233,23 +223,30 @@ if ($mode == 'thumbs') {
                 for ($x=0; $x<$nRows; $x++) {
                     @set_time_limit(30);
                     $row = DB_fetchArray($result);
-                    $imageDisplay = '';
-                    $srcImage     = '';
-                    $mfn = $row['media_filename'][0] . '/' . $row['media_filename'];
+                    $srcImage = '';
+                    $displayExt = MG_getDisplayExtension180($row['mime_type'], $row['media_mime_ext']);
+                    $imageDisplay = Media::getFilePath('disp', $row['media_filename'], $displayExt);
+
                     if ($_MG_CONF['discard_original'] == 1) {
-                        $ext = MG_getMediaExt($_MG_CONF['path_mediaobjects'] . 'disp/' . $mfn);
-                        if (!empty($ext)) {
-                            $imageDisplay = $_MG_CONF['path_mediaobjects'] . 'disp/' . $mfn . $ext;
-                            $srcImage = $imageDisplay;
+                        $existingDisplay = Media::getReadableFileInfo('disp', $row['media_filename'], $displayExt);
+                        if ($existingDisplay !== false) {
+                            $srcImage = $existingDisplay['path'];
                         }
                     } else {
-                        $srcImage = $_MG_CONF['path_mediaobjects'] . 'orig/' . $mfn . '.' . $row['media_mime_ext'];
-                        $ext = MG_getMediaExt($_MG_CONF['path_mediaobjects'] . 'disp/' . $mfn);
-                        if (!empty($ext)) {
-                            $imageDisplay = $_MG_CONF['path_mediaobjects'] . 'disp/' . $mfn . $ext;
+                        $original = Media::getReadableFileInfo('orig', $row['media_filename'], $row['media_mime_ext']);
+                        if ($original !== false) {
+                            $srcImage = $original['path'];
                         }
                     }
-                    if ($imageDisplay == '') continue;
+
+                    if ($srcImage === '') {
+                        MG_setSessionLog(
+                            $session_id,
+                            'Resize Images: source image is missing for media ' . $row['media_id']
+                        );
+                        continue;
+                    }
+
                     MG_registerSession(array(
                         'session_id' => $session_id,
                         'mid'        => $row['mime_type'],
@@ -259,7 +256,7 @@ if ($mode == 'thumbs') {
                         'data3'      => $row['media_mime_ext']
                     ));
                 }
-                $display = MG_continueSession($session_id, 0, $_MG_CONF['def_refresh_rate']);
+                $display = MG_continueSession($session_id, max(1, (int) $_MG_CONF['def_item_limit']), $_MG_CONF['def_refresh_rate']);
                 $display = COM_createHTMLDocument($display);
                 COM_output($display);
                 exit;
@@ -283,45 +280,22 @@ if ($mode == 'thumbs') {
                 $display .= COM_showMessageText($LANG_MG01['remove_error']
                           . '  [ <a href=\'javascript:history.go(-1)\'>' . $LANG_MG02['go_back'] . '</a> ]');
                 $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
-                $display = COM_createHTMLDocument($display);
+                $display = MG_adminCreateHTMLDocument($display);
                 COM_output($display);
                 exit;
             }
 
-            $B = new Template($_MG_CONF['template_path']);
-            $B->set_file('admin', 'thumbs.thtml');
-            $B->set_var(array(
-                'lang_title'     => $LANG_MG01['remove_originals'],
-                's_form_action'  => $_MG_CONF['admin_url'] . 'maint.php?mode=remove&amp;step=two',
-                'lang_next'      => $LANG_MG01['next'],
-                'lang_cancel'    => $LANG_MG01['cancel'],
-                'lang_help'      => $LANG_MG01['remove_help'],
-                'lang_details'   => $LANG_MG01['remove_details'],
-                'site_url'       => $_CONF['site_url'],
-                'site_admin_url' => $_CONF['site_admin_url'],
-                'xhtml'          => XHTML,
-            ));
-            $B->parse('output', 'admin');
-
-            $T = new Template($_MG_CONF['template_path']);
-            $T->set_file('admin', 'administration.thtml');
-            $T->set_var(array(
-                'site_admin_url' => $_CONF['site_admin_url'],
-                'site_url'       => $_MG_CONF['site_url'],
-                'xhtml'          => XHTML,
-                'admin_body'     => $B->finish($B->get_var('output')),
-                'title'          => $LANG_MG01['discard_originals'],
-                'lang_admin'     => $LANG_MG00['admin'],
-                'lang_help'      => '<img src="' . MG_getImageFile('button_help.png') . '" style="border:none;" alt="?"' . XHTML . '>',
-                'help_url'       => $_MG_CONF['site_url'] . '/docs/usage.html#Discard_Original_Images',
-            ));
-            $T->parse('output', 'admin');
-
             $display = COM_startBlock($LANG_MG00['admin'], '', COM_getBlockTemplate('_admin_block', 'header'));
             $display .= MG_showAdminMenu('batch_sessions');
-            $display .= $T->finish($T->get_var('output'));
+            $display .= MG_renderMaintenanceConfirm180(
+                $LANG_MG01['remove_originals'],
+                $LANG_MG01['remove_help'],
+                $LANG_MG01['remove_details'],
+                $_MG_CONF['admin_url'] . 'maint.php?mode=remove&amp;step=two',
+                $_MG_CONF['site_url'] . '/docs/usage.html#Discard_Original_Images'
+            );
             $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
-            $display = COM_createHTMLDocument($display);
+            $display = MG_adminCreateHTMLDocument($display);
             COM_output($display);
             exit;
             break;
@@ -336,9 +310,9 @@ if ($mode == 'thumbs') {
                 $actionURL = $_MG_CONF['admin_url'] . 'index.php';
                 $session_description = $LANG_MG01['discard_originals'];
                 $session_id = MG_beginSession('droporiginal', $actionURL, $session_description);
-                $mfn = $row['media_filename'][0] . '/' . $row['media_filename'];
                 for ($x=0; $x<$nRows; $x++) {
                     $row = DB_fetchArray($result);
+                    $mfn = $row['media_filename'][0] . '/' . $row['media_filename'];
                     $srcImage = $_MG_CONF['path_mediaobjects'] . 'orig/' . $mfn . '.' . $row['media_mime_ext'];
                     if (!file_exists($srcImage)) continue;
                     $ext = MG_getMediaExt($_MG_CONF['path_mediaobjects'] . 'disp/' . $mfn);
@@ -352,7 +326,7 @@ if ($mode == 'thumbs') {
                         'data3'      => $row['media_mime_ext']
                     ));
                 }
-                $display = MG_continueSession($session_id, 0, $_MG_CONF['def_refresh_rate']);
+                $display = MG_continueSession($session_id, max(1, (int) $_MG_CONF['def_item_limit']), $_MG_CONF['def_refresh_rate']);
                 $display = COM_createHTMLDocument($display);
                 COM_output($display);
                 exit;
@@ -405,7 +379,7 @@ if ($mode == 'thumbs') {
         $display .= MG_continueSession($sid, $item_limit, $refresh_rate);
     }
     $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
-    $display = COM_createHTMLDocument($display);
+    $display = MG_adminCreateHTMLDocument($display);
     COM_output($display);
     exit;
 
