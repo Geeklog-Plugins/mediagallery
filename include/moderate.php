@@ -140,13 +140,9 @@ function MG_approveSubmission($media_id)
         if (DB_numRows($result) === 1) {
             list($username, $fullname, $email) = DB_fetchArray($result);
             if ($email != '') {
+                require_once $_CONF['path'] . 'plugins/mediagallery/include/email_180.php';
                 $subject = $LANG_MG01['upload_approved'];
-                $body  = $LANG_MG01['upload_approved'];
-                $body .= '<br' . XHTML . '><br' . XHTML . '>';
-                $body .= $LANG_MG01['thanks_submit'];
-                $body .= '<br' . XHTML . '><br' . XHTML . '>';
-                $body .= $_CONF['site_name'] . '<br' . XHTML . '>';
-                $body .= $_CONF['site_url'] . '<br' . XHTML . '>';
+                $body = MG_buildApprovalEmail180();
                 $to = COM_formatEmailAddress($username, $email);
 
                 if (!COM_mail($to, $subject, $body, '', true)) {
