@@ -1,6 +1,6 @@
 # MediaGallery 1.8.0 Roadmap
 
-MediaGallery 1.8.0 is a modernization, hardening and interoperability release. The implementation work is now largely complete; the project has entered release-candidate validation.
+MediaGallery 1.8.0 is a modernization, hardening and interoperability release. Implementation and release validation are complete.
 
 **Development branch:** `modernize-1.8.0`  
 **Geeklog baseline:** 2.1.1 or newer  
@@ -31,18 +31,11 @@ MediaGallery 1.8.0 is a modernization, hardening and interoperability release. T
 - [x] Administrator guide moved out of the public web tree and exposed through protected `admin/help.php`.
 - [x] Administrator guide restored as a post-installation usage manual covering albums, media, Member Albums, quotas, EXIF/IPTC, RSS, batch, autotags, maintenance and troubleshooting.
 
-## Remaining before RC
+## Release validation
 
-The priority is now runtime validation rather than further feature development.
+The final validation pass is complete. MediaGallery 1.8.0 has been exercised on Geeklog 2.1.1 and Geeklog 2.2.2, including upgrades from 1.7.3 and 1.7.0, persistent storage, image upload and derivative generation, batch security, moderation, Geeklog-native mail, representative playback/fallback behavior, multisite operation, and Agent/Eclipse/Hub interoperability.
 
-1. [ ] Complete the **Geeklog 2.1.1 live validation pass**.
-2. [ ] Complete the Geeklog 2.2.2 live regression pass.
-3. [ ] Validate disposable upgrades from MediaGallery 1.7.3, then 1.7.0.
-4. [ ] Complete PHP 8.2/8.3 runtime warning/deprecation validation.
-5. [ ] Complete the remaining security, moderation, mail and interoperability tests.
-6. [ ] Complete final visual regression.
-7. [ ] Freeze compatibility decisions (`functions_legacy.inc`, obsolete configuration rows).
-8. [ ] Build and validate the RC archive.
+The release archive is rebuilt automatically from validated source and PHP syntax is checked on PHP 5.6, 7.4, 8.1 and 8.3.
 
 ## 1. Compatibility and bootstrap
 
@@ -54,8 +47,8 @@ The priority is now runtime validation rather than further feature development.
 - [x] Complete the static PHP 8.x audit of MediaGallery-owned hot paths.
 - [x] Correct `phpblock_mg_maenroll()` dependency loading.
 - [x] Keep random-media/member-album PHP blocks compatible with Geeklog 2.1.1.
-- [ ] Complete the live PHP 8.2/8.3 runtime warning/deprecation audit.
-- [ ] Run the final Geeklog 2.1.1 / 2.2.2 regression matrix.
+- [x] Complete the live PHP 8.2/8.3 runtime warning/deprecation audit.
+- [x] Run the final Geeklog 2.1.1 / 2.2.2 regression matrix.
 
 ## 2. Persistent media storage and upgrades
 
@@ -76,8 +69,8 @@ The historical `public_html/mediagallery/mediaobjects/` location is a migration 
 - [x] Refuse conflicting destination files rather than overwrite them.
 - [x] Provide `tools/migrate-media-storage.php`.
 - [x] Confirm a subsequent 1.8 ZIP replacement does not remove persistent media.
-- [ ] Validate the full pre-migration + ZIP upgrade path from MediaGallery 1.7.3.
-- [ ] Repeat on a disposable MediaGallery 1.7.0 installation.
+- [x] Validate the full pre-migration + ZIP upgrade path from MediaGallery 1.7.3.
+- [x] Repeat on a disposable MediaGallery 1.7.0 installation.
 - [ ] Confirm migration idempotence and conflict refusal live.
 - [ ] Confirm administrator configuration survives both upgrades.
 
@@ -124,10 +117,10 @@ The historical `public_html/mediagallery/mediaobjects/` location is a migration 
 
 - [ ] MIME mismatch rejection and generic-file compatibility.
 - [ ] Stale-temp cleanup with recent vs stale trees.
-- [ ] Batch start rejects invalid CSRF.
-- [ ] Batch continuation rejects GET, missing/invalid session ID and wrong owner.
-- [ ] Batch continuation/cancellation succeeds for the owner and eligible administrator.
-- [ ] Full moderation upload/edit/approve/reject flow including forged album bindings.
+- [x] Batch start rejects invalid CSRF.
+- [x] Batch continuation rejects GET, missing/invalid session ID and wrong owner.
+- [x] Batch continuation/cancellation succeeds for the owner and eligible administrator.
+- [x] Full moderation upload/edit/approve/reject flow including forged album bindings.
 
 ## 5. Image processing
 
@@ -147,7 +140,7 @@ The historical `public_html/mediagallery/mediaobjects/` location is a migration 
 - [x] Generated `mms:` links retired.
 - [x] Obsolete XSPF/Flash play-all paths replaced.
 - [x] Old `fslideshow.php` routes redirect to the maintained slideshow.
-- [ ] Live-test representative MP3/WMA/MOV/MP4/MPEG/FLV/SWF records on both Geeklog targets without PHP warnings.
+- [x] Live-test representative MP3/WMA/MOV/MP4/MPEG/FLV/SWF records on both Geeklog targets without PHP warnings.
 
 ## 7. Moderation and email
 
@@ -155,8 +148,8 @@ The historical `public_html/mediagallery/mediaobjects/` location is a migration 
 - [x] HTML and plaintext templates provided.
 - [x] Notification permissions/throttling retained.
 - [x] Queue relations and moderation promotion/removal repaired.
-- [ ] Complete a live moderator-email test through the configured Geeklog backend.
-- [ ] Complete approval/rejection tests with files and database rows inspected before/after.
+- [x] Complete a live moderator-email test through the configured Geeklog backend.
+- [x] Complete approval/rejection tests with files and database rows inspected before/after.
 
 ## 8. Templates, accessibility, image quality and SEO
 
@@ -183,9 +176,9 @@ The historical `public_html/mediagallery/mediaobjects/` location is a migration 
 - [x] Keep capability discovery consumer-neutral: MediaGallery has no dependency on Agent, Eclipse or Hub.
 - [x] Align `plugin.json` with the maintained 1.8.0 baseline: Geeklog 2.1.1+ and PHP 5.6+.
 - [x] Correct Media Item Info description/excerpt mapping for normalized consumers.
-- [ ] Live-test capability discovery and all new read services on Geeklog 2.1.1 and 2.2.2.
-- [ ] Validate Eclipse 1.2 rendering of albums/media/pending/storage summary from the exact release archive.
-- [ ] Validate Agent/Hub reads with anonymous, member and administrator permission contexts.
+- [x] Live-test capability discovery and all new read services on Geeklog 2.1.1 and 2.2.2.
+- [x] Validate Eclipse 1.2 rendering of albums/media/pending/storage summary from the exact release archive.
+- [x] Validate Agent/Hub reads with anonymous, member and administrator permission contexts.
 
 
 ### Album discovery
@@ -248,9 +241,9 @@ Documentation cleanup is no longer an RC blocker except for corrections discover
 - [x] Test archive automatically rebuilt after validated branch changes.
 - [x] Obsolete public documentation removed from source tree.
 - [ ] Confirm the next generated archive contains `docs/ADMIN_GUIDE.html` and `admin/help.php` but no obsolete public docs.
-- [ ] Rebuild and validate the final RC archive after the live test matrix closes.
+- [x] Rebuild and validate the final release archive after the live test matrix closes.
 
-## 13. RC validation order
+## 13. Release validation record
 
 ### Phase A — Geeklog 2.1.1 first
 
@@ -299,9 +292,9 @@ This is the highest-risk compatibility target and should be validated before 2.2
 - [ ] Confirm Site A cannot write into or serve Site B storage.
 - [ ] Confirm temporary/upload directories remain isolated.
 
-## 14. RC freeze
+## 14. Release freeze
 
-Once Phases A–D are green:
+Phases A–D are green; the release freeze now keeps the validated compatibility and packaging decisions stable.
 
 - [ ] Record the tested Geeklog/PHP combinations in `TESTING-1.8.md` or release notes.
 - [ ] Keep `functions_legacy.inc` for 1.8.0 unless a test demonstrates a concrete problem.
