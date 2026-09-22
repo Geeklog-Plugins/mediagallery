@@ -123,7 +123,9 @@ function MG_createThumbnail($srcImage, $imageThumb, $mimeType, $aid)
         list($rc, $msg) = MG_convertImageFormat($srcImage, $tmpImage, 'image/jpeg', 0);
         if ($rc == false) {
             COM_errorLog("MG_createThumbnail: Error converting uploaded image to jpeg format.");
-            @unlink($srcImage);
+            if ($processOriginal) {
+                @unlink($srcImage);
+            }
             return array(false, $msg);
         }
     }
@@ -171,7 +173,7 @@ function MG_createThumbnail($srcImage, $imageThumb, $mimeType, $aid)
 // --
 // Create the display image
 // --
-function MG_createDisplayImage($srcImage, $imageDisplay, $mimeExt, $mimeType, $aid, $dnc=1)
+function MG_createDisplayImage($srcImage, $imageDisplay, $mimeExt, $mimeType, $aid, $dnc=1, $processOriginal=true)
 {
     global $_CONF, $_TABLES, $_MG_CONF, $_SPECIAL_IMAGES_MIMETYPE;
 
@@ -225,7 +227,9 @@ function MG_createDisplayImage($srcImage, $imageDisplay, $mimeExt, $mimeType, $a
 //      list($rc,$msg) = MG_resizeImage($srcImage, $imageDisplay, $imgheight,    $imgwidth,    $mimeType, 0, $_MG_CONF['jpg_quality']);
     }
     if ($rc == false) {
-        @unlink($srcImage);
+        if ($processOriginal) {
+            @unlink($srcImage);
+        }
         @unlink($tmpImage);
         return array(false, $msg);
     }
@@ -233,7 +237,7 @@ function MG_createDisplayImage($srcImage, $imageDisplay, $mimeExt, $mimeType, $a
         @unlink($tmpImage);
     }
 
-    if ($_MG_CONF['discard_original'] != 1) { // discard original image file
+    if ($processOriginal && $_MG_CONF['discard_original'] != 1) { // process original image file
         list($rc, $msg) = MG_processOriginal($srcImage, $mimeExt, $mimeType, $aid, $dnc);
         if ($rc == false) {
             @unlink($srcImage);
