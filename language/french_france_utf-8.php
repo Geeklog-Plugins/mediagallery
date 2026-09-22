@@ -1453,4 +1453,17 @@ $LANG_MG01['media_access_ownership'] = "Accès et propriété";
 $LANG_MG01['media_access_inherited'] = "Les droits d’accès de ce média sont hérités de l’album « %s ».";
 $LANG_MG01['media_edit_album_rights'] = "Modifier les droits de l’album";
 
+
+// MediaGallery 1.8 storage diagnostics
+$LANG_MG01['core_path_images'] = "Geeklog path_images";
+$LANG_MG01['core_images_url'] = "Geeklog images_url";
+$LANG_MG01['persistent_storage_files'] = "Fichiers du stockage persistant";
+$LANG_MG01['legacy_storage_user_files'] = "Fichiers utilisateur dans l’ancien stockage";
+$LANG_MG01['legacy_storage_files_warning'] = "Inattendu sur une installation 1.8 neuve";
+$LANG_MG01['local_media_db_rows'] = "Médias locaux en base de données";
+$LANG_MG01['image_original_files'] = "Originaux image lisibles";
+$LANG_MG01['image_display_files'] = "Images d’affichage lisibles";
+$LANG_MG01['image_thumbnail_files'] = "Vignettes lisibles";
+$LANG_MG01['missing_media_files'] = "IDs média manquants";
+
 ?>
