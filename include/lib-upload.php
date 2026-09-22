@@ -43,16 +43,7 @@ require_once $_CONF['path'] . 'plugins/mediagallery/include/lib/imglib/lib-image
 require_once $_CONF['path'] . 'plugins/mediagallery/include/upload_security_180.php';
 
 global $_SPECIAL_IMAGES_MIMETYPE;
-$_SPECIAL_IMAGES_MIMETYPE = array(
-    'image/x-targa',
-    'image/tga',
-    'image/photoshop',
-    'image/x-photoshop',
-    'image/psd',
-    'application/photoshop',
-    'application/psd',
-    'image/tiff'
-);
+$_SPECIAL_IMAGES_MIMETYPE = MG_getSpecialImageMimeTypes180();
 
 function MG_videoThumbnail($aid, $srcImage, $media_filename)
 {
@@ -1020,11 +1011,7 @@ function MG_getFile($filename, $file, $album_id, $opt = array())
         case 'image/jpg' :
         case 'image/png' :
         case 'image/bmp' :
-            $dispExt = $mimeExt;
-
-            if (in_array($mimeType, $_SPECIAL_IMAGES_MIMETYPE)) {
-                $dispExt = 'jpg';
-            }
+            $dispExt = MG_getDisplayExtension180($mimeType, $mimeExt);
             $media_orig = MG_getFilePath('orig', $media_filename, $mimeExt);
             $media_disp = MG_getFilePath('disp', $media_filename, $dispExt);
             $media_tn   = MG_getFilePath('tn',   $media_filename, $dispExt);
