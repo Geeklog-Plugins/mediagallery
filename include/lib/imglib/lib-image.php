@@ -322,13 +322,16 @@ function MG_resizeImage($srcImage, $destImage, $dImageHeight, $dImageWidth, $mim
         $dImageWidth = 200;
     }
 
-    $imgsize    = @getimagesize("$srcImage");
-    $imgwidth   = $imgsize[0];
-    $imgheight  = $imgsize[1];
-    if ($imgwidth == 0 || $imgheight == 0 ) {
-        $imgwidth   = $dImageWidth;
-        $imgheight  = $dImageHeight;
+    $imgsize = MG_getImageInfo180($srcImage);
+    if ($imgsize === false
+        && $mimeType != 'image/x-targa'
+        && $mimeType != 'image/tga'
+    ) {
+        return array(false, 'Unable to determine source image dimensions.');
     }
+
+    $imgwidth = (is_array($imgsize) && isset($imgsize[0])) ? (int) $imgsize[0] : 0;
+    $imgheight = (is_array($imgsize) && isset($imgsize[1])) ? (int) $imgsize[1] : 0;
 
     if ( $mimeType == '' ) {
         $metaData = MG_getMediaMetaData($srcImage);
@@ -372,17 +375,51 @@ function MG_resizeImage($srcImage, $destImage, $dImageHeight, $dImageWidth, $mim
     // if smaller, do not upsize, simply copy the src to the dest.
 
     if (($newheight > $imgheight) && ($newwidth > $imgwidth)) {
-        $rc = copy($srcImage, $destImage);
-        COM_errorLog("MG_resizeImage: Original (" . $srcImage . ") is smaller than target, original copied to target image (" . $destImage . ".");
-        return array(true,'Original is smaller than target, original copied to target image.');
+        if (!@copy($srcImage, $destImage)) {
+            COM_errorLog(
+                "MG_resizeImage: unable to copy smaller source image (" . $srcImage
+                . ") to destination (" . $destImage . ")."
+            );
+            return array(false, 'Unable to copy source image to destination image.');
+        }
+
+        clearstatcache(true, $destImage);
+        if (!is_file($destImage) || !is_readable($destImage) || filesize($destImage) < 1) {
+            COM_errorLog("MG_resizeImage: copied destination image is missing or unreadable: " . $destImage);
+            return array(false, 'Destination image was not created correctly.');
+        }
+
+        COM_errorLog(
+            "MG_resizeImage: Original (" . $srcImage
+            . ") is smaller than target, original copied to target image (" . $destImage . ")."
+        );
+        return array(true, 'Original is smaller than target, original copied to target image.');
     }
 
-    list($rc, $msg) = _img_resizeImage($srcImage, $destImage, $imgheight, $imgwidth, $newheight, $newwidth, $mimeType, $JpegQuality);
+    list($rc, $msg) = _img_resizeImage(
+        $srcImage,
+        $destImage,
+        $imgheight,
+        $imgwidth,
+        $newheight,
+        $newwidth,
+        $mimeType,
+        $JpegQuality
+    );
     if ($rc == false) {
-        return array($rc, $msg);
+        return array(false, $msg);
     }
 
-    return array(true,'Image successfully resized');
+    clearstatcache(true, $destImage);
+    if (!is_file($destImage) || !is_readable($destImage) || filesize($destImage) < 1) {
+        COM_errorLog(
+            "MG_resizeImage: image backend reported success but destination is missing or unreadable: "
+            . $destImage
+        );
+        return array(false, 'Image backend did not create a valid destination image.');
+    }
+
+    return array(true, 'Image successfully resized');
 }
 
 /*
