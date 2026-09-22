@@ -1689,4 +1689,17 @@ $LANG_MG01['media_access_ownership'] = "アクセスと所有権";
 $LANG_MG01['media_access_inherited'] = "このメディアのアクセス権はアルバム「%s」から継承されます。";
 $LANG_MG01['media_edit_album_rights'] = "アルバムのアクセス権を編集";
 
+
+// MediaGallery 1.8 storage diagnostics
+$LANG_MG01['core_path_images'] = "Geeklog path_images";
+$LANG_MG01['core_images_url'] = "Geeklog images_url";
+$LANG_MG01['persistent_storage_files'] = "永続ストレージのファイル";
+$LANG_MG01['legacy_storage_user_files'] = "旧ストレージのユーザーファイル";
+$LANG_MG01['legacy_storage_files_warning'] = "新規1.8インストールでは想定外です";
+$LANG_MG01['local_media_db_rows'] = "データベース内のローカルメディア";
+$LANG_MG01['image_original_files'] = "読み取り可能な元画像";
+$LANG_MG01['image_display_files'] = "読み取り可能な表示画像";
+$LANG_MG01['image_thumbnail_files'] = "読み取り可能なサムネイル";
+$LANG_MG01['missing_media_files'] = "欠落しているメディアID";
+
 ?>
