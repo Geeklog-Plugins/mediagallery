@@ -222,23 +222,30 @@ if ($mode == 'thumbs') {
                 for ($x=0; $x<$nRows; $x++) {
                     @set_time_limit(30);
                     $row = DB_fetchArray($result);
-                    $imageDisplay = '';
-                    $srcImage     = '';
-                    $mfn = $row['media_filename'][0] . '/' . $row['media_filename'];
+                    $srcImage = '';
+                    $displayExt = MG_getDisplayExtension180($row['mime_type'], $row['media_mime_ext']);
+                    $imageDisplay = Media::getFilePath('disp', $row['media_filename'], $displayExt);
+
                     if ($_MG_CONF['discard_original'] == 1) {
-                        $ext = MG_getMediaExt($_MG_CONF['path_mediaobjects'] . 'disp/' . $mfn);
-                        if (!empty($ext)) {
-                            $imageDisplay = $_MG_CONF['path_mediaobjects'] . 'disp/' . $mfn . $ext;
-                            $srcImage = $imageDisplay;
+                        $existingDisplay = Media::getReadableFileInfo('disp', $row['media_filename'], $displayExt);
+                        if ($existingDisplay !== false) {
+                            $srcImage = $existingDisplay['path'];
                         }
                     } else {
-                        $srcImage = $_MG_CONF['path_mediaobjects'] . 'orig/' . $mfn . '.' . $row['media_mime_ext'];
-                        $ext = MG_getMediaExt($_MG_CONF['path_mediaobjects'] . 'disp/' . $mfn);
-                        if (!empty($ext)) {
-                            $imageDisplay = $_MG_CONF['path_mediaobjects'] . 'disp/' . $mfn . $ext;
+                        $original = Media::getReadableFileInfo('orig', $row['media_filename'], $row['media_mime_ext']);
+                        if ($original !== false) {
+                            $srcImage = $original['path'];
                         }
                     }
-                    if ($imageDisplay == '') continue;
+
+                    if ($srcImage === '') {
+                        MG_setSessionLog(
+                            $session_id,
+                            'Resize Images: source image is missing for media ' . $row['media_id']
+                        );
+                        continue;
+                    }
+
                     MG_registerSession(array(
                         'session_id' => $session_id,
                         'mid'        => $row['mime_type'],
