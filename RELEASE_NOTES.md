@@ -21,6 +21,21 @@ MediaGallery 1.8.0 is a major modernization and hardening release for Geeklog. I
 - Improved album thumbnails and portrait rendering.
 - Reusable MediaGallery media picker and permission-filtered album/media discovery.
 
+## Upstream issues addressed
+
+MediaGallery 1.8.0 incorporates or supersedes the fixes tracked in the official Geeklog-Plugins/mediagallery issue tracker:
+
+- [#4](https://github.com/Geeklog-Plugins/mediagallery/issues/4) — Add Media navigation works with Denim Three / UIkit-style navigation.
+- [#5](https://github.com/Geeklog-Plugins/mediagallery/issues/5) — Remote Media no longer raises a `count()` warning when no categories exist.
+- [#6](https://github.com/Geeklog-Plugins/mediagallery/issues/6) — MediaGallery mail now uses Geeklog's configured mail backend with HTML/plaintext templates for moderation and approval notifications.
+- [#7](https://github.com/Geeklog-Plugins/mediagallery/issues/7) — comment enablement respects album and user read permissions.
+- [#8](https://github.com/Geeklog-Plugins/mediagallery/issues/8) — upload `post_max_size` conversion uses the complete numeric value.
+- [#9](https://github.com/Geeklog-Plugins/mediagallery/issues/9) — thumbnail paths remain correct for filenames containing multiple periods.
+- [#10](https://github.com/Geeklog-Plugins/mediagallery/issues/10) — member album discovery is exposed through the public `album_list` service, with additional album/media read and collection services for interoperable consumers.
+- [#11](https://github.com/Geeklog-Plugins/mediagallery/issues/11) — PHP 8.x compatibility work covers configuration bootstrap defaults, initialized media-view variables, administration paths including member-album purge, and broader PHP 8.1/8.3 runtime hardening.
+
+Issue #11 also contains a defense-in-depth suggestion for web-server-level script execution protection in media storage. MediaGallery 1.8.0 instead enforces portable application-level executable-extension rejection and MIME/extension validation so deployments are not coupled to Apache-specific `.htaccess` directives.
+
 ## Geeklog interoperability
 
 MediaGallery 1.8.0 exposes a shared, consumer-neutral capability contract for Agent, Eclipse, Hub and future integrations.
