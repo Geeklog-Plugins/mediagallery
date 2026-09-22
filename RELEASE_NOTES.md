@@ -71,6 +71,8 @@ public_html/mediagallery/mediaobjects/
 
 using the supplied migration tool and confirm that the copy/verification succeeds. See `UPGRADE` for the complete procedure.
 
-## Release-candidate validation still required
+## Validation
 
-Before tagging the final release, complete the live matrix documented in `TESTING-1.8.md`, including Geeklog 2.1.1, Geeklog 2.2.2/PHP 8.3, upgrade tests, multisite isolation, moderation, MIME/security checks and validation of the exact generated release archive.
+The 1.8.0 release has been validated across the supported transition matrix, including Geeklog 2.1.1 and Geeklog 2.2.2, upgrades from MediaGallery 1.7.3 and 1.7.0, persistent-storage migration, batch security, moderation, Geeklog-native mail, representative playback/fallback paths, and the Agent/Eclipse/Hub interoperability services.
+
+The release archive is generated from the validated `modernize-1.8.0` source and checked for PHP syntax compatibility on PHP 5.6, 7.4, 8.1 and 8.3.
