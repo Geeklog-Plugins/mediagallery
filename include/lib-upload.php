@@ -123,9 +123,7 @@ function MG_createThumbnail($srcImage, $imageThumb, $mimeType, $aid)
         list($rc, $msg) = MG_convertImageFormat($srcImage, $tmpImage, 'image/jpeg', 0);
         if ($rc == false) {
             COM_errorLog("MG_createThumbnail: Error converting uploaded image to jpeg format.");
-            if ($processOriginal) {
-                @unlink($srcImage);
-            }
+            @unlink($srcImage);
             return array(false, $msg);
         }
     }
@@ -215,7 +213,9 @@ function MG_createDisplayImage($srcImage, $imageDisplay, $mimeExt, $mimeType, $a
         list($rc, $msg) = MG_convertImageFormat($srcImage, $tmpImage, 'image/jpeg', 0);
         if ($rc == false) {
             COM_errorLog("MG_createDisplayImage: Error converting uploaded image to jpeg format.");
-            @unlink($srcImage);
+            if ($processOriginal) {
+                @unlink($srcImage);
+            }
             return array(false, $msg);
         }
     }
