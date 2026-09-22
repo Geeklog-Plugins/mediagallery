@@ -1,0 +1,5 @@
+<p>{lang_upload_approved}</p>
+<p>{lang_thanks_submit}</p>
+{email_divider_html}
+<p>{site_name}</p>
+<p><a href="{site_url_html}">{site_url}</a></p>
