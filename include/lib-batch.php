@@ -391,7 +391,9 @@ function mg_batch_session_rebuilddisplay($row)
         $imageDisplay,
         $mimeExt,
         $mimeType,
-        $aid
+        $aid,
+        1,
+        false
     );
 
     if ($rc === false) {
