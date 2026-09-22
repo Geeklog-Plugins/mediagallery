@@ -152,8 +152,17 @@ function MG_continueSession($session_id, $item_limit, $refresh_rate)
 
         $function = 'mg_batch_session_' . $session['session_action'];
         if (function_exists($function)) {
-            $function($row);
-            DB_change($_TABLES['mg_session_items'], 'status', 1, 'id', $row['id']);
+            $batchResult = $function($row);
+            // 1 = completed successfully, 2 = attempted but failed.
+            // Failed items must not remain pending forever, but they also
+            // must not be reported as successful work.
+            DB_change(
+                $_TABLES['mg_session_items'],
+                'status',
+                ($batchResult === false) ? 2 : 1,
+                'id',
+                $row['id']
+            );
         }
 
         // calculate time for each loop iteration
@@ -183,21 +192,35 @@ function MG_continueSession($session_id, $item_limit, $refresh_rate)
         $processing_messages = '<p>' . sprintf($LANG_MG01['timer_expired'], $timer_expired_secs) . '</p>';
     }
 
+    $escapedSessionId = DB_escapeString($session_id);
+
     $sql = "SELECT COUNT(*) AS processed "
          . "FROM {$_TABLES['mg_session_items']} "
-         . "WHERE session_id='" . DB_escapeString($session_id) . "' AND status=1";
+         . "WHERE session_id='" . $escapedSessionId . "' AND status=1";
     $result = DB_query($sql);
     $row = DB_fetchArray($result);
-    $session_items_processed = $row['processed'];
+    $session_items_processed = (int) $row['processed'];
+
+    $sql = "SELECT COUNT(*) AS failed "
+         . "FROM {$_TABLES['mg_session_items']} "
+         . "WHERE session_id='" . $escapedSessionId . "' AND status=2";
+    $result = DB_query($sql);
+    $row = DB_fetchArray($result);
+    $session_items_failed = (int) $row['failed'];
 
     $sql = "SELECT COUNT(*) AS processing "
          . "FROM {$_TABLES['mg_session_items']} "
-         . "WHERE session_id='" . DB_escapeString($session_id) . "'";
+         . "WHERE session_id='" . $escapedSessionId . "'";
     $result = DB_query($sql);
     $row = DB_fetchArray($result);
-    $session_items_processing = $row['processing'];
+    $session_items_processing = (int) $row['processing'];
 
-    $items_remaining = $session_items_processing - $session_items_processed;
+    $sql = "SELECT COUNT(*) AS remaining "
+         . "FROM {$_TABLES['mg_session_items']} "
+         . "WHERE session_id='" . $escapedSessionId . "' AND status=0";
+    $result = DB_query($sql);
+    $row = DB_fetchArray($result);
+    $items_remaining = (int) $row['remaining'];
 
     if ($items_remaining > 0) {
         if ($item_limit == 0) {
@@ -228,7 +251,10 @@ function MG_continueSession($session_id, $item_limit, $refresh_rate)
         MG_endSession($session_id);
     }
 
-    $session_percent = ($session_items_processed / $session_items_processing) * 100;
+    $session_items_attempted = $session_items_processed + $session_items_failed;
+    $session_percent = ($session_items_processing > 0)
+        ? (($session_items_attempted / $session_items_processing) * 100)
+        : 100;
     $session_time    = $cycle_end_time - $session['session_start_time'];
 
     $T->set_var(array(
@@ -250,7 +276,7 @@ function MG_continueSession($session_id, $item_limit, $refresh_rate)
         'L_ITEMS_PER_CYCLE'    => $LANG_MG01['items_per_cycle'],
         'TOTAL_ITEMS'          => $session_items_processing,
         'ITEMS_PROCESSED'      => $session_items_processed,
-        'ITEMS_REMAINING'      => $session_items_processing - $session_items_processed,
+        'ITEMS_REMAINING'      => $items_remaining,
         'ITEM_RATE'            => sprintf($LANG_MG01['seconds_per_item'],round(($last_cycle_time / max($num_rows, 1)))),
         'PROCESSING_MESSAGES'  => $processing_messages,
         'SESSION_PERCENT'      => round($session_percent, 2) . ' %',
