@@ -50,6 +50,7 @@ if (!SEC_hasRights('mediagallery.config')) {
 require_once $_CONF['path'] . 'plugins/mediagallery/include/common.php';
 require_once $_CONF['path'] . 'plugins/mediagallery/include/lib-batch.php';
 require_once $_CONF['path'] . 'plugins/mediagallery/include/classAlbum.php';
+require_once $_CONF['path'] . 'plugins/mediagallery/include/classMedia.php';
 require_once $_MG_CONF['path_admin'] . 'navigation.php';
 
 function MG_renderMaintenanceConfirm180($title, $help, $details, $formAction, $helpUrl)
