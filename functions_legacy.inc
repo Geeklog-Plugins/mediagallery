@@ -272,6 +272,36 @@ if ($_CONF['loginrequired'] == 1) {
 }
 
 /*
+ * PHP 8.x-safe bootstrap defaults.
+ *
+ * During plugin enable Geeklog may load functions.inc before every
+ * MediaGallery Configuration API value is available. Keep this block
+ * PHP 5.6-compatible while ensuring the legacy calculations below never
+ * dereference undefined keys. See Geeklog-Plugins/mediagallery issue #11.
+ */
+if (!isset($_MG_CONF['dfid'])) {
+    $_MG_CONF['dfid'] = 0;
+}
+if (!isset($_MG_CONF['usage_tracking'])) {
+    $_MG_CONF['usage_tracking'] = 0;
+}
+$mg_formats_180 = array(
+    'jpg', 'png', 'tif', 'gif', 'bmp', 'tga', 'psd', 'mp3', 'ogg',
+    'asf', 'swf', 'mov', 'mp4', 'mpg', 'flv', 'rflv', 'emb', 'zip', 'other'
+);
+foreach ($mg_formats_180 as $mg_format_180) {
+    $admin_key_180 = 'ad_valid_format_' . $mg_format_180;
+    $member_key_180 = 'member_valid_format_' . $mg_format_180;
+    if (!isset($_MG_CONF[$admin_key_180])) {
+        $_MG_CONF[$admin_key_180] = 0;
+    }
+    if (!isset($_MG_CONF[$member_key_180])) {
+        $_MG_CONF[$member_key_180] = 0;
+    }
+}
+unset($mg_formats_180, $mg_format_180, $admin_key_180, $member_key_180);
+
+/*
 $_MG_CONF['up_mp3_player_enabled'] = 0;
 
 if ($_MG_CONF['installed_version']) {
