@@ -173,8 +173,14 @@ class Media {
 
         $resolved = false;
         if ($info['media_tn_attached'] == 1) {
-            $relative = 'tn/' . $info['media_filename'][0] . '/tn_' . $info['media_filename'] . '.jpg';
-            $resolved = MG_resolveMediaStorageFile180($relative);
+            $relativeBase = 'tn/' . $info['media_filename'][0] . '/tn_' . $info['media_filename'];
+            $attachedExtensions = array('jpg', 'jpeg', 'png', 'gif', 'bmp');
+            foreach ($attachedExtensions as $attachedExt) {
+                $resolved = MG_resolveMediaStorageFile180($relativeBase . '.' . $attachedExt);
+                if ($resolved !== false) {
+                    break;
+                }
+            }
         } else {
             $fname = self::getDefaultThumbnail($info, $tn_size);
 
