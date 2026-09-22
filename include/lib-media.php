@@ -266,9 +266,10 @@ function MG_displayMP3($I, $opt=array())
             $playback_options['height'] = 50;
             $u_pic='';
             if ($I['media_tn_attached'] == 1) {
-                $u_tn = Media::getFileUrl('tn', $I['media_filename'], 'jpg', 1);
-                $media_size_disp = @getimagesize(Media::getFilePath('tn', $I['media_filename'], '', 1));
-                $u_pic = '<img src="' . $u_tn . '"' . XHTML . '>';
+                list($u_tn, $p_tn, $media_size_disp) = Media::getThumbInfo($I);
+                if (!empty($u_tn)) {
+                    $u_pic = '<img src="' . $u_tn . '"' . XHTML . '>';
+                }
             }
             $win_width  = $playback_options['width'];
             $win_height = $playback_options['height'];
