@@ -351,14 +351,42 @@ function mg_batch_session_rebuildthumb($row)
 function mg_batch_session_rebuilddisplay($row)
 {
     global $_CONF;
+
     require_once $_CONF['path'] . 'plugins/mediagallery/include/lib-upload.php';
+
     $srcImage = $row['data'];
     $imageDisplay = $row['data2'];
     $mimeExt = $row['data3'];
     $mimeType = $row['mid'];
     $aid = $row['aid'];
-    list($rc, $msg) = MG_createDisplayImage($srcImage, $imageDisplay, $mimeExt, $mimeType, $aid);
-    return;
+
+    list($rc, $msg) = MG_createDisplayImage(
+        $srcImage,
+        $imageDisplay,
+        $mimeExt,
+        $mimeType,
+        $aid
+    );
+
+    if ($rc === false) {
+        $detail = 'Resize Images: unable to rebuild ' . $imageDisplay;
+        if ($msg !== '') {
+            $detail .= ' - ' . $msg;
+        }
+        MG_setSessionLog($row['session_id'], $detail);
+        COM_errorLog('MediaGallery: ' . $detail, 1);
+        return false;
+    }
+
+    clearstatcache(true, $imageDisplay);
+    if (!is_file($imageDisplay) || !is_readable($imageDisplay) || filesize($imageDisplay) < 1) {
+        $detail = 'Resize Images: rebuilt display image is missing or unreadable: ' . $imageDisplay;
+        MG_setSessionLog($row['session_id'], $detail);
+        COM_errorLog('MediaGallery: ' . $detail, 1);
+        return false;
+    }
+
+    return true;
 }
 
 function mg_batch_session_droporiginal($row)
