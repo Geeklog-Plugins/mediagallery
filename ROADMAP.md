@@ -313,12 +313,14 @@ MediaGallery 1.8.0 should be safer to upgrade than 1.7.x, preserve user media ou
 
 MediaGallery 1.9.0 introduces an event-oriented capture, publishing and delivery workflow while keeping MediaGallery albums and media as the canonical storage model. The feature must not create a parallel media library.
 
-**Core model:** Event → MediaGallery album → Sessions → MediaGallery media.
+**Core model:** Special Events album → Events → Sessions → MediaGallery media.
 
 ## 15. Event foundation
 
-- [ ] Add an optional Event / Quick Share mode on top of existing MediaGallery albums.
-- [ ] Allow an administrator or authorized photographer to create an event and associate it with an existing or newly created MediaGallery album.
+- [ ] Add an optional Event / Quick Share mode based on a special MediaGallery album type/container dedicated to Events.
+- [ ] Allow a special Events album to contain multiple distinct events instead of creating one normal MediaGallery album per event.
+- [ ] Allow an administrator to designate/create one or more special Events albums where useful (for example separate professional and private event collections).
+- [ ] Allow an administrator or authorized photographer to create an event inside a selected special Events album.
 - [ ] Keep uploaded photographs as normal MediaGallery media so existing permissions, metadata, derivatives, storage, lifecycle notifications and interoperability remain usable.
 - [ ] Add event status and lifecycle controls: draft, active, closed and optionally expired.
 - [ ] Allow optional event start/end dates and configurable retention/expiration without deleting canonical media unexpectedly.
@@ -401,7 +403,7 @@ Implementation requirements:
 
 ## 21. Event administration and UX
 
-- [ ] Add an Event administration view listing event name, album, status, sessions, media count and sharing state.
+- [ ] Add an Event administration view listing event name, parent Events album, status, sessions, media count and sharing state.
 - [ ] Provide fast actions: Open upload, New session, Show QR, Copy link, Close event and Disable sharing.
 - [ ] Provide a session view with assigned photographs and reassignment/removal controls.
 - [ ] Allow QR presentation in a large high-contrast view suitable for showing directly on the photographer's phone.
@@ -413,9 +415,9 @@ Implementation requirements:
 ## 22. Data model and interoperability
 
 - [ ] Add event/session tables only for workflow metadata and relationships; do not duplicate MediaGallery media records.
-- [ ] Define explicit relations between event, album, session and media IDs.
+- [ ] Define explicit relations between special Events album, event, session and media IDs.
 - [ ] Ensure deleting/revoking a session does not delete canonical media unless an administrator explicitly performs a normal MediaGallery deletion.
-- [ ] Define behavior when media are moved to another album or deleted through normal MediaGallery tools.
+- [ ] Define behavior when event media are moved outside their Events container or deleted through normal MediaGallery tools.
 - [ ] Extend MediaGallery services/capabilities only where a generic event/session read contract is useful.
 - [ ] Emit appropriate lifecycle notifications for event/session publication changes without coupling MediaGallery to Hub, Eclipse, Agent or another consumer.
 - [ ] Keep the implementation compatible with shared-code multisite isolation.
@@ -434,7 +436,8 @@ Implementation requirements:
 ## 24. 1.9.0 implementation phases
 
 ### Phase A — Event MVP
-- [ ] Event linked to a MediaGallery album.
+- [ ] Special MediaGallery Events album/container capable of holding multiple events.
+- [ ] Event creation inside the selected Events album without requiring a separate normal album for every event.
 - [ ] Mobile multi-photo quick upload.
 - [ ] Local pre-upload review of the selected batch.
 - [ ] Large-format photo viewer optimized for judging image quality on a phone.
@@ -471,5 +474,5 @@ Implementation requirements:
 
 ## 25. 1.9.0 design principle
 
-Event / Quick Share is a workflow layer, not a second gallery system. Albums and MediaGallery media remain canonical. Events organize albums for temporary/event-oriented publication; sessions provide selective delivery; QR codes provide fast access. The architecture should remain useful for weddings, parties, trade shows, sports, excursions, associations and professional event photographers without forcing personal-data collection or facial recognition.
+Event / Quick Share is a workflow layer, not a second gallery system. MediaGallery albums and media remain canonical. A special Events album acts as a container for multiple events; an event is not required to become a separate normal MediaGallery album. Events organize temporary/event-oriented publication inside that container; sessions provide selective delivery; QR codes provide fast access. The architecture should remain useful for weddings, parties, trade shows, sports, excursions, associations and professional event photographers without forcing personal-data collection or facial recognition.
 
