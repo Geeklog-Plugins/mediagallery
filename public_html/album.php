@@ -545,5 +545,21 @@ if (!empty($albumStructuredData)) {
     $meta .= MG_renderJsonLd($albumStructuredData);
 }
 
+/*
+ * Generic Geeklog public item extension point.
+ *
+ * MediaGallery only announces the canonical album identity. Consumers such
+ * as Hub may contribute contextual fragments without MediaGallery depending
+ * on them.
+ */
+$itemDisplayFragments = PLG_itemDisplay(MG_albumItemId180($album_id), 'mediagallery');
+if (is_array($itemDisplayFragments)) {
+    foreach ($itemDisplayFragments as $itemDisplayFragment) {
+        if (is_string($itemDisplayFragment) && $itemDisplayFragment !== '') {
+            $display .= $itemDisplayFragment;
+        }
+    }
+}
+
 $display = MG_createHTMLDocument($display, $pageTitle, $meta);
 COM_output($display);
