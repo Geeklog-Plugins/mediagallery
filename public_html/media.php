@@ -129,6 +129,21 @@ if (!empty($structuredData)) {
     $meta .= MG_renderJsonLd($structuredData);
 }
 
+/*
+ * Generic Geeklog public item extension point.
+ *
+ * Media ids remain the canonical interoperability ids for individual media.
+ * Active consumers may append contextual server-rendered fragments.
+ */
+$itemDisplayFragments = PLG_itemDisplay((string) $mid, 'mediagallery');
+if (is_array($itemDisplayFragments)) {
+    foreach ($itemDisplayFragments as $itemDisplayFragment) {
+        if (is_string($itemDisplayFragment) && $itemDisplayFragment !== '') {
+            $display .= $itemDisplayFragment;
+        }
+    }
+}
+
 $display = MG_createHTMLDocument($display, $ptitle, $meta);
 
 COM_output($display);
