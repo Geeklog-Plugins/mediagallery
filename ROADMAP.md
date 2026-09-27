@@ -472,7 +472,47 @@ Implementation requirements:
 - [ ] Accessibility and theme regression.
 - [ ] Documentation and operator workflow examples.
 
-## 25. 1.9.0 design principle
+## 25. Optional paid session access / Store integration
+
+Paid delivery must remain optional. MediaGallery must not implement its own checkout/payment system and must continue to operate normally when the Store plugin is absent or disabled.
+
+- [ ] Add an optional paid access mode at Event Session level alongside free/private sharing modes.
+- [ ] Keep MediaGallery independent from Store: expose the purchasable session/resource and entitlement checks through a bounded interoperability contract rather than direct Store SQL/table knowledge.
+- [ ] Let Store own product/price, checkout, payment, order/refund state and purchase entitlement.
+- [ ] Start with a simple product model: unlock/download the complete session for a configured price.
+- [ ] Keep the data model extensible for later per-photo or selected-photo purchasing without making those models mandatory for 1.9.0.
+- [ ] Allow protected previews before purchase where configured, using reduced-resolution and/or watermarked derivatives while keeping originals and protected downloads inaccessible.
+- [ ] A session QR/share token identifies the session but must never by itself prove payment or grant paid download entitlement.
+- [ ] After confirmed payment, allow MediaGallery to resolve a Store-issued entitlement and unlock the permitted originals/session ZIP.
+- [ ] Revoke or update entitlement appropriately after cancellation/refund where Store reports that state.
+- [ ] Define safe behavior when Store is unavailable: never accidentally unlock paid content and never break ordinary free/private Event workflows.
+
+### Guest purchase without site account
+
+Creating a Geeklog user account must **not** be required to buy and retrieve Event photographs.
+
+- [ ] Support Store guest checkout for paid Event Sessions without requiring registration or login on the Geeklog site.
+- [ ] Do not silently create a permanent Geeklog account as a side effect of guest purchase.
+- [ ] Bind guest purchase entitlement to the Store order and Event Session using a cryptographically strong, non-guessable, revocable access/download token rather than a logged-in user ID.
+- [ ] Return the purchaser to the unlocked session immediately after successful payment when the payment flow allows it.
+- [ ] Provide a secure recovery/delivery mechanism for later access (for example a Store-generated secure order/download link) without requiring account creation.
+- [ ] Minimize purchaser personal data; MediaGallery must not require name/email/PII beyond what Store/payment processing actually needs.
+- [ ] Never expose order IDs, sequential session IDs or predictable values as sufficient download authorization.
+- [ ] Support expiration/rotation/revocation of guest download tokens independently from canonical MediaGallery media.
+- [ ] Ensure a leaked session QR cannot be combined with public order information to derive a paid download URL.
+- [ ] Keep entitlement verification server-side for original-file and ZIP delivery; hiding download controls in the browser is not authorization.
+- [ ] Document guest purchase, successful payment, failed/cancelled payment, refund, expired token and link-recovery test cases.
+
+### Paid-session delivery UX
+
+- [ ] Clearly distinguish preview access from purchased download access.
+- [ ] Show session price and what the purchase unlocks before checkout.
+- [ ] Provide a direct “Unlock / Buy session” action from the QR-opened session page when Store integration is available.
+- [ ] After purchase, return to the same session context rather than forcing the participant to navigate MediaGallery.
+- [ ] Provide individual and/or full-session ZIP download according to the purchased entitlement.
+- [ ] Keep the participant workflow mobile-first and usable entirely from the phone used to scan the QR code.
+
+## 26. 1.9.0 design principle
 
 Event / Quick Share is a workflow layer, not a second gallery system. MediaGallery albums and media remain canonical. A special Events album acts as a container for multiple events; an event is not required to become a separate normal MediaGallery album. Events organize temporary/event-oriented publication inside that container; sessions provide selective delivery; QR codes provide fast access. The architecture should remain useful for weddings, parties, trade shows, sports, excursions, associations and professional event photographers without forcing personal-data collection or facial recognition.
 
