@@ -1,6 +1,9 @@
 name: Build MediaGallery installable archive
 
 on:
+  push:
+    branches:
+      - mediagallery_1.9.0
   workflow_call:
   workflow_dispatch:
 
@@ -22,6 +25,12 @@ jobs:
         with:
           ref: ${{ github.sha }}
           fetch-depth: 0
+
+      - name: Run public item-display contract test
+        shell: bash
+        run: |
+          set -euo pipefail
+          php tests/public_item_display_contract_test.php
 
       - name: Build dist archive
         shell: bash
@@ -49,7 +58,7 @@ jobs:
           cat > package/mediagallery/BUILD_INFO.txt <<EOF
           MediaGallery 1.8.0 test archive
           Geeklog target: 2.1.1+
-          Source branch: modernize-1.8.0
+          Source branch: mediagallery_1.9.0
           Source commit: ${SOURCE_SHA}
           EOF
 
@@ -78,6 +87,10 @@ jobs:
           unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/templates/admin_navigation.thtml'
           unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/public_html/admin.css'
           unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/public_html/js/upload.js'
+          unzip -p "dist/${ARCHIVE}" mediagallery/public_html/album.php \
+            | grep -Fq "PLG_itemDisplay(MG_albumItemId180(\$album_id), 'mediagallery')"
+          unzip -p "dist/${ARCHIVE}" mediagallery/public_html/media.php \
+            | grep -Fq "PLG_itemDisplay((string) \$mid, 'mediagallery')"
           unzip -p "dist/${ARCHIVE}" mediagallery/templates/userupload.thtml \
             | grep -q 'name="newmedia\[\]" multiple{upload_accept}'
           unzip -p "dist/${ARCHIVE}" mediagallery/templates/mediaitems.thtml \
@@ -139,8 +152,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git fetch origin modernize-1.8.0
-          BRANCH_SHA="$(git rev-parse origin/modernize-1.8.0)"
+          git fetch origin mediagallery_1.9.0
+          BRANCH_SHA="$(git rev-parse origin/mediagallery_1.9.0)"
           if [ "$BRANCH_SHA" != "$SOURCE_SHA" ]; then
             echo "A newer branch commit exists; this archive is stale and will not be committed."
             echo "commit_archive=false" >> "$GITHUB_OUTPUT"
@@ -148,7 +161,7 @@ jobs:
             echo "commit_archive=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Commit archive to modernize-1.8.0
+      - name: Commit archive to mediagallery_1.9.0
         if: steps.freshness.outputs.commit_archive == 'true'
         shell: bash
         run: |
@@ -161,4 +174,4 @@ jobs:
             exit 0
           fi
           git commit -m "Build mediagallery_1.8.0_2.1.1.zip for ${SOURCE_SHA} [skip ci]"
-          git push origin HEAD:modernize-1.8.0
+          git push origin HEAD:mediagallery_1.9.0
