@@ -328,8 +328,17 @@ MediaGallery 1.9.0 introduces an event-oriented capture, publishing and delivery
 
 - [ ] Provide a minimal responsive upload interface designed first for iPhone and Android browsers.
 - [ ] Use the device-native photo picker and support multiple-photo selection.
-- [ ] Allow direct upload into the currently selected event/session with as few interactions as possible.
-- [ ] Display selected-file count, upload progress, individual failures and a clear completion state.
+- [ ] Treat the native picker as the initial batch selection only: do not upload immediately after files are chosen.
+- [ ] Build a local pre-upload review workflow so selected photographs can be inspected without first sending them to the server.
+- [ ] Provide a large-format mobile viewer as the primary photo-selection interface; small thumbnails may be used for navigation/overview but must not be the only way to judge and select photographs.
+- [ ] Allow swipe/previous/next navigation through the locally selected photographs.
+- [ ] Provide touch zoom / pinch-to-zoom where browser capabilities allow, so the photographer can inspect focus, faces, expressions and image detail before publication.
+- [ ] Allow each photograph to be explicitly selected or rejected from the large viewer, with a persistent selected/total counter.
+- [ ] Provide a thumbnail/grid recap after review with select all, deselect all and individual selection correction.
+- [ ] Show a final action such as “Upload 7 photos” reflecting the actual number selected for publication.
+- [ ] Upload only the photographs retained after the local review step.
+- [ ] Allow direct upload into the currently selected event/session with as few interactions as possible after review.
+- [ ] Display per-file upload progress, individual success/failure states, overall completion state and retry of failed uploads without resending successful files.
 - [ ] Support immediate publication when the operator has permission, with optional moderation where required.
 - [ ] Preserve MediaGallery upload validation, MIME checks, quotas, image processing and security rules.
 - [ ] Make interrupted/partial mobile uploads recoverable where practical.
@@ -427,6 +436,12 @@ Implementation requirements:
 ### Phase A — Event MVP
 - [ ] Event linked to a MediaGallery album.
 - [ ] Mobile multi-photo quick upload.
+- [ ] Local pre-upload review of the selected batch.
+- [ ] Large-format photo viewer optimized for judging image quality on a phone.
+- [ ] Swipe navigation, select/reject controls and selected/total counter.
+- [ ] Touch zoom / pinch-to-zoom where supported.
+- [ ] Grid recap and correction before upload.
+- [ ] Upload only the final selected photographs, with per-file progress and failed-file retry.
 - [ ] Event share URL and QR code.
 - [ ] Public/permission-aware event gallery.
 - [ ] Individual downloads.
