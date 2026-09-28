@@ -287,6 +287,11 @@ $T->set_var(array(
     'instance'              => $instance,
     'target_attr'            => htmlspecialchars($target, ENT_QUOTES, 'UTF-8'),
     'target_json'            => json_encode($target, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT),
+    'selection_key_attr'     => htmlspecialchars(sha1($target . '|' . $instance), ENT_QUOTES, 'UTF-8'),
+    'selected_singular_attr' => htmlspecialchars((isset($_CONF['language']) && strpos($_CONF['language'], 'french') === 0) ? 'image sélectionnée' : 'image selected', ENT_QUOTES, 'UTF-8'),
+    'selected_plural_attr'   => htmlspecialchars((isset($_CONF['language']) && strpos($_CONF['language'], 'french') === 0) ? 'images sélectionnées' : 'images selected', ENT_QUOTES, 'UTF-8'),
+    'insert_one_attr'        => htmlspecialchars((isset($_CONF['language']) && strpos($_CONF['language'], 'french') === 0) ? 'Insérer l’image' : 'Insert image', ENT_QUOTES, 'UTF-8'),
+    'insert_many_attr'       => htmlspecialchars((isset($_CONF['language']) && strpos($_CONF['language'], 'french') === 0) ? 'Insérer %d images' : 'Insert %d images', ENT_QUOTES, 'UTF-8'),
     'lang_select_album'     => $LANG_mgMB['select_album'],
     'lang_thumbnails'       => $LANG_mgMB['thumbnails'],
     'lang_cancel'           => $LANG_mgMB['cancel'],
@@ -294,8 +299,17 @@ $T->set_var(array(
         ? 'Choisissez une image ou insérez directement l’album affiché.'
         : 'Choose an image or insert the current album.',
     'insert_media'          => (isset($_CONF['language']) && strpos($_CONF['language'], 'french') === 0)
-        ? 'Insérer l’image'
-        : 'Insert image',
+        ? 'Insérer les images'
+        : 'Insert images',
+    'selected_singular'     => (isset($_CONF['language']) && strpos($_CONF['language'], 'french') === 0)
+        ? 'image sélectionnée'
+        : 'image selected',
+    'selected_plural'       => (isset($_CONF['language']) && strpos($_CONF['language'], 'french') === 0)
+        ? 'images sélectionnées'
+        : 'images selected',
+    'clear_selection'       => (isset($_CONF['language']) && strpos($_CONF['language'], 'french') === 0)
+        ? 'Effacer la sélection'
+        : 'Clear selection',
     'insert_album'          => (isset($_CONF['language']) && strpos($_CONF['language'], 'french') === 0)
         ? 'Insérer l’album'
         : 'Insert album',
@@ -336,7 +350,7 @@ if ($total_media > 0) {
             $celldisplay = '<label class="mg-picker-card-label">'
                          . '<div class="thumb">' . $MG_media[$j]->displayRawThumb() . '</div>'
                          . '<div class="description">' . COM_truncate($title, 48, '...') . '</div>'
-                         . '<input class="mg-picker-radio" type="radio" name="thumbnail" value="' . (int) $MG_media[$j]->id . '">'
+                         . '<input class="mg-picker-checkbox" type="checkbox" name="thumbnail" value="' . (int) $MG_media[$j]->id . '">'
                          . '<span class="mg-picker-selected" aria-hidden="true">✓</span>'
                          . '</label>';
             $T->set_var('CELL_DISPLAY_IMAGE', $celldisplay);
