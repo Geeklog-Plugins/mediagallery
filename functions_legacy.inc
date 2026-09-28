@@ -698,15 +698,15 @@ function plugin_getheadercode_mediagallery()
     $styleFile .= '?v=' . rawurlencode($styleCacheVersion);
     $retval .= LB . '<link rel="stylesheet" type="text/css" href="' . $styleFile . '"' . XHTML . '>' . LB;
 
-    $_SCRIPTS->setJavaScriptFile('mediagallery', '/mediagallery/js/mediagallery.js');
+    $_SCRIPTS->setJavaScriptFile('mediagallery', MG_assetUrl180('/mediagallery/js/mediagallery.js'));
 
     $_SCRIPTS->setJavaScriptLibrary('jquery');
 
     if (! $_MG_CONF['disable_lightbox']) {
-        $_SCRIPTS->setJavaScriptFile('jquery.slimbox2', '/mediagallery/js/slimbox2.js');
+        $_SCRIPTS->setJavaScriptFile('jquery.slimbox2', MG_assetUrl180('/mediagallery/js/slimbox2.js'));
     }
 
-    $_SCRIPTS->setJavaScriptFile('jquery.cyclelite', '/mediagallery/js/jquery.cycle.lite.min.js');
+    $_SCRIPTS->setJavaScriptFile('jquery.cyclelite', MG_assetUrl180('/mediagallery/js/jquery.cycle.lite.min.js'));
 
     $frameStyleRelative = '/mediagallery/frames/' . $_MG_CONF['random_skin'] . '/style.css';
     $frameStylePath = $_CONF['path_html'] . ltrim($frameStyleRelative, '/');
@@ -717,7 +717,7 @@ function plugin_getheadercode_mediagallery()
     }
     $_SCRIPTS->setCSSFile(
         'mg.framecss' . $_MG_CONF['random_skin'],
-        $frameStyleRelative . '?v=' . rawurlencode($frameCacheVersion),
+        MG_assetUrl180($frameStyleRelative),
         false
     );
 
