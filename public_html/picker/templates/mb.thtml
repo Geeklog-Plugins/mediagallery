@@ -14,101 +14,44 @@ function InsertHtml(htmltag)
 }
 </script>
 
-<form name="mediabrowser" method="post" action="{s_form_action}">
+<form class="mg-picker" name="mediabrowser" method="post" action="{s_form_action}">
 <input type="hidden" name="i" value="{instance}">
 <input type="hidden" name="target" value="{target_attr}">
 <input type="hidden" name="refresh" value="1">
 <input type="hidden" name="navigation" value="none">
-<fieldset>
-  <legend>{lang_thumbnails}</legend>
-  <div style="text-align:center;margin-bottom:10px">
-    {jumpbox}
-    <input type="submit" value="&lt;&lt;" onclick='document.mediabrowser.navigation.value="prev"' onkeypress='document.mediabrowser.navigation.value="prev"'{prev_disabled}>
-    <input type="submit" value="&gt;&gt;" onclick='document.mediabrowser.navigation.value="next"' onkeypress='document.mediabrowser.navigation.value="next"'{next_disabled}>&nbsp;&nbsp;
-    {page_number}
+
+<header class="mg-picker__header">
+  <div>
+    <h1 class="mg-picker__title">{lang_thumbnails}</h1>
+    <p class="mg-picker__help">{picker_help}</p>
   </div>
+  <button class="mg-picker__close" type="button" onclick="window.close();">{lang_cancel}</button>
+</header>
+
+<section class="mg-picker__album">
+  <div class="mg-picker__album-nav">
+    <div class="mg-picker__album-select">{jumpbox}</div>
+    <div class="mg-picker__pagination">
+      <button type="submit" aria-label="Previous page" onclick='document.mediabrowser.navigation.value="prev"'{prev_disabled}>&lsaquo;</button>
+      <span>{page_number}</span>
+      <button type="submit" aria-label="Next page" onclick='document.mediabrowser.navigation.value="next"'{next_disabled}>&rsaquo;</button>
+    </div>
+  </div>
+  <div class="mg-picker__album-action">
+    <button class="mg-picker__button mg-picker__button--secondary" type="button" onclick="return insertAlbum(this.form);">
+      {insert_album}
+    </button>
+  </div>
+</section>
+
+<section class="mg-picker__media" aria-label="{lang_thumbnails}">
   {album_body}
-</fieldset>
+</section>
 
-<fieldset>
-  <legend>{lang_autotag_attr}</legend>
-  <div style="margin-bottom:5px;">
-  <input type="radio" name="autotag" value="album" onchange="dodisabled()"{albumon}>&nbsp;{lang_album}&nbsp;&nbsp;
-  <input type="radio" name="autotag" value="slideshow" onchange="dodisabled()"{slideshowon}>&nbsp;{lang_slideshow}&nbsp;&nbsp;
-  <!-- <input type="radio" name="autotag" value="fslideshow" onchange="dodisabled()"{fslideshowon}>&nbsp;{lang_fslideshow}&nbsp;&nbsp; -->
-  <input type="radio" name="autotag" value="media" onchange="dodisabled()"{mediaon}>&nbsp;{lang_media}
-  <!-- </div>
-
-  <div style="margin-bottom:5px;"> -->
-  <!-- <input type="radio" name="autotag" value="mlink" onchange="dodisabled()"{mlinkon}>&nbsp;{lang_mlink}&nbsp;&nbsp; -->
-  <input type="radio" name="autotag" value="img" onchange="dodisabled()"{imgon}>&nbsp;{lang_img}&nbsp;&nbsp;
-  <input type="radio" name="autotag" value="video" onchange="dodisabled()"{videoon}>&nbsp;{lang_video}&nbsp;&nbsp;
-  <input type="radio" name="autotag" value="audio" onchange="dodisabled()"{audioon}>&nbsp;{lang_audio}&nbsp;&nbsp;
-  <!-- <input type="radio" name="autotag" value="playall" onchange="dodisabled()"{playallon}>&nbsp;{lang_playall} -->
-  </div>
-
-  <div style="margin-bottom:5px;">
-  {lang_width}
-  <input type="text" name="width" size="3" maxlength="3" value="{width}">&nbsp;&nbsp;
-  {lang_height}
-  <input type="text" name="height" size="3" maxlength="3" value="{height}">&nbsp;&nbsp;
-  {lang_border}
-  <select name="border">
-    <option value="0"{border_no}>{lang_no}</option>
-    <option value="1"{border_yes}>{lang_yes}</option>
-  </select>&nbsp;&nbsp;
-  {lang_alignment}
-  <select name="alignment">
-    <option value="auto"{align_auto}>{lang_auto}</option>
-    <option value="none"{align_none}>{lang_none}</option>
-    <option value="left"{align_left}>{lang_left}</option>
-    <option value="right"{align_right}>{lang_right}</option>
-  </select>
-  </div>
-
-  <div style="margin-bottom:5px;">
-  {lang_source}
-  <select name="source">
-    <option value="tn"{src_tn}>{lang_thumbnail}</option>
-    <option value="disp"{src_disp}>{lang_display}</option>
-    <option value="orig"{src_orig}>{lang_original}</option>
-  </select>&nbsp;&nbsp;
-  {lang_link}
-  <select name="link">
-    <option value="0"{link_no}>{lang_no}</option>
-    <option value="1"{link_yes}>{lang_yes}</option>
-  </select>&nbsp;&nbsp;
-  {lang_autoplay}
-  <select name="autoplay">
-    <option value="0"{autoplay_no}>{lang_no}</option>
-    <option value="1"{autoplay_yes}>{lang_yes}</option>
-  </select>&nbsp;&nbsp;
-  {lang_delay}
-  <input type="text" name="delay" size="3" maxlength="3" value="{delay}">
-  </div>
-
-  <div style="margin-bottom:5px;">
-  <!--{destination}&nbsp;&nbsp;
-  {lang_alturl}
-  <select name="alturl">
-    <option value="0"{alturl_no}>{lang_no}</option>
-    <option value="1"{alturl_yes}>{lang_yes}</option>
-  </select>&nbsp;&nbsp; -->
-  {lang_lightbox}
-  <select name="lightbox">
-    <option value="0"{lightbox_no}>{lang_no}</option>
-    <option value="1"{lightbox_yes}>{lang_yes}</option>
-  </select>
-  </div>
-
-  <div style="margin-bottom:5px;">
-  {lang_caption}
-  <input type="text" name="caption" size="80" maxlength="120" value="{caption}">
-  </div>
-</fieldset>
-
-<div style="text-align:center">
-<input type="button" name="button" value="{lang_insert}" onclick="return insertImage(this.form);" onkeypress="return insertImage(this.form);">
-<input type="button" name="cancel" value="{lang_cancel}" onclick="javascript:window.close();" onkeypress="javascript:window.close();">
-</div>
+<footer class="mg-picker__footer">
+  <button class="mg-picker__button mg-picker__button--primary" type="button" onclick="return insertImage(this.form);">
+    {insert_media}
+  </button>
+  <button class="mg-picker__button" type="button" onclick="window.close();">{lang_cancel}</button>
+</footer>
 </form>
