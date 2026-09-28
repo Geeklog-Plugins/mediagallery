@@ -677,10 +677,10 @@ function MG_getThemePublicJSandCSS(&$skin)
 
     if (empty($skin))  return '';
     if (file_exists($_MG_CONF['path_html'] . 'themes/' . $skin . '/javascript.js')) {
-        $_SCRIPTS->setJavaScriptFile('mg.skin' . $skin, '/mediagallery/themes/' . $skin . '/javascript.js');
+        $_SCRIPTS->setJavaScriptFile('mg.skin' . $skin, MG_assetUrl180('/mediagallery/themes/' . $skin . '/javascript.js'));
     }
     if (file_exists($_MG_CONF['path_html'] . 'themes/' . $skin . '/style.css')) {
-        $_SCRIPTS->setCSSFile('mg.skincss' . $skin , '/mediagallery/themes/' . $skin . '/style.css', false);
+        $_SCRIPTS->setCSSFile('mg.skincss' . $skin , MG_assetUrl180('/mediagallery/themes/' . $skin . '/style.css'), false);
     }
     return '';
 }
@@ -693,7 +693,7 @@ function MG_getCSS(&$frame)
     if (!empty($frame) && file_exists($_MG_CONF['path_html'] . 'frames/' . $frame . '/style.css')) {
         $name = $frame;
     }
-    $_SCRIPTS->setCSSFile('mg.framecss' . $name , '/mediagallery/frames/' . $name . '/style.css', false);
+    $_SCRIPTS->setCSSFile('mg.framecss' . $name , MG_assetUrl180('/mediagallery/frames/' . $name . '/style.css'), false);
     return '';
 }
 
