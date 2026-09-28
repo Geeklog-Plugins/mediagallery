@@ -59,11 +59,11 @@
         if (!input || input.name !== 'thumbnail') {
             return;
         }
-        cards = document.querySelectorAll('.mg-picker-card');
+        cards = document.querySelectorAll('.cell');
         for (i = 0; i < cards.length; i += 1) {
             cards[i].classList.remove('is-selected');
         }
-        card = input.closest ? input.closest('.mg-picker-card') : input.parentNode;
+        card = input.closest ? input.closest('.cell') : input.parentNode;
         if (card) {
             card.classList.add('is-selected');
         }
