@@ -121,7 +121,7 @@ if ($_USER['uid'] < 2 && !empty($_MG_CONF['loginrequired'])) {
 */
 
 $target = isset($_REQUEST['target']) ? COM_stripslashes($_REQUEST['target']) : '#form-forum-text';
-if (!preg_match('/^#[A-Za-z][A-Za-z0-9_-]*$/', $target)) {
+if (!preg_match('/^(#[A-Za-z][A-Za-z0-9_-]*|[A-Za-z]+\\[name="[A-Za-z][A-Za-z0-9_-]*"\\])$/', $target)) {
     $target = '#form-forum-text';
 }
 
