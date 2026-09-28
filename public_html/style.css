@@ -395,9 +395,11 @@ a.SWFUProgressCancel:hover {
 .MG_autotag_left,
 .MG_autotag_right,
 .MG_autotag_center,
+.MG_autotag_none,
 .MG_autotag_nb_left,
 .MG_autotag_nb_right,
-.MG_autotag_nb_center {
+.MG_autotag_nb_center,
+.MG_autotag_nb_none {
   text-align: center;
   padding: 5px;
   margin-bottom: 5px;
@@ -405,14 +407,23 @@ a.SWFUProgressCancel:hover {
 
 .MG_autotag_left,
 .MG_autotag_right,
-.MG_autotag_center {
+.MG_autotag_center,
+.MG_autotag_none {
   border: 1px solid silver;
 }
 
 .MG_autotag_nb_left,
 .MG_autotag_nb_right,
-.MG_autotag_nb_center {
+.MG_autotag_nb_center,
+.MG_autotag_nb_none {
   border: none;
+}
+
+.MG_autotag_none,
+.MG_autotag_nb_none {
+  float: none;
+  margin-left: 0;
+  margin-right: 0;
 }
 
 .MG_autotag_left,
