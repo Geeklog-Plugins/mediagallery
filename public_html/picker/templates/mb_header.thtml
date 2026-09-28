@@ -8,4 +8,4 @@
 <script src="{js_lang_url}"></script>
 <script src="{js_url}"></script>
 </head>
-<body dir="{direction}" onload="dodisabled()">
+<body dir="{direction}">
