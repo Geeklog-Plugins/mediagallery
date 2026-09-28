@@ -77,9 +77,12 @@ function MG_popupHeader($pagetitle = '') {
     $header->set_var('page_title',  htmlspecialchars($pagetitle, ENT_QUOTES, $charset));
     $header->set_var('site_url',    $_CONF['site_url']);
     $header->set_var('site_name',   htmlspecialchars($_CONF['site_name'], ENT_QUOTES, $charset));
-    $header->set_var('css_url',     $_CONF['site_url'] . $mb_base_path . '/css/style.css');
-    $header->set_var('js_lang_url', $_CONF['site_url'] . $mb_base_path . '/langs/' . $jslangfile);
-    $header->set_var('js_url',      $_CONF['site_url'] . $mb_base_path . '/js/functions.js');
+    $cssFile = $_CONF['path_html'] . $mb_base_path . '/css/style.css';
+    $jsFile = $_CONF['path_html'] . $mb_base_path . '/js/functions.js';
+    $langJsFile = $_CONF['path_html'] . $mb_base_path . '/langs/' . $jslangfile;
+    $header->set_var('css_url',     $_CONF['site_url'] . $mb_base_path . '/css/style.css?v=' . (file_exists($cssFile) ? filemtime($cssFile) : '1'));
+    $header->set_var('js_lang_url', $_CONF['site_url'] . $mb_base_path . '/langs/' . $jslangfile . '?v=' . (file_exists($langJsFile) ? filemtime($langJsFile) : '1'));
+    $header->set_var('js_url',      $_CONF['site_url'] . $mb_base_path . '/js/functions.js?v=' . (file_exists($jsFile) ? filemtime($jsFile) : '1'));
     $header->set_var('charset',     $charset);
     $header->set_var('direction',   (empty($LANG_DIRECTION) ? 'ltr' : $LANG_DIRECTION));
     $header->parse('output', 'header');
@@ -271,80 +274,6 @@ if ($aOffset > 0) {
 
 $prev_disabled = ($current_print_page <= 1) ? ' disabled' : '';
 $next_disabled = ($current_print_page >= $total_print_pages) ? ' disabled' : '';
-
-$birdseed = MG_getBirdseed($album_id, 0, $sortOrder, 0);
-
-$T->set_var(array(
-        'border_yes'            => $_mgMB_CONF['at_border'] == 1 ? ' selected' : '',
-        'border_no'             => $_mgMB_CONF['at_border'] == 1 ? '' : ' selected',
-        'align_none'            => $_mgMB_CONF['at_align'] == 'none' ? ' selected' : '',
-        'align_auto'            => $_mgMB_CONF['at_align'] == 'auto' ? ' selected' : '',
-        'align_right'           => $_mgMB_CONF['at_align'] == 'right' ? ' selected' : '',
-        'align_left'            => $_mgMB_CONF['at_align'] == 'left' ? ' selected' : '',
-        'width'                 => $_mgMB_CONF['at_width'],
-        'height'                => $_mgMB_CONF['at_height'],
-        'delay'                 => $_mgMB_CONF['at_delay'],
-        'src_tn'                => $_mgMB_CONF['at_src'] == 'tn' ? ' selected' : '',
-        'src_disp'              => $_mgMB_CONF['at_src'] == 'disp' ? ' selected' : '',
-        'src_orig'              => $_mgMB_CONF['at_src'] == 'orig' ? ' selected' : '',
-        'autoplay_yes'          => $_mgMB_CONF['at_autoplay'] == 1 ? ' selected' : '',
-        'autoplay_no'           => $_mgMB_CONF['at_autoplay'] == 1 ? '' : ' selected',
-        'link_yes'              => $_mgMB_CONF['at_enable_link'] == 1 ? ' selected' : '',
-        'link_no'               => $_mgMB_CONF['at_enable_link'] == 0 ? ' selected' : '',
-        'lightbox_yes'          => $_mgMB_CONF['at_enable_link'] == 2 ? ' selected' : '',
-        'lightbox_no'           => $_mgMB_CONF['at_enable_link'] != 2 ? ' selected' : '',
-        'alturl_no'             => (isset($_mgMB_CONF['at_alt_url']) && $_mgMB_CONF['at_alt_url'] == 1) ? '' : ' selected',
-        'alturl_yes'            => (isset($_mgMB_CONF['at_alt_url']) && $_mgMB_CONF['at_alt_url'] == 1) ? ' selected' : '',
-        'mediaon'               => ' checked',
-    ));
-} else {
-    $post = array(
-        'border' => isset($_POST['border']) ? (int) $_POST['border'] : 0,
-        'alignment' => isset($_POST['alignment']) ? COM_applyFilter($_POST['alignment']) : 'none',
-        'width' => isset($_POST['width']) ? (int) $_POST['width'] : 0,
-        'height' => isset($_POST['height']) ? (int) $_POST['height'] : 0,
-        'delay' => isset($_POST['delay']) ? (int) $_POST['delay'] : (int) $_mgMB_CONF['at_delay'],
-        'source' => isset($_POST['source']) ? COM_applyFilter($_POST['source']) : 'tn',
-        'autoplay' => isset($_POST['autoplay']) ? (int) $_POST['autoplay'] : 0,
-        'link' => isset($_POST['link']) ? (int) $_POST['link'] : 0,
-        'lightbox' => isset($_POST['lightbox']) ? (int) $_POST['lightbox'] : 0,
-        'alturl' => isset($_POST['alturl']) ? (int) $_POST['alturl'] : 0,
-        'autotag' => isset($_POST['autotag']) ? COM_applyFilter($_POST['autotag']) : 'media',
-        'caption' => isset($_POST['caption']) ? strip_tags($_POST['caption']) : ''
-    );
-    $T->set_var(array(
-        'border_yes'            => $post['border'] === 1 ? ' selected' : '',
-        'border_no'             => $post['border'] === 1 ? '' : ' selected',
-        'align_none'            => $post['alignment'] === 'none' ? ' selected' : '',
-        'align_auto'            => $post['alignment'] === 'auto' ? ' selected' : '',
-        'align_right'           => $post['alignment'] === 'right' ? ' selected' : '',
-        'align_left'            => $post['alignment'] === 'left' ? ' selected' : '',
-        'width'                 => min(2000, max(0, $post['width'])),
-        'height'                => min(2000, max(0, $post['height'])),
-        'delay'                 => min(999, max(0, $post['delay'])),
-        'src_tn'                => $post['source'] === 'tn' ? ' selected' : '',
-        'src_disp'              => $post['source'] === 'disp' ? ' selected' : '',
-        'src_orig'              => $post['source'] === 'orig' ? ' selected' : '',
-        'autoplay_yes'          => $post['autoplay'] === 1 ? ' selected' : '',
-        'autoplay_no'           => $post['autoplay'] === 1 ? '' : ' selected',
-        'link_yes'              => $post['link'] === 1 ? ' selected' : '',
-        'link_no'               => $post['link'] === 0 ? ' selected' : '',
-        'lightbox_yes'          => $post['lightbox'] === 1 ? ' selected' : '',
-        'lightbox_no'           => $post['lightbox'] === 0 ? ' selected' : '',
-        'alturl_yes'            => $post['alturl'] === 1 ? ' selected' : '',
-        'alturl_no'             => $post['alturl'] === 1 ? '' : ' selected',
-        'albumon'               => $post['autotag'] === 'album' ? ' checked' : '',
-        'slideshowon'           => $post['autotag'] === 'slideshow' ? ' checked' : '',
-        'fslideshowon'          => $post['autotag'] === 'fslideshow' ? ' checked' : '',
-        'mediaon'               => $post['autotag'] === 'media' ? ' checked' : '',
-        'mlinkon'               => $post['autotag'] === 'mlink' ? ' checked' : '',
-        'imgon'                 => $post['autotag'] === 'img' ? ' checked' : '',
-        'videoon'               => $post['autotag'] === 'video' ? ' checked' : '',
-        'audioon'               => $post['autotag'] === 'audio' ? ' checked' : '',
-        'playallon'             => $post['autotag'] === 'playall' ? ' checked' : '',
-        'caption'               => htmlspecialchars($post['caption'], ENT_QUOTES, 'UTF-8'),
-    ));
-}
 
 $T->set_var(array(
     's_form_action'         => htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8'),
