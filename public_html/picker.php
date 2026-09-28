@@ -449,9 +449,12 @@ if ($total_media > 0) {
             if (!empty($MG_media[$j]->title)) {
                 $title = '<p>' . htmlspecialchars(strip_tags($MG_media[$j]->title), ENT_QUOTES, 'UTF-8') . '</p>';
             }
-            $celldisplay = '<div class="thumb">' . $MG_media[$j]->displayRawThumb() . '</div>'
-                         . '<div class="description">' . COM_truncate($title, 20,'...')
-                         . '</div><input type="radio" name="thumbnail" value="' . (int) $MG_media[$j]->id . '">';
+            $celldisplay = '<label class="mg-picker-card-label">'
+                         . '<div class="thumb">' . $MG_media[$j]->displayRawThumb() . '</div>'
+                         . '<div class="description">' . COM_truncate($title, 48, '...') . '</div>'
+                         . '<input class="mg-picker-radio" type="radio" name="thumbnail" value="' . (int) $MG_media[$j]->id . '">'
+                         . '<span class="mg-picker-selected" aria-hidden="true">✓</span>'
+                         . '</label>';
             $T->set_var('CELL_DISPLAY_IMAGE', $celldisplay);
             $T->parse('IDetail', 'ImageDetail', true);
             $T->parse('IColumn', 'ImageColumn', true);
