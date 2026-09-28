@@ -55,6 +55,51 @@ function MG_prepareMediaStorage180($root)
     return true;
 }
 
+/**
+ * Add a cache-busting version to a MediaGallery public CSS/JS asset.
+ *
+ * The plugin version identifies the release while filemtime invalidates the
+ * browser cache for asset changes made during development of the same release.
+ */
+function MG_assetUrl180($url)
+{
+    global $_CONF, $_MG_CONF;
+
+    $url = (string) $url;
+    if ($url === '') {
+        return $url;
+    }
+
+    $path = '';
+    $publicPrefix = '/mediagallery/';
+    $sitePrefix = isset($_MG_CONF['site_url'])
+        ? rtrim((string) $_MG_CONF['site_url'], '/') . '/'
+        : '';
+
+    if (strpos($url, $publicPrefix) === 0) {
+        $path = rtrim($_CONF['path_html'], '/\\') . '/mediagallery/'
+              . substr($url, strlen($publicPrefix));
+    } elseif ($sitePrefix !== '' && strpos($url, $sitePrefix) === 0) {
+        $path = rtrim($_CONF['path_html'], '/\\') . '/mediagallery/'
+              . substr($url, strlen($sitePrefix));
+    }
+
+    $version = !empty($_MG_CONF['pi_version'])
+        ? (string) $_MG_CONF['pi_version']
+        : (!empty($_MG_CONF['installed_version']) ? (string) $_MG_CONF['installed_version'] : 'mediagallery');
+
+    if ($path !== '') {
+        $mtime = @filemtime($path);
+        if ($mtime !== false) {
+            $version .= '-' . $mtime;
+        }
+    }
+
+    return $url
+        . (strpos($url, '?') === false ? '?' : '&')
+        . 'v=' . rawurlencode($version);
+}
+
 function MG_applyRuntimeConfiguration180()
 {
     global $_CONF, $_MG_CONF, $_TABLES;
