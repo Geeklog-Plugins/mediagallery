@@ -1769,9 +1769,9 @@ function plugin_getiteminfo_mediagallery($id, $what, $uid = 0, $options = array(
                         break;
                     case 'url':
                         if (empty($A['id'])) {
-                            $props['url'] = $_MG_CONF['site_url'].'/media.php?f=0&amp;sort=0&amp;s='.$id;
+                            $props['url'] = $_MG_CONF['site_url'].'/media.php?f=0&sort=0&s='.$id;
                         } else {
-                            $props['url'] = $_MG_CONF['site_url'].'/media.php?f=0&amp;sort=0&amp;s='.$A['media_id'];
+                            $props['url'] = $_MG_CONF['site_url'].'/media.php?f=0&sort=0&s='.$A['media_id'];
                         }
                         break;
                     case 'label':
