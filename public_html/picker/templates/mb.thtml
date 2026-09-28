@@ -14,7 +14,12 @@ function InsertHtml(htmltag)
 }
 </script>
 
-<form class="mg-picker" name="mediabrowser" method="post" action="{s_form_action}">
+<form class="mg-picker" name="mediabrowser" method="post" action="{s_form_action}"
+      data-selection-key="{selection_key_attr}"
+      data-selected-singular="{selected_singular_attr}"
+      data-selected-plural="{selected_plural_attr}"
+      data-insert-one="{insert_one_attr}"
+      data-insert-many="{insert_many_attr}">
 <input type="hidden" name="i" value="{instance}">
 <input type="hidden" name="target" value="{target_attr}">
 <input type="hidden" name="navigation" value="none">
@@ -49,9 +54,16 @@ function InsertHtml(htmltag)
 </section>
 
 <footer class="mg-picker__footer">
-  <button class="mg-picker__button mg-picker__button--primary" type="button" onclick="return insertImage(this.form);">
-    {insert_media}
-  </button>
-  <button class="mg-picker__button" type="button" onclick="window.close();">{lang_cancel}</button>
+  <div class="mg-picker__selection-status" aria-live="polite">
+    <strong id="mg-picker-selected-count">0</strong>
+    <span id="mg-picker-selected-label">{selected_plural}</span>
+    <button id="mg-picker-clear" class="mg-picker__clear" type="button">{clear_selection}</button>
+  </div>
+  <div class="mg-picker__footer-actions">
+    <button id="mg-picker-insert" class="mg-picker__button mg-picker__button--primary" type="button" onclick="return insertImages(this.form);" disabled>
+      {insert_media}
+    </button>
+    <button class="mg-picker__button" type="button" onclick="window.close();">{lang_cancel}</button>
+  </div>
 </footer>
 </form>
