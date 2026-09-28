@@ -17,8 +17,8 @@ function InsertHtml(htmltag)
 <form class="mg-picker" name="mediabrowser" method="post" action="{s_form_action}">
 <input type="hidden" name="i" value="{instance}">
 <input type="hidden" name="target" value="{target_attr}">
-<input type="hidden" name="refresh" value="1">
-<input type="hidden" name="navigation" value="none">\n<input type="hidden" name="current_album_id" value="{album_id}">
+<input type="hidden" name="navigation" value="none">
+<input type="hidden" name="current_album_id" value="{album_id}">
 
 <header class="mg-picker__header">
   <div>
