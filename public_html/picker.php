@@ -79,7 +79,7 @@ function MG_popupHeader($pagetitle = '') {
     $header->set_var('site_name',   htmlspecialchars($_CONF['site_name'], ENT_QUOTES, $charset));
     $header->set_var('css_url',     $_CONF['site_url'] . $mb_base_path . '/css/style.css');
     $header->set_var('js_lang_url', $_CONF['site_url'] . $mb_base_path . '/langs/' . $jslangfile);
-    $header->set_var('js_url',      $_CONF['site_url'] . $mb_base_path . '/jscripts/functions.js');
+    $header->set_var('js_url',      $_CONF['site_url'] . $mb_base_path . '/js/functions.js');
     $header->set_var('charset',     $charset);
     $header->set_var('direction',   (empty($LANG_DIRECTION) ? 'ltr' : $LANG_DIRECTION));
     $header->parse('output', 'header');
