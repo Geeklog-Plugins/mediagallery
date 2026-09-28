@@ -405,7 +405,16 @@ $T->set_var(array(
     'lang_original'         => $LANG_mgMB['original'],
     'lang_alturl'           => $LANG_mgMB['alturl'],
     'lang_lightbox'         => $LANG_mgMB['lightbox'],
-    'destination'           => ($_mgMB_CONF['enable_dest'] == 1 ? $LANG_mgMB['destination'] . '&nbsp;<select name="dest"><option value="story">' . $LANG_mgMB['story'] . '</option><option value="block">' . $LANG_mgMB['block'] . '</option></select>' : ''),
+    'destination'           => '',
+    'picker_help'           => (isset($_CONF['language']) && strpos($_CONF['language'], 'french') === 0)
+        ? 'Choisissez une image ou insérez directement l’album affiché.'
+        : 'Choose an image or insert the current album.',
+    'insert_media'          => (isset($_CONF['language']) && strpos($_CONF['language'], 'french') === 0)
+        ? 'Insérer l’image'
+        : 'Insert image',
+    'insert_album'          => (isset($_CONF['language']) && strpos($_CONF['language'], 'french') === 0)
+        ? 'Insérer l’album'
+        : 'Insert album',
 ));
 
 if ($total_media == 0) {
