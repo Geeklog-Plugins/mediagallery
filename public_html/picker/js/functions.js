@@ -20,7 +20,8 @@
     }
 
     function albumId(form) {
-        var value = parseInt(form.aid.value, 10);
+        var source = form.current_album_id ? form.current_album_id.value : form.aid.value;
+        var value = parseInt(source, 10);
         return isFinite(value) && value > 0 ? value : 0;
     }
 
