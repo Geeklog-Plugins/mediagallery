@@ -4,14 +4,14 @@
 
     var form;
     var storageKey;
-    var selected = {};
+    var selected = [];
 
     function readSelection() {
         var raw;
         var ids;
         var i;
 
-        selected = {};
+        selected = [];
         try {
             raw = window.sessionStorage.getItem(storageKey);
             ids = raw ? JSON.parse(raw) : [];
@@ -24,23 +24,24 @@
         }
 
         for (i = 0; i < ids.length; i += 1) {
-            if (/^[0-9]+$/.test(String(ids[i]))) {
-                selected[String(ids[i])] = true;
+            if (/^[0-9]+$/.test(String(ids[i]))
+                && selected.indexOf(String(ids[i])) === -1
+            ) {
+                selected.push(String(ids[i]));
             }
         }
     }
 
     function writeSelection() {
-        var ids = Object.keys(selected);
         try {
-            window.sessionStorage.setItem(storageKey, JSON.stringify(ids));
+            window.sessionStorage.setItem(storageKey, JSON.stringify(selected));
         } catch (e) {
             // The picker still works on the current page if storage is unavailable.
         }
     }
 
     function clearSelectionStore() {
-        selected = {};
+        selected = [];
         try {
             window.sessionStorage.removeItem(storageKey);
         } catch (e) {
@@ -49,7 +50,25 @@
     }
 
     function selectedIds() {
-        return Object.keys(selected);
+        return selected.slice();
+    }
+
+    function isSelected(id) {
+        return selected.indexOf(String(id)) !== -1;
+    }
+
+    function addSelected(id) {
+        id = String(id);
+        if (!isSelected(id)) {
+            selected.push(id);
+        }
+    }
+
+    function removeSelected(id) {
+        var index = selected.indexOf(String(id));
+        if (index !== -1) {
+            selected.splice(index, 1);
+        }
     }
 
     function setCardState(input, isSelected) {
@@ -71,7 +90,7 @@
 
         for (i = 0; i < inputs.length; i += 1) {
             id = String(inputs[i].value);
-            setCardState(inputs[i], !!selected[id]);
+            setCardState(inputs[i], isSelected(id));
         }
     }
 
@@ -171,9 +190,9 @@
 
             id = String(input.value);
             if (input.checked) {
-                selected[id] = true;
+                addSelected(id);
             } else {
-                delete selected[id];
+                removeSelected(id);
             }
 
             setCardState(input, input.checked);
