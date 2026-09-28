@@ -30,6 +30,9 @@
 // Auto Tag defaults - sets default values for MG Media Browser
 $_mgMB_CONF['at_border']          = isset($_MG_CONF['at_border']) ? (int) $_MG_CONF['at_border'] : 0;
 $_mgMB_CONF['at_align']           = isset($_MG_CONF['at_align']) ? $_MG_CONF['at_align'] : 'none';
+if ($_mgMB_CONF['at_align'] === 'auto') {
+    $_mgMB_CONF['at_align'] = 'none';
+}
 $_mgMB_CONF['at_width']           = isset($_MG_CONF['at_width']) ? (int) $_MG_CONF['at_width'] : 0;
 $_mgMB_CONF['at_height']          = isset($_MG_CONF['at_height']) ? (int) $_MG_CONF['at_height'] : 0;
 $_mgMB_CONF['at_src']             = isset($_MG_CONF['at_src']) ? $_MG_CONF['at_src'] : 'tn';
