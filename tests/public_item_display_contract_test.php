@@ -46,6 +46,25 @@ mg_item_display_require(
     $failures
 );
 
+mg_item_display_require(
+    $legacySource,
+    "'/media.php?f=0&sort=0&s='",
+    'MediaGallery Item Info must return raw media URLs with & separators.',
+    $failures
+);
+mg_item_display_require(
+    $interopSource,
+    "'/media.php?f=0&sort=0&s='",
+    'MediaGallery ID resolver must return raw media URLs with & separators.',
+    $failures
+);
+if (strpos($legacySource, "/media.php?f=0&amp;sort=0&amp;s=") !== false) {
+    $failures[] = 'MediaGallery Item Info still returns HTML-escaped media URLs.';
+}
+if (strpos($interopSource, "/media.php?f=0&amp;sort=0&amp;s=") !== false) {
+    $failures[] = 'MediaGallery ID resolver still returns HTML-escaped media URLs.';
+}
+
 if (!empty($failures)) {
     fwrite(STDERR, "MediaGallery public item-display contract failed:\n");
     foreach ($failures as $failure) {
