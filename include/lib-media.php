@@ -645,7 +645,7 @@ function MG_displayMedia($id, $full=0, $sortOrder=0, $comments=0, $spage=0)
         $retval = COM_startBlock($LANG_ACCESS['accessdenied'], '', COM_getBlockTemplate('_msg_block', 'header'))
                  . '<br'.XHTML.'>' . $LANG_MG00['access_denied_msg']
                  . COM_endBlock(COM_getBlockTemplate('_msg_block', 'footer'));
-        return array($LANG_MG00['access_denied_msg'], $retval);
+        return array($LANG_MG00['access_denied_msg'], $retval, (int) $aid);
     }
 
     $sql = MG_buildMediaSql(array(
@@ -657,6 +657,7 @@ function MG_displayMedia($id, $full=0, $sortOrder=0, $comments=0, $spage=0)
 
     $total_media = $nRows;
     $media_array = array();
+    $id_array = array();
     while ($row = DB_fetchArray($result)) {
         $media_array[] = $row;
         $id_array[] = $row['media_id'];
@@ -667,7 +668,7 @@ function MG_displayMedia($id, $full=0, $sortOrder=0, $comments=0, $spage=0)
         $retval = COM_startBlock($LANG_ACCESS['accessdenied'], '', COM_getBlockTemplate('_msg_block', 'header'))
                 . '<br'.XHTML.'>' . $LANG_MG00['access_denied_msg']
                 . COM_endBlock(COM_getBlockTemplate('_msg_block', 'footer'));
-        return array($LANG_MG00['access_denied_msg'], $retval);
+        return array($LANG_MG00['access_denied_msg'], $retval, (int) $aid);
     }
 
     $media = $media_array[$key];
