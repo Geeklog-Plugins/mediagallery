@@ -643,6 +643,7 @@ function MG_displayMedia($id, $full=0, $sortOrder=0, $comments=0, $spage=0)
     if ($mg_album->access == 0) {
         $retval = COM_startBlock($LANG_ACCESS['accessdenied'], '', COM_getBlockTemplate('_msg_block', 'header'))
                  . '<br'.XHTML.'>' . $LANG_MG00['access_denied_msg']
+                 . ' [MediaGallery: album access]'
                  . COM_endBlock(COM_getBlockTemplate('_msg_block', 'footer'));
         return array($LANG_MG00['access_denied_msg'], $retval, (int) $aid);
     }
@@ -669,6 +670,7 @@ function MG_displayMedia($id, $full=0, $sortOrder=0, $comments=0, $spage=0)
     if ($key === false) {
         $retval = COM_startBlock($LANG_ACCESS['accessdenied'], '', COM_getBlockTemplate('_msg_block', 'header'))
                 . '<br'.XHTML.'>' . $LANG_MG00['access_denied_msg']
+                . ' [MediaGallery: media not found in album]'
                 . COM_endBlock(COM_getBlockTemplate('_msg_block', 'footer'));
         return array($LANG_MG00['access_denied_msg'], $retval, (int) $aid);
     }
