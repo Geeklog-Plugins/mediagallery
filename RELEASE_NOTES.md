@@ -14,6 +14,26 @@ MediaGallery 1.9.0 extends the SEO/interoperability work introduced in 1.8.0 whi
 - Complete the remaining runtime hardening tracked in upstream issue #11.
 - Run the release branch through the PHP 5.6, 7.4, 8.1 and 8.3 syntax-validation matrix.
 
+## Language updates
+
+MediaGallery 1.9.0 adds or refreshes the maintained UTF-8 language set against the current English language contract:
+
+- Spanish
+- Italian
+- Japanese
+- Russian
+- Chinese (Simplified)
+- Chinese (Traditional)
+- Hebrew
+- Persian
+- French Canada
+- French France
+- German
+- German Formal
+- Spanish Argentina
+
+The language files are synchronized structurally with the English reference and are included in the 1.9.0 release archive.
+
 ## SEO and structured data
 
 - Album pages now publish Schema.org `CollectionPage` JSON-LD with an `ItemList` for the items displayed on the current page.
