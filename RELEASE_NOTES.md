@@ -1,6 +1,12 @@
-# MediaGallery 1.9.0 development notes
+# MediaGallery 1.9.0 release notes
 
 MediaGallery 1.9.0 extends the SEO/interoperability work introduced in 1.8.0 while keeping OGP optional.
+
+## PHP 8 compatibility completion
+
+- Normalize optional media metadata before renderer dispatch so legacy/imported records cannot trigger PHP 8 undefined-array-key warnings for resolution, remote-media and remote URL fields.
+- Complete the remaining runtime hardening tracked in upstream issue #11.
+- Run the release branch through the PHP 5.6, 7.4, 8.1 and 8.3 syntax-validation matrix.
 
 ## SEO and structured data
 
