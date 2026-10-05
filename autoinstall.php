@@ -150,11 +150,11 @@ function plugin_postinstall_mediagallery($pi_name)
     require_once $_CONF['path'] . 'plugins/mediagallery/include/config_180.php';
     require_once $_CONF['path'] . 'plugins/mediagallery/include/schema_180.php';
     if (!MG_ensureAlbumSchema180(true)) {
-        COM_errorLog('Media Gallery 1.8.0: unable to verify album database schema after install.', 1);
+        COM_errorLog('Media Gallery: unable to verify album database schema after install.', 1);
         return false;
     }
     if (!MG_migrateMediaStorage180(MG_getLegacyMediaStorage180())) {
-        COM_errorLog('Media Gallery 1.8.0: unable to prepare persistent media storage after install.', 1);
+        COM_errorLog('Media Gallery: unable to prepare persistent media storage after install.', 1);
         return false;
     }
 
