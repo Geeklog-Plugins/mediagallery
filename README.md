@@ -2,14 +2,14 @@
 
 MediaGallery is a full-featured media gallery plugin for Geeklog. The `mediagallery_1.9.0` branch is the release line for MediaGallery 1.9.0 and builds on the modernization completed in 1.8.0.
 
-> **Release status:** MediaGallery 1.9.0 is in final pre-release validation for Geeklog 2.2.2. Keep complete database and media backups before upgrading an existing production site.
+> **Release status:** MediaGallery 1.9.0 is in final pre-release validation for Geeklog 2.1.1 through 2.2.2. Keep complete database and media backups before upgrading an existing production site.
 
 ## Compatibility target
 
-- Geeklog **2.2.2 or newer**
-- PHP syntax validation targets **PHP 5.6, 7.4, 8.1 and 8.3** while the supported Geeklog runtime target is 2.2.2+
+- Geeklog **2.1.1 or newer**, including Geeklog 2.2.2
+- PHP **5.6 or newer**; syntax validation covers PHP 5.6, 7.4, 8.1 and 8.3
 
-Geeklog 2.1.x and older are not release targets for MediaGallery 1.9.0.
+MediaGallery 1.9.0 preserves the transition compatibility policy introduced in 1.8.0 so existing Geeklog 2.1.1 sites can upgrade before or alongside a Geeklog core migration.
 
 ## What 1.9.0 includes
 
@@ -195,7 +195,7 @@ Obsolete Flash/FlowPlayer controls are no longer created on fresh installations.
 The release branch produces one installable archive:
 
 ```text
-dist/mediagallery_1.9.0_2.2.2.zip
+dist/mediagallery_1.9.0_2.1.1.zip
 ```
 
 The archive contains one top-level `mediagallery/` directory and excludes repository/build-only content. Automated validation checks PHP syntax, required MediaGallery helpers, public item-display contracts and Geeklog-compatible archive filenames.
