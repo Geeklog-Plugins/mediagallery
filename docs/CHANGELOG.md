@@ -15,9 +15,9 @@ This changelog tracks the maintained MediaGallery development line. MediaGallery
 
 - Normalize optional media renderer metadata to prevent undefined-array-key warnings on PHP 8.x for legacy/imported records.
 - Complete the remaining compatibility work tracked by upstream issue #11.
-- Align the release metadata and distribution target with Geeklog 2.2.2.
+- Preserve the MediaGallery 1.8 compatibility baseline: Geeklog 2.1.1 or newer, including 2.2.2.
 - Run PHP syntax validation on the actual `mediagallery_1.9.0` branch.
-- Build `dist/mediagallery_1.9.0_2.2.2.zip` from the validated branch.
+- Build `dist/mediagallery_1.9.0_2.1.1.zip` from the validated branch.
 
 ## 1.8.0 — modernization foundation
 
