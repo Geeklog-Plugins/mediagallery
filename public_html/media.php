@@ -50,7 +50,7 @@ require_once $_CONF['path'] . 'plugins/mediagallery/include/lib-media.php';
 
 $msg       = isset($_REQUEST['msg'])  ? COM_applyFilter($_REQUEST['msg'], true) : '';
 $full      = isset($_REQUEST['f'])    ? COM_applyFilter($_REQUEST['f'],   true) : 0;
-$mid       = isset($_REQUEST['s'])    ? COM_applyFilter($_REQUEST['s'],   true) : 0;
+$mid       = isset($_REQUEST['s'])    ? COM_applyFilter($_REQUEST['s'])         : '';
 $sortOrder = isset($_REQUEST['sort']) ? COM_applyFilter($_REQUEST['sort'],true) : 0;
 $page      = isset($_REQUEST['p'])    ? COM_applyFilter($_REQUEST['p'],   true) : 0;
 
