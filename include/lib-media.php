@@ -537,6 +537,29 @@ function MG_buildContent($media, &$opt)
 {
     global $_MG_CONF;
 
+    /*
+     * Normalize optional database/media metadata before dispatching to the
+     * format-specific renderers. Older records and some import paths may not
+     * provide every key expected by the legacy display code. Keeping the
+     * defaults here avoids PHP 8.x undefined-array-key warnings without
+     * scattering defensive checks through each renderer.
+     *
+     * See Geeklog-Plugins/mediagallery issue #11.
+     */
+    $mediaDefaults = array(
+        'resolution_x'       => 0,
+        'resolution_y'       => 0,
+        'media_resolution_x' => 0,
+        'media_resolution_y' => 0,
+        'remote_media'       => 0,
+        'remote_url'         => '',
+    );
+    foreach ($mediaDefaults as $key => $default) {
+        if (!isset($media[$key])) {
+            $media[$key] = $default;
+        }
+    }
+
     switch ($media['mime_type']) {
         case 'image/gif' :
         case 'image/jpeg' :
