@@ -40,7 +40,7 @@ if (strpos(strtolower($_SERVER['PHP_SELF']), strtolower(basename(__FILE__))) !==
 
 global $_TABLES, $_DB_table_prefix; // Needs to be set for when plugin enabled (if plugin already disabled)
 $_MG_CONF = array();
-$_MG_CONF['pi_version'] = '1.7.3';
+$_MG_CONF['pi_version'] = defined('MG_VERSION') ? MG_VERSION : '1.7.3';
 $_MG_CONF['installed_version'] = DB_getItem($_TABLES['plugins'], 'pi_version', "pi_name = 'mediagallery'");
 $_MG_CONF['var_current_code'] = version_compare($_MG_CONF['installed_version'], $_MG_CONF['pi_version'], '>=');
 $_MG_CONF['custom_image_width'] = 0;
@@ -1424,7 +1424,7 @@ function plugin_chkVersion_mediagallery()
 {
     global $_MG_CONF;
 
-    return $_MG_CONF['pi_version'];
+    return defined('MG_VERSION') ? MG_VERSION : $_MG_CONF['pi_version'];
 }
 
 
