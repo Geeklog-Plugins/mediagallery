@@ -27,6 +27,7 @@ MediaGallery 1.9.0 carries forward the 1.8.0 modernization and hardening work an
 - generic album/media lifecycle events for IndexNow, XML Sitemap, Hub and other Geeklog consumers;
 - improved album thumbnail sharpness and portrait-image rendering;
 - Geeklog 2.1.1-compatible PHP-block and batch-session fixes.
+- 13 maintained UTF-8 translations synchronized with the current English language contract: Spanish, Italian, Japanese, Russian, Chinese (Simplified), Chinese (Traditional), Hebrew, Persian, French Canada, French France, German, German Formal and Spanish Argentina.
 
 See [RELEASE_NOTES.md](RELEASE_NOTES.md) for 1.9.0 changes and [ROADMAP.md](ROADMAP.md) for the broader implementation record.
 
