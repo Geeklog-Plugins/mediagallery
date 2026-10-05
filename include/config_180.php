@@ -1,5 +1,7 @@
 <?php
 
+require_once dirname(__DIR__) . '/version.php';
+
 // +--------------------------------------------------------------------------+
 // | Media Gallery Plugin - Geeklog                                           |
 // +--------------------------------------------------------------------------+
@@ -104,7 +106,7 @@ function MG_applyRuntimeConfiguration180()
 {
     global $_CONF, $_MG_CONF, $_TABLES;
 
-    $_MG_CONF['pi_version'] = defined('MG_VERSION') ? MG_VERSION : '1.9.0';
+    $_MG_CONF['pi_version'] = MG_VERSION;
 
     /*
      * functions.inc is loaded by Geeklog while a plugin archive is being
