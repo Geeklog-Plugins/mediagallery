@@ -7,7 +7,7 @@ To request a new archive, push a validated source change to `mediagallery_1.9.0`
 The workflow always replaces the previous generated package with exactly one installable archive:
 
 ```text
-dist/mediagallery_1.9.0_2.2.2.zip
+dist/mediagallery_1.9.0_2.1.1.zip
 ```
 
 The ZIP contains a single top-level `mediagallery/` directory suitable for Geeklog plugin installation/testing.
