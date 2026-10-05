@@ -2,6 +2,12 @@
 
 MediaGallery 1.9.0 extends the SEO/interoperability work introduced in 1.8.0 while keeping OGP optional.
 
+## Canonical release metadata and compatibility
+
+- Keep the MediaGallery 1.8 transition baseline: Geeklog 2.1.1 or newer, including Geeklog 2.2.2.
+- Centralize the runtime release version and minimum Geeklog requirement in `version.php` so bootstrap, installer and upgrade code share one authoritative source.
+- Keep `plugin.json` as static discovery metadata and validate it against the canonical installer metadata during the distribution build.
+
 ## PHP 8 compatibility completion
 
 - Normalize optional media metadata before renderer dispatch so legacy/imported records cannot trigger PHP 8 undefined-array-key warnings for resolution, remote-media and remote URL fields.
