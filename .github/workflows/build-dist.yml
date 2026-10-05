@@ -38,7 +38,7 @@ jobs:
           set -euo pipefail
 
           SOURCE_SHA="$(git rev-parse HEAD)"
-          ARCHIVE="mediagallery_1.8.0_2.1.1-hub.zip"
+          ARCHIVE="mediagallery_1.9.0_2.2.2.zip"
 
           rm -rf package
           mkdir -p package/mediagallery dist
@@ -56,8 +56,8 @@ jobs:
             --exclude='tmp/'
 
           cat > package/mediagallery/BUILD_INFO.txt <<EOF
-          MediaGallery 1.8.0 test archive
-          Geeklog target: 2.1.1+
+          MediaGallery 1.9.0 installable archive
+          Geeklog target: 2.2.2
           Source branch: mediagallery_1.9.0
           Source commit: ${SOURCE_SHA}
           EOF
@@ -173,5 +173,5 @@ jobs:
             echo 'No dist changes to commit.'
             exit 0
           fi
-          git commit -m "Build mediagallery_1.8.0_2.1.1-hub.zip for ${SOURCE_SHA} [skip ci]"
+          git commit -m "Build mediagallery_1.9.0_2.2.2.zip for ${SOURCE_SHA} [skip ci]"
           git push origin HEAD:mediagallery_1.9.0
