@@ -676,7 +676,7 @@ function plugin_getheadercode_mediagallery()
     global $_CONF, $_MG_CONF, $_SCRIPTS, $mgLightBox, $swfjsinclude;
 
     $retval = '';
-    $assetVersion = !empty($_MG_CONF['pi_version']) ? $_MG_CONF['pi_version'] : '1.8.0';
+    $assetVersion = MG_VERSION;
 
     //
     // Check to see if the template path is using the plugins/ directory, if yes,
