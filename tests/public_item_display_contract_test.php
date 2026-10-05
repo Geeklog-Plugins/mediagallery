@@ -27,6 +27,18 @@ mg_item_display_require(
     'Public media pages do not expose the generic PLG_itemDisplay() hook.',
     $failures
 );
+
+mg_item_display_require(
+    $mediaSource,
+    "\$mid       = isset(\$_REQUEST['s'])    ? COM_applyFilter(\$_REQUEST['s'])",
+    'Public media pages must preserve alphanumeric MediaGallery media IDs.',
+    $failures
+);
+if (strpos($mediaSource, "COM_applyFilter(\$_REQUEST['s'],   true)") !== false
+    || strpos($mediaSource, "COM_applyFilter(\$_REQUEST['s'], true)") !== false
+) {
+    $failures[] = 'Public media pages still force media IDs through numeric filtering.';
+}
 mg_item_display_require(
     $interopSource,
     "return 'album:' . intval(\$album_id);",
