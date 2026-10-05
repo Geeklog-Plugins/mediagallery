@@ -1,21 +1,19 @@
-# MediaGallery 1.8.0 for Geeklog
+# MediaGallery 1.9.0 for Geeklog
 
-MediaGallery is a full-featured media gallery plugin for Geeklog. The `modernize-1.8.0` branch is the active development line for MediaGallery 1.8.0 and is based on the historical 1.7.3 codebase.
+MediaGallery is a full-featured media gallery plugin for Geeklog. The `mediagallery_1.9.0` branch is the release line for MediaGallery 1.9.0 and builds on the modernization completed in 1.8.0.
 
-> **Release status:** MediaGallery 1.8.0 has completed its release validation for Geeklog 2.1.1 and Geeklog 2.2.2. Keep complete database and media backups before upgrading an existing production site.
+> **Release status:** MediaGallery 1.9.0 is in final pre-release validation for Geeklog 2.2.2. Keep complete database and media backups before upgrading an existing production site.
 
 ## Compatibility target
 
-- Geeklog **2.1.1 or newer**
-- Geeklog 2.2.2 supported
-- PHP source remains compatible with **PHP 5.6 syntax** for legacy Geeklog 2.1.1 deployments
-- Development/lint coverage also targets PHP 7.4, 8.1 and 8.3
+- Geeklog **2.2.2 or newer**
+- PHP syntax validation targets **PHP 5.6, 7.4, 8.1 and 8.3** while the supported Geeklog runtime target is 2.2.2+
 
-Geeklog 2.0.x is not a target for MediaGallery 1.8.0.
+Geeklog 2.1.x and older are not release targets for MediaGallery 1.9.0.
 
-## What 1.8.0 changes
+## What 1.9.0 includes
 
-MediaGallery 1.8.0 is primarily a modernization and hardening release. The major work already implemented includes:
+MediaGallery 1.9.0 carries forward the 1.8.0 modernization and hardening work and adds the current SEO/interoperability maintenance release. The maintained feature set includes:
 
 - persistent media storage outside the replaceable plugin public directory;
 - safer upgrades from existing 1.7.x installations;
@@ -30,7 +28,7 @@ MediaGallery 1.8.0 is primarily a modernization and hardening release. The major
 - improved album thumbnail sharpness and portrait-image rendering;
 - Geeklog 2.1.1-compatible PHP-block and batch-session fixes.
 
-See [ROADMAP.md](ROADMAP.md) for the completed 1.8.0 implementation and validation record.
+See [RELEASE_NOTES.md](RELEASE_NOTES.md) for 1.9.0 changes and [ROADMAP.md](ROADMAP.md) for the broader implementation record.
 
 ## Persistent media storage
 
@@ -197,12 +195,12 @@ Obsolete Flash/FlowPlayer controls are no longer created on fresh installations.
 The release branch produces one installable archive:
 
 ```text
-dist/mediagallery_1.8.0_2.1.1.zip
+dist/mediagallery_1.9.0_2.2.2.zip
 ```
 
-The archive contains one top-level `mediagallery/` directory and excludes repository/build-only content. Automated validation checks PHP syntax, required 1.8 helpers and Geeklog-compatible archive filenames.
+The archive contains one top-level `mediagallery/` directory and excludes repository/build-only content. Automated validation checks PHP syntax, required MediaGallery helpers, public item-display contracts and Geeklog-compatible archive filenames.
 
-The archive is rebuilt automatically from validated source changes and is the package intended for the 1.8.0 release.
+The archive is rebuilt automatically from validated source changes and is the package intended for the 1.9.0 release.
 
 ## Documentation
 
