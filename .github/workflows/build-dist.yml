@@ -38,7 +38,9 @@ jobs:
           set -euo pipefail
 
           SOURCE_SHA="$(git rev-parse HEAD)"
-          ARCHIVE="mediagallery_1.9.0_2.2.2.zip"
+          PLUGIN_VERSION="$(php -r "require 'version.php'; echo MG_VERSION;")"
+          GEEKLOG_MIN="$(php -r "require 'version.php'; echo MG_MIN_GEEKLOG_VERSION;")"
+          ARCHIVE="mediagallery_${PLUGIN_VERSION}_${GEEKLOG_MIN}.zip"
 
           rm -rf package
           mkdir -p package/mediagallery dist
@@ -56,8 +58,8 @@ jobs:
             --exclude='tmp/'
 
           cat > package/mediagallery/BUILD_INFO.txt <<EOF
-          MediaGallery 1.9.0 installable archive
-          Geeklog target: 2.2.2
+          MediaGallery ${PLUGIN_VERSION} installable archive
+          Geeklog minimum: ${GEEKLOG_MIN}
           Source branch: mediagallery_1.9.0
           Source commit: ${SOURCE_SHA}
           EOF
@@ -79,6 +81,7 @@ jobs:
           set -euo pipefail
           unzip -t "dist/${ARCHIVE}" >/dev/null
           unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/functions.inc'
+          unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/version.php'
           unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/autoinstall.php'
           unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/BUILD_INFO.txt'
           unzip -Z1 "dist/${ARCHIVE}" | grep -qx 'mediagallery/admin/navigation.php'
@@ -117,6 +120,25 @@ jobs:
           unzip -p "dist/${ARCHIVE}" mediagallery/include/config_180.php \
             | grep -q "isset(\$_MG_CONF\['installed_version'\])"
 
+          php -r '
+          require "version.php";
+          require "autoinstall.php";
+          $manifest = json_decode(file_get_contents("plugin.json"), true);
+          $install = plugin_autoinstall_mediagallery("mediagallery");
+          if ($install["info"]["pi_version"] !== MG_VERSION) {
+              fwrite(STDERR, "autoinstall pi_version does not match MG_VERSION\n");
+              exit(1);
+          }
+          if ($install["info"]["pi_gl_version"] !== MG_MIN_GEEKLOG_VERSION) {
+              fwrite(STDERR, "autoinstall pi_gl_version does not match MG_MIN_GEEKLOG_VERSION\n");
+              exit(1);
+          }
+          if ($manifest["requires"]["geeklog"] !== MG_MIN_GEEKLOG_VERSION) {
+              fwrite(STDERR, "plugin.json Geeklog requirement does not match MG_MIN_GEEKLOG_VERSION\n");
+              exit(1);
+          }
+          '
+
           python3 - <<'PY'
           import os
           import re
@@ -141,7 +163,7 @@ jobs:
                       invalid.append(path)
 
           if invalid:
-              print('Unsafe archive filenames for Geeklog 2.2.2:')
+              print('Unsafe archive filenames for the supported Geeklog range:')
               for path in invalid:
                   print(' - ' + path)
               sys.exit(1)
@@ -173,5 +195,5 @@ jobs:
             echo 'No dist changes to commit.'
             exit 0
           fi
-          git commit -m "Build mediagallery_1.9.0_2.2.2.zip for ${SOURCE_SHA} [skip ci]"
+          git commit -m "Build ${ARCHIVE} for ${SOURCE_SHA} [skip ci]"
           git push origin HEAD:mediagallery_1.9.0
