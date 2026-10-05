@@ -639,13 +639,15 @@ function MG_displayMedia($id, $full=0, $sortOrder=0, $comments=0, $spage=0)
     if (isset($mg_album->pid)) {
         $pid = $mg_album->pid;
     }
-    $aOffset = -1;
     $aOffset = $mg_album->getOffset();
-    if ($aOffset == -1 || $mg_album->access == 0) {
+    if ($mg_album->access == 0) {
         $retval = COM_startBlock($LANG_ACCESS['accessdenied'], '', COM_getBlockTemplate('_msg_block', 'header'))
                  . '<br'.XHTML.'>' . $LANG_MG00['access_denied_msg']
                  . COM_endBlock(COM_getBlockTemplate('_msg_block', 'footer'));
         return array($LANG_MG00['access_denied_msg'], $retval, (int) $aid);
+    }
+    if ($aOffset < 0) {
+        $aOffset = 0;
     }
 
     $sql = MG_buildMediaSql(array(
