@@ -11,6 +11,11 @@ This changelog tracks the maintained MediaGallery development line. MediaGallery
 - Add content-specific description fallbacks.
 - Add optional OGP integration while preserving standalone Open Graph/Twitter metadata fallbacks.
 
+### Language updates
+
+- Add or refresh the maintained UTF-8 translations for Spanish, Italian, Japanese, Russian, Chinese Simplified, Chinese Traditional, Hebrew, Persian, French Canada, French France, German, German Formal and Spanish Argentina.
+- Synchronize the maintained language files with the current English language contract and include them in the 1.9.0 distribution archive.
+
 ### PHP 8 compatibility and release hardening
 
 - Normalize optional media renderer metadata to prevent undefined-array-key warnings on PHP 8.x for legacy/imported records.
