@@ -104,7 +104,7 @@ function MG_applyRuntimeConfiguration180()
 {
     global $_CONF, $_MG_CONF, $_TABLES;
 
-    $_MG_CONF['pi_version'] = '1.8.0';
+    $_MG_CONF['pi_version'] = '1.9.0';
 
     /*
      * functions.inc is loaded by Geeklog while a plugin archive is being
