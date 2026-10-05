@@ -43,8 +43,8 @@ function plugin_autoinstall_mediagallery($pi_name)
     $info = array(
         'pi_name'         => $pi_name,
         'pi_display_name' => $pi_display_name,
-        'pi_version'      => '1.8.0',
-        'pi_gl_version'   => '2.1.1',
+        'pi_version'      => '1.9.0',
+        'pi_gl_version'   => '2.2.2',
         'pi_homepage'     => 'https://github.com/hostellerie/mediagallery'
     );
 
@@ -168,7 +168,7 @@ function plugin_compatible_with_this_version_mediagallery($pi_name)
         return false;
     }
 
-    if (COM_versionCompare(VERSION, '2.1.1', '<')) {
+    if (COM_versionCompare(VERSION, '2.2.2', '<')) {
         return false;
     }
 
@@ -251,6 +251,12 @@ function MG_upgrade()
             break;
 
         case '1.8.0':
+            // 1.9.0 is a compatibility/maintenance release. No schema
+            // migration is required beyond the existing 1.8.0 state.
+            $current_version = '1.9.0';
+            break;
+
+        case '1.9.0':
         default:
             $done = true;
             break;
