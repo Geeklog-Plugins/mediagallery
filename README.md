@@ -72,9 +72,9 @@ Older MediaGallery installations may still store user media in:
 public_html/mediagallery/mediaobjects/
 ```
 
-Geeklog's plugin ZIP updater replaces the plugin's public directory before MediaGallery's upgrade code can run. Therefore **do not upload the 1.8.0 ZIP over a 1.7.x installation until legacy media have been pre-migrated**.
+Geeklog's plugin ZIP updater replaces the plugin's public directory before MediaGallery's upgrade code can run. Therefore **do not upload a 1.8.0-or-newer ZIP over a 1.7.x installation until legacy media have been pre-migrated**.
 
-Extract the 1.8.0 package on the server and run:
+Extract the target MediaGallery package on the server and run:
 
 ```bash
 php tools/migrate-media-storage.php /path/to/geeklog
@@ -94,11 +94,11 @@ MediaGallery uses Geeklog's configured `$_CONF['image_lib']` backend:
 - `imagemagick` — the configured ImageMagick tools must be executable;
 - `netpbm` — the configured NetPBM tools must be executable.
 
-MediaGallery 1.8.0 checks backend availability before resize, conversion, rotation and watermark operations and returns a clear error when the configured backend is unavailable.
+MediaGallery checks backend availability before resize, conversion, rotation and watermark operations and returns a clear error when the configured backend is unavailable.
 
 Non-image media such as PDF/ZIP files may not require image conversion.
 
-## Security work in 1.8.0
+## Security foundation introduced in 1.8.0
 
 The modernization branch hardens the main mutation and import paths, including:
 
@@ -125,7 +125,7 @@ This avoids false “security token expired” failures during multi-step batch 
 
 ## Modern public output
 
-The maintained MediaGallery 1.8.0 templates now include:
+The maintained MediaGallery templates include:
 
 - responsive CSS Grid/Flexbox album and media layouts;
 - semantic headings and navigation landmarks;
@@ -141,7 +141,7 @@ The maintained MediaGallery 1.8.0 templates now include:
 
 ### Shared capability discovery
 
-MediaGallery 1.8.0 declares provider-neutral capabilities for Agent, Eclipse, Hub and future Geeklog consumers. It exposes bounded read-only album/media services and an administration `dashboard_summary` service, while keeping MediaGallery permissions authoritative and avoiding direct consumer access to `mg_*` tables.
+MediaGallery declares provider-neutral capabilities for Agent, Eclipse, Hub and future Geeklog consumers. It exposes bounded read-only album/media services and an administration `dashboard_summary` service, while keeping MediaGallery permissions authoritative and avoiding direct consumer access to `mg_*` tables.
 
 
 ### Album discovery
@@ -184,7 +184,7 @@ This allows IndexNow 1.3.0, XML Sitemap, Hub and future connectors to react thro
 
 ## Configuration
 
-MediaGallery 1.8.0 does not restore the old manually edited MediaGallery `config.php` model.
+MediaGallery does not restore the old manually edited MediaGallery `config.php` model.
 
 Administrator preferences stay in Geeklog's Configuration API where appropriate. Runtime-derived values such as plugin URLs, template paths and storage paths are calculated from the active Geeklog site configuration.
 
