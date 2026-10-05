@@ -1,6 +1,6 @@
 # Distribution archive
 
-The installable MediaGallery test archive generated from `mediagallery_1.9.0` is committed directly in this directory by the GitHub Actions workflow **Build MediaGallery installable archive**.
+The installable MediaGallery release archive generated from `mediagallery_1.9.0` is committed directly in this directory by the GitHub Actions workflow **Build MediaGallery installable archive**.
 
 To request a new archive, push a validated source change to `mediagallery_1.9.0` or run the workflow manually with `workflow_dispatch`.
 
