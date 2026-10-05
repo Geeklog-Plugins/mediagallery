@@ -33,6 +33,8 @@
 // |                                                                          |
 // +--------------------------------------------------------------------------+
 
+require_once __DIR__ . '/version.php';
+
 function plugin_autoinstall_mediagallery($pi_name)
 {
     $pi_name         = 'mediagallery';
@@ -43,8 +45,8 @@ function plugin_autoinstall_mediagallery($pi_name)
     $info = array(
         'pi_name'         => $pi_name,
         'pi_display_name' => $pi_display_name,
-        'pi_version'      => '1.9.0',
-        'pi_gl_version'   => '2.2.2',
+        'pi_version'      => MG_VERSION,
+        'pi_gl_version'   => MG_MIN_GEEKLOG_VERSION,
         'pi_homepage'     => 'https://github.com/hostellerie/mediagallery'
     );
 
@@ -168,7 +170,7 @@ function plugin_compatible_with_this_version_mediagallery($pi_name)
         return false;
     }
 
-    if (COM_versionCompare(VERSION, '2.2.2', '<')) {
+    if (COM_versionCompare(VERSION, MG_MIN_GEEKLOG_VERSION, '<')) {
         return false;
     }
 
