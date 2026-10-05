@@ -10,9 +10,9 @@ if (strpos(strtolower($_SERVER['PHP_SELF']), strtolower(basename(__FILE__))) !==
 }
 
 /*
- * Keep the proven 1.7.3 implementation intact while the 1.8.0 modernization
- * is introduced in controlled layers. This transitional include can be folded
- * back into functions.inc once the configuration/template refactor is stable.
+ * Keep the proven legacy implementation isolated while the maintained
+ * modernization layers provide current configuration, interoperability,
+ * storage, security and UI behavior.
  */
 require_once __DIR__ . '/version.php';
 
