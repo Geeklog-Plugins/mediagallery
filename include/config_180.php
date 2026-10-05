@@ -5,7 +5,7 @@ require_once dirname(__DIR__) . '/version.php';
 // +--------------------------------------------------------------------------+
 // | Media Gallery Plugin - Geeklog                                           |
 // +--------------------------------------------------------------------------+
-// | MediaGallery 1.8.0 runtime configuration                                 |
+// | MediaGallery runtime configuration (introduced in 1.8.0)                 |
 // +--------------------------------------------------------------------------+
 
 if (strpos(strtolower($_SERVER['PHP_SELF']), strtolower(basename(__FILE__))) !== false) {
@@ -24,7 +24,7 @@ function MG_prepareDirectory180($path)
         return true;
     }
 
-    COM_errorLog('Media Gallery 1.8.0: unable to create directory ' . $path);
+    COM_errorLog('Media Gallery: unable to create directory ' . $path);
     return false;
 }
 
@@ -142,7 +142,7 @@ function MG_applyRuntimeConfiguration180()
     $_MG_CONF['template_path'] = $_CONF['path'] . 'plugins/mediagallery/templates';
 
     /*
-     * MediaGallery 1.8.0 keeps all persistent public media below Geeklog's
+     * MediaGallery keeps all persistent public media below Geeklog's
      * images root, outside the replaceable public_html/mediagallery directory.
      * This protects media from Geeklog's native plugin ZIP upgrade process and
      * naturally isolates shared-code multisite installations when each site
@@ -154,7 +154,7 @@ function MG_applyRuntimeConfiguration180()
         $_MG_CONF['mediaobjects_url'] = $storage['url'];
         if (!MG_prepareMediaStorage180($_MG_CONF['path_mediaobjects'])) {
             COM_errorLog(
-                'Media Gallery 1.8.0: persistent media storage is not writable: '
+                'Media Gallery: persistent media storage is not writable: '
                 . $_MG_CONF['path_mediaobjects'],
                 1
             );
@@ -266,7 +266,7 @@ function MG_updateConfig180()
 }
 
 /**
- * Ensure fresh 1.8.0 installations receive the same Configuration API keys
+ * Ensure fresh installations receive the same Configuration API keys
  * as upgraded installations. This is intentionally idempotent.
  */
 function MG_ensureConfig180()
